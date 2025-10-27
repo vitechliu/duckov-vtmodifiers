@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "VTModifiers", "VTModifiers.csproj", "{BE324E19-2D3C-40B3-A1C4-8F9150DC817C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{BE324E19-2D3C-40B3-A1C4-8F9150DC817C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BE324E19-2D3C-40B3-A1C4-8F9150DC817C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BE324E19-2D3C-40B3-A1C4-8F9150DC817C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BE324E19-2D3C-40B3-A1C4-8F9150DC817C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
