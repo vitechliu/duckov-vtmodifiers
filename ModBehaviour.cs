@@ -53,7 +53,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LootBoxLoader), "Setup")]
     public static void LootSpawner_Setup_PostFix(LootBoxLoader __instance) {
-        int L
+        
         LogStatic($"LootBoxLoaderSetup:{__instance.GetInstanceID()}");
     }
 
