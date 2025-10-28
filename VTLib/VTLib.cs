@@ -1,6 +1,5 @@
 namespace VTModifiers.VTLib;
 
-public class VTLib
-{
+public class VTLib {
     
 }

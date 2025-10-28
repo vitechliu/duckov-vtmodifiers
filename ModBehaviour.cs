@@ -3,6 +3,8 @@ using UnityEngine;
 using System.Reflection;
 using HarmonyLib;
 using Unity.VisualScripting;
+using Cysharp.Threading.Tasks;
+using Duckov.Utilities;
 
 namespace VTModifiers;
 
@@ -11,7 +13,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     protected string _logFilePath;
     protected string _dllDirectory;
 
-    protected string _modName = "ModTest2";
+    protected string _modName = "VTModifiers";
 
     protected string _version = "0.0.1";
     protected bool _isInitialized = false;
@@ -31,15 +33,28 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ItemAgent_Gun), "ShootOneBullet")]
     public static void ItemAgentGun_ShootOneBullet_PostFix(ItemAgent_Gun __instance) {
         Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
         float beforeDamage = temp.context.damage;
-        LogStatic($"BeforeDamage:{beforeDamage}");
+        LogStatic($"ShootOneBullet:BeforeDamage:{beforeDamage}");
         temp.context.damage += 10f;
         Traverse.Create(__instance).Field("projInst").SetValue(temp);
+    }
+
+    //不支持
+    // [HarmonyPostfix]
+    // [HarmonyPatch(typeof(ItemAgent_Gun), "Damage", MethodType.Getter)]
+    // public static void ItemAgentGun_Damage_PostFix(ref float damage) {
+    //     LogStatic($"DamageGetter:{damage}");
+    // }
+    
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(LootBoxLoader), "Setup")]
+    public static void LootSpawner_Setup_PostFix(LootBoxLoader __instance) {
+        int L
+        LogStatic($"LootBoxLoaderSetup:{__instance.GetInstanceID()}");
     }
 
     protected override void OnAfterSetup() {
@@ -62,9 +77,18 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    protected void RegisterEvents() { }
+    protected void RegisterEvents() {
+        LevelManager.OnLevelInitialized += OnLevelInitialized;
+    }
 
-    protected void UnregisterEvents() { }
+    protected void UnregisterEvents() {
+        LevelManager.OnLevelInitialized -= OnLevelInitialized;
+    }
+
+    //初始化地图后，扫描该地图的敌人和物资箱，为其中的武器等道具异步加入词缀
+    private void OnLevelInitialized() {
+        Log("地图已初始化");
+    }
 
     // void Awake() {
     //     Debug.Log("fffff loaded!! v1");
@@ -75,8 +99,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         Directory.CreateDirectory(str);
         _logFilePath = Path.Combine(str,
             string.Format("{0}_log_{1:yyyyMMdd}.txt", this._modName, (object)DateTime.Now));
-        Log("日志路径: " + _logFilePath);
         Log("模组启动，开始初始化，版本:" + _version);
+        Log("日志路径: " + _logFilePath);
     }
 
     public static void LogStatic(string message, bool isError = false) {
@@ -87,9 +111,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     protected void Log(string message, bool isError = false) {
         try {
             File.AppendAllText(this._logFilePath,
-                string.Format("[{0:HH:mm:ss}] {1}\n", (object)DateTime.Now, (object)message));
-            if (isError) Debug.LogError((object)("[" + this._modName + "]" + message));
-            else Debug.Log((object)("[" + this._modName + "]" + message));
+                string.Format("[{0:HH:mm:ss}] {1}\n", (object)DateTime.Now, message));
+            if (isError) Debug.LogError(("[" + this._modName + "]" + message));
+            else Debug.Log(("[" + this._modName + "]" + message));
         }
         catch (Exception ex) {
             Debug.LogError((object)("日志写入失败: " + ex.Message));
