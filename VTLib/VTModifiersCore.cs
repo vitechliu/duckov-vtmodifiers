@@ -1,5 +1,13 @@
+using Duckov.UI;
+using Duckov.Utilities;
+using HarmonyLib;
 using ItemStatsSystem;
 using ItemStatsSystem.Stats;
+using SodaCraft.Localizations;
+using UnityEngine;
+using Random = UnityEngine.Random;
+
+// ReSharper disable All
 
 namespace VTModifiers.VTLib;
 
@@ -8,12 +16,7 @@ public class VTModifiersCore {
 
     public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
 
-    
-
-    //todo 本地化
-    public static string ModifierDisplayText(string modifier) {
-        return TmpLangDict.GetValueOrDefault(modifier, modifier);
-    }
+    public const bool DEBUG = false;
 
     
     public static string? GetAModifierByWeight() {
@@ -33,76 +36,146 @@ public class VTModifiersCore {
     }
 
 
+
     private static bool TryPatchModifier(Item item, VtModifier vtModifier, string vtm) {
         //todo
         float? val = vtModifier.GetVal(vtm);
         if (val != null && vtModifier.GetVal(vtm) != DefaultModifier.GetVal(vtm)) {
             if (ModifierLogic != null && ModifierLogic.TryGetValue(vtm, out var vtp)) {
-                if (item.Modifiers == null) {
-                    item.CreateModifiersComponent();
+                if (item.Modifiers == null) item.CreateModifiersComponent();
+                if (item.Modifiers == null) return false;
+
+                if (item.Modifiers.Find(tmd => (tmd.Key == vtp.Item1 && IsModMD(tmd))) != null) {
+                    //避免重复添加
+                    return false;
                 }
-                item.Modifiers.Add(new ModifierDescription(
-                    ModifierTarget.Parent,
+
+                ModifierDescription md = new ModifierDescription(
+                    ModifierTarget.Self,
                     vtp.Item1,
                     vtp.Item2,
-                    (float)val
-                ));
+                    (float)val,
+                    false,
+                    MAGIC_ORDER
+                );
+                Traverse tmp = Traverse.Create(md);
+                tmp.Field("display").SetValue(true);
+                // tmp.Field("displayNamekey").SetValue("VTM_" + vtp.Item1);
+                
+                item.Modifiers.Add(md);
                 return true;
             }
         }
 
         return false;
     }
+
+    public const int MAGIC_ORDER = -1145141919;
+    public static void TryUnpatchItem(Item item) {
+        string modifier = item.GetString(VariableVtModifierHashCode);
+        if (modifier == null) return;
+        CustomDataCollection variables = Traverse.Create(item).Field("variables").GetValue<CustomDataCollection>();
+        if (variables != null) {
+            CustomData cd = variables.GetEntry(VariableVtModifierHashCode);
+            if (cd != null) variables.Remove(cd);
+        }
+
+        int removedModifiersCount = 0;
+        List<ModifierDescription> toRemove = new();
+        if (item.Modifiers != null) {
+            foreach (ModifierDescription md in item.Modifiers) {
+                if (IsModMD(md)) {
+                    toRemove.Add(md);
+                    removedModifiersCount++;
+                }
+            }
+            foreach (ModifierDescription md in toRemove) {
+                item.Modifiers.Remove(md);
+            }
+            item.Modifiers.ReapplyModifiers();
+        }
+        ModBehaviour.LogStatic($"移除词缀:{item.DisplayName}成功，同时移除了{removedModifiersCount}个原生Modifier");
+        
+    }
+
+    public static bool Probability(float probability) {
+        return UnityEngine.Random.value < probability;
+    }
     public static string PatchItem(Item item, Sources source) {
         if (item.GetBool("IsGun")) {
             //暂时只支持热武器
+            switch (source) {
+                case Sources.LootBox:
+                    if (!Probability(0.8f)) return null;
+                    break;
+                case Sources.Enemy:
+                    if (!Probability(0.4f)) return null;
+                    break;
+            }
             string? modifier = GetAModifierByWeight();
             if (modifier != null) {
-                item.SetString(VariableVtModifierHashCode, modifier, true);
-                
-                VtModifier vtModifier = ModifierData[modifier];
-                bool flag = false;
-                foreach (string vtm in Vtms) {
-                    if (TryPatchModifier(item, vtModifier, vtm)) {
-                        flag = true;
-                        ModBehaviour.LogStatic($"注入了Modifier:{item.DisplayName}_{vtm}");
-                    }
-                }
-                if (flag) item.Modifiers.ReapplyModifiers();
-                string modifierDisplayName = ModifierDisplayText(modifier);
-                ModBehaviour.LogStatic($"注入:{item.DisplayName}为{modifierDisplayName} 来源:{source.ToString()}");
-                return modifier;
+                return PatchItem(item, source, modifier);
             }
-            else {
-                // ModBehaviour.LogStatic($"未找到Modifier 无法Patch");
-            }
+            // ModBehaviour.LogStatic($"未找到Modifier 无法Patch");
         }
-
         return null;
     }
 
-
+    public static bool IsModMD(ModifierDescription modifierDescription) {
+        return modifierDescription.Order == MAGIC_ORDER;
+    }
+    //为Item Patch Modifier
+    public static void CalcItemModifiers(Item item) {
+        string modifier = item.GetString(VariableVtModifierHashCode);
+        if (modifier == null) return;
+        VtModifier vtModifier = ModifierData[modifier];
+        bool flag = false;
+        foreach (string vtm in Vtms) {
+            if (TryPatchModifier(item, vtModifier, vtm)) {
+                flag = true;
+                // ModBehaviour.LogStatic($"注入了Modifier:{item.DisplayName}_{vtm}");
+            }
+        }
+        if (flag) item.Modifiers.ReapplyModifiers();
+    }
+    
+    public static string PatchItem(Item item, Sources source, string modifier) {
+        item.SetString(VariableVtModifierHashCode, modifier, true);
+        string modifierDisplayName = modifier.ToPlainText();
+        if (DEBUG)
+            ModBehaviour.LogStatic($"注入:{item.DisplayName}为{modifierDisplayName}, source:{source}");
+        CalcItemModifiers(item);
+        return modifier;
+    }
+    
     public static string PatchItemDisplayName(Item item) {
+        return PatchItemDisplayName(item, item.DisplayName);
+    }
+    public static string PatchItemDisplayName(Item item, string before) {
         if (item == null) return "";
         string modifier = item.GetString(VariableVtModifierHashCode);
-        string itemDisplayName = item.DisplayName;
         if (modifier != null) {
-            string modifierDisplayText = ModifierDisplayText(modifier);
-            return modifierDisplayText + " " + itemDisplayName;
+            string modifierDisplayText = modifier.ToPlainText();
+            return modifierDisplayText + " " + before;
         }
-        return itemDisplayName;
+        return before;
     }
     public static float Modify(Item item, string vtm, float original) {
         string modifier = item.GetString(VariableVtModifierHashCode);
-        if (modifier != null && ModifierData != null && ModifierData.TryGetValue(modifier, out var modifierStruct)) {
-            switch (vtm) {
-                case VtmElementElectricity:
-                case VtmElementFire:
-                case VtmElementPoison:
-                case VtmElementSpace:
-                    float? add = modifierStruct.GetVal(vtm);
-                    if (add != null) return original + (float)add;
-                    break;
+        if (modifier != null && ModifierData.TryGetValue(modifier, out var modifierStruct)) {
+            float? val = modifierStruct.GetVal(vtm);
+            if (val.HasValue) {
+                switch (vtm) {
+                    case VtmElementElectricity:
+                    case VtmElementFire:
+                    case VtmElementPoison:
+                    case VtmElementSpace:
+                    case VtmBleedChance:
+                        return original + val.Value;
+                    case VtmWeight:
+                    case VtmPriceMultiplier:
+                        return original * (1f + val.Value);
+                }
             }
         }
         return original;
@@ -115,68 +188,156 @@ public class VTModifiersCore {
         Debug, //测试用
     }
 
+    
     public static void InitData() {
         //todo 从config加载
         if (ModifierData == null) {
-            ModifierData = new Dictionary<string, VtModifier>() {
-                ["Unreal"] =                  new() { ModifierWeight = 100, DamageMultiplier = 1.15f, ShootSpeed = 0.1f, CritRate = 0.05f, PriceMultiplier = 2.0985f },
-                ["Sighted"] =                 new() { ModifierWeight = 300, DamageMultiplier = 1.05f, CritRate = 0.03f, PriceMultiplier = 1.2f },
-                ["WithElectricity"] =         new() { ModifierWeight = 100,ElementElectricity = 0.2f, DamageMultiplier = 0.9f, PriceMultiplier = 1.5f },
-                ["WithFire"] =                new() { ModifierWeight = 100,ElementFire = 0.2f, DamageMultiplier = 0.9f, PriceMultiplier = 1.5f },
-                ["WithSpace"] =               new() { ModifierWeight = 100,ElementSpace = 0.2f, DamageMultiplier = 0.9f, PriceMultiplier = 1.5f },
-                ["WithPoison"] =              new() { ModifierWeight = 100,ElementPoison = 0.2f, DamageMultiplier = 0.9f, PriceMultiplier = 1.5f },
+            ModifierData = new () {
+                ["Legendary"] =               new() { ModifierWeight = 50, ShootSpeedMultiplier = 0.2f, Weight = -0.3f, DamageMultiplier = 0.5f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 3f },
+                ["Unreal"] =                  new() { ModifierWeight = 100, ShootSpeedMultiplier = 0.1f, DamageMultiplier = 0.15f, BulletSpeedMultiplier = 0.1f, CritRate = 0.05f, PriceMultiplier = 2.0985f },
+                ["Sighted"] =                 new() { ModifierWeight = 300, CritRate = 0.03f, ScatterFactorADSMultiplier = -0.1f, PriceMultiplier = 0.2f },
+                ["Light"] =                   new() { ModifierWeight = 500, Weight = -0.4f, DamageMultiplier = -0.05f, ReloadTimeMultiplier = -0.2f, PriceMultiplier = 0.2f },
+                ["Heavy"] =                   new() { ModifierWeight = 500, Weight = 0.4f, RecoilScaleVMultiplier = -0.1f, DamageMultiplier = 0.4f, PriceMultiplier = 0.3f },
+                ["Eagle-Eye"] =               new() { ModifierWeight = 400, DamageMultiplier = 0.1f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 0.6f },
+                ["Silver"] =                  new() { ModifierWeight = 200, DamageMultiplier = 0.05f, BleedChance = 0.2f, ElementPoison = 0.1f, PriceMultiplier = 0.5f },
+                ["Chaos"] =                   new() { ModifierWeight = 50, ElementElectricity = 0.2f, ElementFire = 0.2f, ElementSpace = 0.2f, ElementPoison = 0.2f, PriceMultiplier = 0.8f },
+               
+                ["Alienated"] =               new() { ModifierWeight = 100, DamageMultiplier = -0.3f, ElementPoison = 0.3f, ShootSpeed = 0.4f, PriceMultiplier = 0.1f },
+                ["Scalding"] =                new() { ModifierWeight = 100, DamageMultiplier = 0.2f, Weight = 0.4f, ElementFire = 0.4f, ShootSpeed = -0.2f, PriceMultiplier = 0.1f },
+                ["Concentrated"] =            new() { ModifierWeight = 200, DamageMultiplier = -0.1f, RecoilScaleHMultiplier = -0.5f, ShootSpeed = 0.1f, PriceMultiplier = 0.1f },
+                ["Portable"] =                new() { ModifierWeight = 300, ScatterFactorMultiplier = -0.4f, ScatterFactorADSMultiplier = 0.2f, PriceMultiplier = 0.1f },
+                ["Brutal"] =                  new() { ModifierWeight = 300, DamageMultiplier = 0.4f, BleedChance = 0.3f, ShootSpeedMultiplier = -0.2f, PriceMultiplier = 0.2f },
+               
+                ["Apollyon"] =                new() { ModifierWeight = 20, BulletSpeedMultiplier = 2f, PriceMultiplier = 0.2f },
+                ["Silent"] =                  new() { ModifierWeight = 200, DamageMultiplier = -0.1f, SoundRange = -0.4f, PriceMultiplier = 0.1f },
+                ["Violent"] =                 new() { ModifierWeight = 200, DamageMultiplier = 0.4f, SoundRange = 0.8f, PriceMultiplier = 0.2f },
+
+                
+                ["Broken"] =                  new() { ModifierWeight = 250, DamageMultiplier = -0.2f, ShootDistanceMultiplier = -0.2f, PriceMultiplier = -0.5f },
+                
+                
+                ["WithElectricity"] =         new() { ModifierWeight = 100, ElementElectricity = 0.5f, DamageMultiplier = -0.15f, PriceMultiplier = 0.5f },
+                ["WithFire"] =                new() { ModifierWeight = 100, ElementFire = 0.5f, DamageMultiplier = -0.15f, PriceMultiplier = 0.5f },
+                ["WithSpace"] =               new() { ModifierWeight = 100, ElementSpace = 0.5f, DamageMultiplier = -0.15f, PriceMultiplier = 0.5f },
+                ["WithPoison"] =              new() { ModifierWeight = 100, ElementPoison = 0.5f, DamageMultiplier = -0.15f, PriceMultiplier = 0.5f },
+                
+                
+                ["Debug"] =                   new() { ModifierWeight = 0, BleedChance = 1f, ElementElectricity = 0.2f, ElementFire = 0.2f, PriceMultiplier = 9f},
             };
         }
 
         if (ModifierLogic == null) {
             //这里的int对应Item Stat的Hash
-            ModifierLogic = new Dictionary<string, ValueTuple<string, ModifierType>>() {
+            ModifierLogic = new () {
                 [VtmDamage] = (nameof (ItemAgent_Gun.Damage), ModifierType.Add),
                 [VtmDamageMultiplier] = (nameof (ItemAgent_Gun.Damage), ModifierType.PercentageAdd),
                 [VtmBulletSpeed] = (nameof (ItemAgent_Gun.BulletSpeed), ModifierType.Add),
                 [VtmBulletSpeedMultiplier] = (nameof (ItemAgent_Gun.BulletSpeed), ModifierType.PercentageAdd),
                 [VtmShootDistance] = (nameof (ItemAgent_Gun.BulletDistance), ModifierType.Add),
                 [VtmShootDistanceMultiplier] = (nameof (ItemAgent_Gun.BulletDistance), ModifierType.PercentageAdd),
+                [VtmReloadTime] = (nameof (ItemAgent_Gun.ReloadTime), ModifierType.PercentageAdd),
                 [VtmCritRate] = (nameof (ItemAgent_Gun.CritRate), ModifierType.Add),
                 [VtmCritDamage] = (nameof (ItemAgent_Gun.CritDamageFactor), ModifierType.Add),
                 [VtmSoundRange] = (nameof (ItemAgent_Gun.SoundRange), ModifierType.PercentageAdd),
+                [VtmShootSpeedMultiplier] = (nameof (ItemAgent_Gun.ShootSpeed), ModifierType.PercentageAdd),
+                [VtmRecoilHMultiplier] = (nameof (ItemAgent_Gun.RecoilScaleH), ModifierType.PercentageAdd),
+                [VtmRecoilVMultiplier] = (nameof (ItemAgent_Gun.RecoilScaleV), ModifierType.PercentageAdd),
+                [VtmScatterMultiplier] = ("ScatterFactor", ModifierType.PercentageAdd),
+                [VtmScatterADSAMultiplier] = ("ScatterFactorADS", ModifierType.PercentageAdd),
+
+                
+                [VtmBleedChance] = ("VTMC_" + VtmBleedChance, ModifierType.PercentageAdd), //通过patch
+                [VtmWeight] = ("VTMC_" + VtmWeight, ModifierType.PercentageAdd),
+                [VtmAmmoSave] = ("VTMC_" + VtmAmmoSave, ModifierType.Add),
+                [VtmElementElectricity] = ("VTMC_" + VtmElementElectricity, ModifierType.Add),
+                [VtmElementFire] = ("VTMC_" + VtmElementFire, ModifierType.Add),
+                [VtmElementSpace] = ("VTMC_" + VtmElementSpace, ModifierType.Add),
+                [VtmElementPoison] = ("VTMC_" + VtmElementPoison, ModifierType.Add),
             };
+        }
+        
+        //初始化Language
+        SystemLanguage language = SodaCraft.Localizations.LocalizationManager.CurrentLanguage;
+        if (
+            language == SystemLanguage.ChineseSimplified 
+            || language == SystemLanguage.Chinese 
+           || language == SystemLanguage.ChineseTraditional 
+        ) {
+            ModBehaviour.LogStatic("加载中文翻译...");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Stat_VTMC_" + VtmWeight, "重量");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Stat_VTMC_" + VtmAmmoSave, "弹药节省率");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Stat_VTMC_" + VtmElementElectricity, "电元素附加");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Stat_VTMC_" + VtmElementFire, "火元素附加");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Stat_VTMC_" + VtmElementSpace, "空间元素附加");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Stat_VTMC_" + VtmElementPoison, "毒元素附加");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Stat_VTMC_" + VtmBleedChance, "流血概率");
+            
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Unreal", "虚幻");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Sighted", "精准");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Light", "轻便");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Heavy", "重量级");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Eagle-Eye", "鹰眼");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Legendary", "传说");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Silver", "银质");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Chaos", "混沌");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Alienated", "异化");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Scalding", "高热");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Concentrated", "集束");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Portable", "便携");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Brutal", "残暴");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Apollyon", "亚神");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Silent", "寂静");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Violent", "狂暴");
+            
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("WithElectricity", "带电");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("WithFire", "带火");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("WithSpace", "空间");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("WithPoison", "剧毒");
+            
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Broken", "破损");
+            
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Debug", "测试");
+            
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("VTMC_FIX", "修正");
+        }
+        else {
+            //todo english more
+            foreach (string key in ModifierData.Keys) {
+                SodaCraft.Localizations.LocalizationManager.SetOverrideText(key, key);
+            }
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("VTMC_FIX", "Fix");
         }
         
     }
     
     public static readonly VtModifier DefaultModifier = new VtModifier();
-    public static readonly Dictionary<string, string> TmpLangDict = new() {
-        { "Unreal", "虚幻" },
-        { "Sighted", "精准" },
-        
-        
-        { "WithElectricity", "带电" },
-        { "WithFire", "带火" },
-        { "WithSpace", "空间" },
-        { "WithPoison", "剧毒" },
-    };
     public static Dictionary<string, VtModifier> ModifierData;
     public static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogic;
-    
+    // public static Dictionary<string, string> ModifierDisplayName; //暂时用于翻译部分字段
     
     
     public const string VtmDamage = "Damage"; //伤害修正
     public const string VtmDamageMultiplier = "DamageMultiplier";  //乘算的
     
     public const string VtmBulletSpeed = "BulletSpeed"; //弹速，亚门！
-    public const string VtmBulletSpeedMultiplier = "ShootSpeedMultiplier";
+    public const string VtmBulletSpeedMultiplier = "BulletSpeedMultiplier";
     public const string VtmShootDistance = "ShootDistance"; //射程 加算
     public const string VtmShootDistanceMultiplier = "ShootDistanceMultiplier"; //射程 加算
+    public const string VtmShootSpeedMultiplier = "ShootSpeedMultiplier";
     public const string VtmCritRate = "CritRate"; //暴击率,加算
     public const string VtmCritDamage = "CritDamage"; //爆伤,乘算
     public const string VtmSoundRange = "SoundRange"; //声音
+    public const string VtmReloadTime = "ReloadTime"; //换弹速度
+    public const string VtmScatterMultiplier = "ScatterMultiplier";
+    public const string VtmScatterADSAMultiplier = "ScatterADSMultiplier";
+    public const string VtmRecoilVMultiplier = "RecoilVMultiplier";
+    public const string VtmRecoilHMultiplier = "RecoilHMultiplier";
+    
     
     public const string VtmBleedChance = "BleedChance"; //流血几率
-    
-    public const string VtmWeight = "Weight";               //暂未实装
+    public const string VtmWeight = "Weight"; 
     public const string VtmAmmoSave = "AmmoSave";           //暂未实装
-    public const string VtmPriceMultiplier = "PriceMultiplier";                 //暂未实装 价值加成
+    public const string VtmPriceMultiplier = "PriceMultiplier";
     
     
     public const string VtmElementFire = "ElementFire";
@@ -192,6 +353,12 @@ public class VTModifiersCore {
         VtmBulletSpeedMultiplier,
         VtmShootDistance,
         VtmShootDistanceMultiplier,
+        VtmReloadTime,
+        VtmShootSpeedMultiplier,
+        VtmRecoilHMultiplier,
+        VtmRecoilVMultiplier,
+        VtmScatterMultiplier,
+        VtmScatterADSAMultiplier,
         VtmCritRate,
         VtmCritDamage,
         VtmSoundRange,
@@ -205,10 +372,6 @@ public class VTModifiersCore {
         VtmElementElectricity,
     };
     
-    public enum  ModifierLogicType {
-        
-    }
-    
     
     public struct VtModifier {
         public int ModifierWeight = 0; //出现的权重
@@ -217,21 +380,30 @@ public class VTModifiersCore {
         public float PriceMultiplier = 1f; //不展示
         
         public float Damage = 0f;
-        public float DamageMultiplier = 1f;
+        public float DamageMultiplier = 0f;
         public float AmmoSave = 0f;
         public float ShootSpeed = 0f;
-        public float ShootSpeedMultiplier = 1f;
+        public float ShootSpeedMultiplier = 0f;
+        public float BulletSpeed = 0f;
+        public float BulletSpeedMultiplier = 0f;
         public float ShootDistance = 0f;
-        public float ShootDistanceMultiplier = 1f;
+        public float ShootDistanceMultiplier = 0f;
+        public float ReloadTimeMultiplier = 0f;
+        public float RecoilScaleVMultiplier = 0f;
+        public float RecoilScaleHMultiplier = 0f;
+        public float ScatterFactorADSMultiplier = 0f;
+        public float ScatterFactorMultiplier = 0f;
         public float CritRate = 0f;
         public float BleedChance = 0f;
         public float SoundRange = 0f;
+        
         public float ElementFire = 0f;
         public float ElementSpace = 0f;
         public float ElementPoison = 0f;
         public float ElementElectricity = 0f;
 
         public bool ApplyOnGuns = true;
+        public bool ApplyOnHelmets = false;
         public VtModifier() { }
 
         public readonly float? GetVal(string vtm) {
@@ -245,15 +417,28 @@ public class VTModifiersCore {
                 case VtmSoundRange:
                     return this.SoundRange;
                 case VtmBulletSpeed:
-                    return this.ShootSpeed;
+                    return this.BulletSpeed;
                 case VtmBulletSpeedMultiplier:
+                    return this.BulletSpeedMultiplier;
+                case VtmShootSpeedMultiplier:
                     return this.ShootSpeedMultiplier;
                 case VtmShootDistance:
                     return this.ShootDistance;
                 case VtmShootDistanceMultiplier:
                     return this.ShootDistanceMultiplier;
+                case VtmReloadTime:
+                    return this.ReloadTimeMultiplier;
                 case VtmCritRate:
                     return this.CritRate;
+                case VtmScatterMultiplier:
+                    return this.ScatterFactorMultiplier;
+                case VtmScatterADSAMultiplier:
+                    return this.ScatterFactorADSMultiplier;
+                case VtmRecoilHMultiplier:
+                    return this.RecoilScaleHMultiplier;
+                case VtmRecoilVMultiplier:
+                    return this.RecoilScaleVMultiplier;
+                
                 case VtmBleedChance:
                     return this.BleedChance;
                 case VtmElementFire:
@@ -264,6 +449,13 @@ public class VTModifiersCore {
                     return this.ElementPoison;
                 case VtmElementSpace:
                     return this.ElementSpace;
+                
+                
+                
+                case VtmWeight:
+                    return this.Weight;
+                case VtmPriceMultiplier:
+                    return this.PriceMultiplier;
             }
 
             return null;

@@ -1,9 +1,12 @@
 using ItemStatsSystem;
 using UnityEngine;
 using System.Reflection;
+using System.Text;
 using HarmonyLib;
 using Duckov.UI;
 using Duckov.Utilities;
+using ItemStatsSystem.Data;
+using SodaCraft.Localizations;
 using TMPro;
 using VTModifiers.VTLib;
 using UnityEngine.UI;
@@ -42,28 +45,63 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     [HarmonyPatch(typeof(ItemAgent_Gun), "ShootOneBullet")]
     public static void ItemAgentGun_ShootOneBullet_PostFix(ItemAgent_Gun __instance) {
         Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
-        // float beforeDamage = temp.context.damage;
-        // float afterDamage = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmDamageMultiplier, beforeDamage);
-        // afterDamage = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmDamage, afterDamage);
-        // temp.context.damage = afterDamage;
-        // if (afterDamage > beforeDamage) {
-        //     LogStatic($"ShootOneBullet ModifyDamage:{beforeDamage} -> {afterDamage}");
-        // }
-        
         temp.context.element_Electricity = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementElectricity, temp.context.element_Electricity);
         temp.context.element_Fire = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementFire, temp.context.element_Fire);
         temp.context.element_Poison = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementPoison, temp.context.element_Poison);
         temp.context.element_Space = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementSpace, temp.context.element_Space);
         
-        // Traverse.Create(__instance).Field("projInst").SetValue(temp);
+        temp.context.bleedChance = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
+    }
+    
+    
+
+    //重量Patch
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Item), "get_SelfWeight")]
+    public static void Item_SelfWeight_PostFix(Item __instance, ref float __result) {
+        __result = VTModifiersCore.Modify(__instance, VTModifiersCore.VtmWeight, __result);
+    }
+    
+    //MD:DisplayName patch
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ModifierDescription), "get_DisplayName")]
+    public static void ModifierDescription_DisplayName_PostFix(ModifierDescription __instance, ref string __result) {
+        if (
+            VTModifiersCore.IsModMD(__instance)
+            && !__result.StartsWith("VTMC_")
+            && !__result.StartsWith("VTM_")
+        ) {
+            if (VTModifiersCore.Vtms.Contains("VTMC_" + __instance.Key)) {
+                //是特殊词缀
+                __result = "VTMC_" + __result;
+            } else {
+                __result = "VTM_" + __result;
+            }
+        }
+    }
+    
+    //try DisplayName patch
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Item), "get_DisplayName")]
+    public static void Item_DisplayName_PostFix(Item __instance, ref string __result) {
+        __result = VTModifiersCore.PatchItemDisplayName(__instance, __result);
+    }
+    
+    
+    //物品价值Patch
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Item), "GetTotalRawValue")]
+    public static void Item_GetTotalRawValue_PostFix(Item __instance, ref int __result) {
+        // LogStatic($"ItemPriceModify: {__instance.DisplayName}");
+        int beforePrice = __result;
+        __result = Mathf.RoundToInt(
+            VTModifiersCore.Modify(__instance, VTModifiersCore.VtmPriceMultiplier, (float)__result)
+        );
+        // if (__result != beforePrice) {
+        //     LogStatic($"ItemPriceModify: {__instance.DisplayName}: {beforePrice} -> {__result}");
+        // }
     }
 
-     // //不支持 会报错
-     // [HarmonyPostfix]
-     // [HarmonyPatch(typeof(ItemAgent_Gun), "Damage", MethodType.Getter)]
-     // public static void ItemAgentGun_Damage_PostFix(ref float damage) {
-     //     LogStatic($"DamageGetter:{damage}");
-     // }
     
 
     //对随机敌人背包道具词缀化
@@ -141,41 +179,82 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     {
         // Text.gameObject.SetActive(false);
     }
-
+    
     //物品悬停UI改变物品名
     private void OnSetupItemHoveringUI(ItemHoveringUI uiInstance, Item item) {
         if (item == null) {
             // Text.gameObject.SetActive(false);
             return;
         }
-
-        string modifier = item.GetString(VTModifiersCore.VariableVtModifierHashCode);
-        if (modifier != null) {
-            // Log($"ItemHoveringModifier:{modifier}");
-            TextMeshProUGUI itemNameUGUI = Traverse.Create(uiInstance).Field("itemName").GetValue<TextMeshProUGUI>();
-            itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
+    }
+    
+    static Color VTLabelColor = Color.magenta;
+    static Color VTLabelColorLight = new Color(247/255, 82/255, 228/255);
+    static Color VTLabelColorDefault = Color.white;
+    
+    
+    //物品InventoryView键值对UI改颜色
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(ItemModifierEntry), "Refresh")]
+    public static void ItemModifierEntry_Refresh_PostFix(ItemModifierEntry __instance) {
+        Traverse t = Traverse.Create(__instance);
+        TextMeshProUGUI labelGUI = t.Field("displayName").GetValue<TextMeshProUGUI>();
+        TextMeshProUGUI valueGUI = t.Field("value").GetValue<TextMeshProUGUI>();
+        string label = labelGUI.text;
+        if (label.StartsWith("VTM_")) {
+            labelGUI.color = VTLabelColorLight;
+            labelGUI.text = labelGUI.text.Substring(4);
+            valueGUI.color = VTLabelColorLight;
+        } else if (label.StartsWith("VTMC_")) {
+            labelGUI.color = VTLabelColorLight;
+            labelGUI.text = labelGUI.text.Substring(5);
+            valueGUI.color = VTLabelColorLight;
+        } else {
+            labelGUI.color = VTLabelColorDefault;
+            valueGUI.color = VTLabelColorDefault;
         }
     }
     
-    //物品操作菜单Patch
+    //物品HoveringUI参数键值对UI改颜色
     [HarmonyPostfix]
-    [HarmonyPatch(typeof(ItemOperationMenu), "Setup")]
-    public static void ItemOperationMenu_Setup_PostPatch(ItemOperationMenu __instance) {
-        Item item = Traverse.Create(__instance).Field("TargetItem").GetValue<Item>();
-        if (item == null) return;
-        TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("nameText").GetValue<TextMeshProUGUI>();
-        itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
+    [HarmonyPatch(typeof(LabelAndValue), "Setup")]
+    public static void LabelAndValue_Setup_PostFix(LabelAndValue __instance, string label) {
+        Traverse t = Traverse.Create(__instance);
+        TextMeshProUGUI labelGUI = t.Field("labelText").GetValue<TextMeshProUGUI>();
+        TextMeshProUGUI valueGUI = t.Field("valueText").GetValue<TextMeshProUGUI>();
+        if (label.StartsWith("VTM_")) {
+            labelGUI.color = VTLabelColor;
+            labelGUI.text = labelGUI.text.Substring(4);
+            valueGUI.color = VTLabelColor;
+        } else if (label.StartsWith("VTMC_")) {
+            labelGUI.color = VTLabelColor;
+            labelGUI.text = labelGUI.text.Substring(5);
+            valueGUI.color = VTLabelColor;
+        } else{
+            labelGUI.color = VTLabelColorDefault;
+            valueGUI.color = VTLabelColorDefault;
+        }
     }
     
-    //物品自定义菜单Patch
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ItemCustomizeSelectionView), "RefreshSelectedItemInfo")]
-    public static void ItemCustomizeSelectionView_RefreshSelectedItemInfo_PostPatch(ItemCustomizeSelectionView __instance) {
-        Item item = ItemUIUtilities.SelectedItem;
-        if (item == null) return;
-        TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("selectedItemName").GetValue<TextMeshProUGUI>();
-        itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
-    }
+    // //物品操作菜单Patch
+    // [HarmonyPostfix]
+    // [HarmonyPatch(typeof(ItemOperationMenu), "Setup")]
+    // public static void ItemOperationMenu_Setup_PostPatch(ItemOperationMenu __instance) {
+    //     Item item = Traverse.Create(__instance).Field("TargetItem").GetValue<Item>();
+    //     if (item == null) return;
+    //     TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("nameText").GetValue<TextMeshProUGUI>();
+    //     itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
+    // }
+    
+    // //物品自定义菜单Patch
+    // [HarmonyPostfix]
+    // [HarmonyPatch(typeof(ItemCustomizeSelectionView), "RefreshSelectedItemInfo")]
+    // public static void ItemCustomizeSelectionView_RefreshSelectedItemInfo_PostPatch(ItemCustomizeSelectionView __instance) {
+    //     Item item = ItemUIUtilities.SelectedItem;
+    //     if (item == null) return;
+    //     TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("selectedItemName").GetValue<TextMeshProUGUI>();
+    //     itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
+    // }
     
     protected override void OnAfterSetup() {
         if (!_isInitialized) {
@@ -206,12 +285,26 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // LevelManager.OnLevelInitialized += OnLevelInitialized;
         ItemHoveringUI.onSetupItem += OnSetupItemHoveringUI;
         ItemHoveringUI.onSetupMeta += OnSetupMeta;
+        ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
+        ItemTreeData.OnItemLoaded += OnItemLoaded;
     }
 
     protected void UnregisterEvents() {
         // LevelManager.OnLevelInitialized -= OnLevelInitialized;
         ItemHoveringUI.onSetupItem -= OnSetupItemHoveringUI;
         ItemHoveringUI.onSetupMeta -= OnSetupMeta;
+        ItemUtilities.OnItemSentToPlayerInventory -= OnItemSentToPlayerInventory;
+        ItemTreeData.OnItemLoaded -= OnItemLoaded;
+    }
+
+    private void OnItemSentToPlayerInventory(Item item) {
+        // LogStatic($"OnItemSentToPlayerInventory: {item.DisplayName}");
+        VTModifiersCore.CalcItemModifiers(item);
+    }
+    //从存档等地方加载Item后，需要更新Modifier
+    private void OnItemLoaded(Item item) {
+        // LogStatic($"OnItemLoaded: {item.DisplayName}");
+        VTModifiersCore.CalcItemModifiers(item);
     }
 
     //初始化地图后，扫描该地图的敌人和物资箱，为其中的武器等道具异步加入词缀
@@ -221,7 +314,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
 
     void Update() {
-        if (_isInitialized) {
+        if (VTModifiersCore.DEBUG && _isInitialized) {
             if (Input.GetKeyDown(KeyCode.G)) {
                 KeyDownG();
             }
@@ -235,6 +328,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     void KeyDownG() {
         Item weapon = MainCharacterWeapon();
         if (weapon != null) {
+            VTModifiersCore.TryUnpatchItem(weapon);
             VTModifiersCore.PatchItem(weapon, VTModifiersCore.Sources.Debug);
             Log($"KeyCodeG PatchMainCharacterWeapon: {weapon.DisplayName}");
         }
@@ -242,7 +336,44 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     }
 
     void KeyDownH() {
-        Log("KeyCodeH Pressed");
+        Item item = MainCharacterWeapon();
+        if (item != null) {
+            StringBuilder stringBuilder = new StringBuilder();
+            if (item.Variables != null)
+            {
+                foreach (CustomData variable in item.Variables)
+                {
+                    if (variable.Display)
+                        stringBuilder.AppendLine(variable.Key + "\t" + variable.DisplayName + "\t" + variable.GetValueDisplayString());
+                }
+            }
+            if (item.Constants != null)
+            {
+                foreach (CustomData constant in item.Constants)
+                {
+                    if (constant.Display)
+                        stringBuilder.AppendLine(constant.Key + "\t" + constant.DisplayName + "\t" + constant.GetValueDisplayString());
+                }
+            }
+            if ((UnityEngine.Object) item.Stats != (UnityEngine.Object) null)
+            {
+                foreach (Stat stat in item.Stats)
+                {
+                    if (stat.Display)
+                        stringBuilder.AppendLine(stat.Key + "\t" + string.Format("{0}\t{1}", (object) stat.DisplayName, (object) stat.Value));
+                }
+            }
+            if ((UnityEngine.Object) item.Modifiers != (UnityEngine.Object) null)
+            {
+                foreach (ModifierDescription modifier in item.Modifiers)
+                {
+                    if (modifier.Display)
+                        stringBuilder.AppendLine(modifier.Key + "\t" + modifier.DisplayName + "\t" + modifier.GetDisplayValueString());
+                }
+            }
+            Log($"ItemPropertiesDisplay:{item.DisplayName}");
+            Log(stringBuilder.ToString());
+        }
     }
     
     Item MainCharacterWeapon() {
