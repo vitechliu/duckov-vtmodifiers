@@ -36,30 +36,20 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    // [HarmonyPostfix]
-    // [HarmonyPatch(typeof(InteractableLootbox), "get_Inventory")]
-    // public static void InteractableLootbox_Inventory_PostFix() {
-    //     LogStatic($"获取到InteractableLootbox_Inventory");
-    // }
-    //
     
     
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ItemAgent_Gun), "ShootOneBullet")]
     public static void ItemAgentGun_ShootOneBullet_PostFix(ItemAgent_Gun __instance) {
         Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
-        float beforeDamage = temp.context.damage;
-        float afterDamage = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmDamageMultiplier, beforeDamage);
-        afterDamage = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmDamage, afterDamage);
-        temp.context.damage = afterDamage;
-        if (afterDamage > beforeDamage) {
-            LogStatic($"ShootOneBullet ModifyDamage:{beforeDamage} -> {afterDamage}");
-        }
+        // float beforeDamage = temp.context.damage;
+        // float afterDamage = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmDamageMultiplier, beforeDamage);
+        // afterDamage = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmDamage, afterDamage);
+        // temp.context.damage = afterDamage;
+        // if (afterDamage > beforeDamage) {
+        //     LogStatic($"ShootOneBullet ModifyDamage:{beforeDamage} -> {afterDamage}");
+        // }
         
-        temp.context.speed = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmDamage, temp.context.speed);
-        temp.context.critRate = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmCritRate, temp.context.critRate);
-        temp.context.distance = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmShootDistance, temp.context.distance);
-        temp.context.bleedChance = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
         temp.context.element_Electricity = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementElectricity, temp.context.element_Electricity);
         temp.context.element_Fire = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementFire, temp.context.element_Fire);
         temp.context.element_Poison = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementPoison, temp.context.element_Poison);
@@ -68,14 +58,12 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // Traverse.Create(__instance).Field("projInst").SetValue(temp);
     }
 
-    //不支持
-    // [HarmonyPostfix]
-    // [HarmonyPatch(typeof(ItemAgent_Gun), "Damage", MethodType.Getter)]
-    // public static void ItemAgentGun_Damage_PostFix(ref float damage) {
-    //     LogStatic($"DamageGetter:{damage}");
-    // }
-
-    
+     // //不支持 会报错
+     // [HarmonyPostfix]
+     // [HarmonyPatch(typeof(ItemAgent_Gun), "Damage", MethodType.Getter)]
+     // public static void ItemAgentGun_Damage_PostFix(ref float damage) {
+     //     LogStatic($"DamageGetter:{damage}");
+     // }
     
 
     //对随机敌人背包道具词缀化
@@ -163,7 +151,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
         string modifier = item.GetString(VTModifiersCore.VariableVtModifierHashCode);
         if (modifier != null) {
-            Log($"ItemHoveringModifier:{modifier}");
+            // Log($"ItemHoveringModifier:{modifier}");
             TextMeshProUGUI itemNameUGUI = Traverse.Create(uiInstance).Field("itemName").GetValue<TextMeshProUGUI>();
             itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
         }
@@ -235,10 +223,30 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     void Update() {
         if (_isInitialized) {
             if (Input.GetKeyDown(KeyCode.G)) {
-                //试图获取主要角色手上的武器
-                Log("KeyCodeG Pressed");
+                KeyDownG();
+            }
+            
+            if (Input.GetKeyDown(KeyCode.H)) {
+                KeyDownH();
             }
         }
+    }
+
+    void KeyDownG() {
+        Item weapon = MainCharacterWeapon();
+        if (weapon != null) {
+            VTModifiersCore.PatchItem(weapon, VTModifiersCore.Sources.Debug);
+            Log($"KeyCodeG PatchMainCharacterWeapon: {weapon.DisplayName}");
+        }
+        
+    }
+
+    void KeyDownH() {
+        Log("KeyCodeH Pressed");
+    }
+    
+    Item MainCharacterWeapon() {
+        return CharacterMainControl.Main?.PrimWeaponSlot()?.Content;
     }
 
     // void Awake() {
