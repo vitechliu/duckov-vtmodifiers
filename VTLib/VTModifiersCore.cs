@@ -139,28 +139,33 @@ public class VTModifiersCore {
     public static void CalcItemModifiers(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier == null) return;
-        VtModifier vtModifier = ModifierData[modifier];
-        bool flag = false;
-        Random.State originalState = Random.state;
-        if (!IsModifierFixed(vtModifier)) {
-            int modifierSeed = item.GetInt(VariableVtModifierSeedHashCode, -1);
-            if (modifierSeed == -1) {
-                modifierSeed = Random.Range(0, 1000000);
-                item.SetInt(VariableVtModifierSeedHashCode, modifierSeed);
+        if (ModifierData.TryGetValue(modifier, out VtModifier vtModifier)) {
+            bool flag = false;
+            Random.State originalState = Random.state;
+            if (!IsModifierFixed(vtModifier)) {
+                int modifierSeed = item.GetInt(VariableVtModifierSeedHashCode, -1);
+                if (modifierSeed == -1) {
+                    modifierSeed = Random.Range(0, 1000000);
+                    item.SetInt(VariableVtModifierSeedHashCode, modifierSeed);
+                }
+                Random.InitState(modifierSeed);
             }
-            Random.InitState(modifierSeed);
+        
+            foreach (string vtm in Vtms) {
+                if (TryPatchModifier(item, vtModifier, vtm)) {
+                    flag = true;
+                    // ModBehaviour.LogStatic($"注入了Modifier:{item.DisplayName}_{vtm}");
+                }
+            }
+            if (flag) {
+                item.Modifiers.ReapplyModifiers();
+            }
+            Random.state = originalState;
+        }
+        else {
+            ModBehaviour.LogStatic($"找不到modifier:{modifier}");
         }
         
-        foreach (string vtm in Vtms) {
-            if (TryPatchModifier(item, vtModifier, vtm)) {
-                flag = true;
-                // ModBehaviour.LogStatic($"注入了Modifier:{item.DisplayName}_{vtm}");
-            }
-        }
-        if (flag) {
-            item.Modifiers.ReapplyModifiers();
-        }
-        Random.state = originalState;
     }
     
     public static string PatchItem(Item item, Sources source, string modifier) {
@@ -216,7 +221,7 @@ public class VTModifiersCore {
     
     public static void InitData() {
         //todo 从config加载
-        if (ModifierData == null) {
+        if (ModifierData == null || ModifierData.Count == 0) {
             ModifierData = new () {
                 ["Legendary"] =               new() { ModifierWeight = 50, ShootSpeedMultiplier = 0.2f, Weight = -0.3f, DamageMultiplier = 0.5f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 3f },
                 ["Unreal"] =                  new() { ModifierWeight = 100, ForceFixed = true, ShootSpeedMultiplier = 0.1f, DamageMultiplier = 0.15f, BulletSpeedMultiplier = 0.1f, CritRate = 0.05f, PriceMultiplier = 2.0985f },
