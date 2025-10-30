@@ -51,6 +51,12 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         temp.context.element_Space = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementSpace, temp.context.element_Space);
         
         temp.context.bleedChance = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
+
+        if (VTModifiersCore.DEBUG) {
+            LogStatic($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
+                      $"ArmorPiercing:{temp.context.armorPiercing}, " +
+                      $"ArmorBreak:{temp.context.armorBreak}");
+        }
     }
     
     
@@ -87,6 +93,17 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         __result = VTModifiersCore.PatchItemDisplayName(__instance, __result);
     }
     
+    //弹药节省Patch
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ItemSetting_Gun), "UseABullet")]
+    public static bool ItemSettingGun_UseABullet_PreFix(ItemSetting_Gun __instance) {
+
+        float? ammoSaveChance = VTModifiersCore.GetItemVtm(__instance.Item, VTModifiersCore.VtmAmmoSave);
+        if (ammoSaveChance.HasValue) {
+            return !VTLib.VTLib.Probability(ammoSaveChance.Value);
+        }
+        return true;
+    }
     
     //物品价值Patch
     [HarmonyPostfix]
@@ -337,7 +354,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         Item weapon = MainCharacterWeapon();
         if (weapon != null) {
             VTModifiersCore.TryUnpatchItem(weapon);
-            VTModifiersCore.PatchItem(weapon, VTModifiersCore.Sources.Debug);
+            VTModifiersCore.PatchItem(weapon, VTModifiersCore.Sources.Debug, "Debug");
             Log($"KeyCodeG PatchMainCharacterWeapon: {weapon.DisplayName}");
         }
         
