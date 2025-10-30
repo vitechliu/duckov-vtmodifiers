@@ -106,10 +106,13 @@ public class VTModifiersCore {
             //暂时只支持热武器
             switch (source) {
                 case Sources.LootBox:
-                    if (!Probability(0.8f)) return null;
+                    if (!Probability(0.75f)) return null;
                     break;
                 case Sources.Enemy:
                     if (!Probability(0.4f)) return null;
+                    break;
+                case Sources.Craft:
+                    if (!Probability(0.75f)) return null;
                     break;
             }
             string? modifier = GetAModifierByWeight();
@@ -186,6 +189,7 @@ public class VTModifiersCore {
         LootBox, //物资
         Enemy, //敌人AI
         Debug, //测试用
+        Craft, //制作的
     }
 
     
@@ -196,10 +200,10 @@ public class VTModifiersCore {
                 ["Legendary"] =               new() { ModifierWeight = 50, ShootSpeedMultiplier = 0.2f, Weight = -0.3f, DamageMultiplier = 0.5f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 3f },
                 ["Unreal"] =                  new() { ModifierWeight = 100, ShootSpeedMultiplier = 0.1f, DamageMultiplier = 0.15f, BulletSpeedMultiplier = 0.1f, CritRate = 0.05f, PriceMultiplier = 2.0985f },
                 ["Sighted"] =                 new() { ModifierWeight = 300, CritRate = 0.03f, ScatterFactorADSMultiplier = -0.1f, PriceMultiplier = 0.2f },
-                ["Light"] =                   new() { ModifierWeight = 500, Weight = -0.4f, DamageMultiplier = -0.05f, ReloadTimeMultiplier = -0.2f, PriceMultiplier = 0.2f },
-                ["Heavy"] =                   new() { ModifierWeight = 500, Weight = 0.4f, RecoilScaleVMultiplier = -0.1f, DamageMultiplier = 0.4f, PriceMultiplier = 0.3f },
-                ["Eagle-Eye"] =               new() { ModifierWeight = 400, DamageMultiplier = 0.1f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 0.6f },
-                ["Silver"] =                  new() { ModifierWeight = 200, DamageMultiplier = 0.05f, BleedChance = 0.2f, ElementPoison = 0.1f, PriceMultiplier = 0.5f },
+                ["Light"] =                   new() { ModifierWeight = 300, Weight = -0.4f, DamageMultiplier = -0.05f, ReloadTimeMultiplier = -0.2f, PriceMultiplier = 0.2f },
+                ["Heavy"] =                   new() { ModifierWeight = 300, Weight = 0.4f, RecoilScaleVMultiplier = -0.1f, DamageMultiplier = 0.4f, PriceMultiplier = 0.3f },
+                ["Eagle-Eye"] =               new() { ModifierWeight = 100, DamageMultiplier = 0.1f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 0.6f },
+                ["Silver"] =                  new() { ModifierWeight = 100, DamageMultiplier = 0.05f, BleedChance = 0.2f, ElementPoison = 0.1f, PriceMultiplier = 0.5f },
                 ["Chaos"] =                   new() { ModifierWeight = 50, ElementElectricity = 0.2f, ElementFire = 0.2f, ElementSpace = 0.2f, ElementPoison = 0.2f, PriceMultiplier = 0.8f },
                
                 ["Alienated"] =               new() { ModifierWeight = 100, DamageMultiplier = -0.3f, ElementPoison = 0.3f, ShootSpeed = 0.4f, PriceMultiplier = 0.1f },
@@ -208,7 +212,7 @@ public class VTModifiersCore {
                 ["Portable"] =                new() { ModifierWeight = 300, ScatterFactorMultiplier = -0.4f, ScatterFactorADSMultiplier = 0.2f, PriceMultiplier = 0.1f },
                 ["Brutal"] =                  new() { ModifierWeight = 300, DamageMultiplier = 0.4f, BleedChance = 0.3f, ShootSpeedMultiplier = -0.2f, PriceMultiplier = 0.2f },
                
-                ["Apollyon"] =                new() { ModifierWeight = 20, BulletSpeedMultiplier = 2f, PriceMultiplier = 0.2f },
+                ["Apollyon"] =                new() { ModifierWeight = 10, BulletSpeedMultiplier = 2f, PriceMultiplier = 0.2f },
                 ["Silent"] =                  new() { ModifierWeight = 200, DamageMultiplier = -0.1f, SoundRange = -0.4f, PriceMultiplier = 0.1f },
                 ["Violent"] =                 new() { ModifierWeight = 200, DamageMultiplier = 0.4f, SoundRange = 0.8f, PriceMultiplier = 0.2f },
 

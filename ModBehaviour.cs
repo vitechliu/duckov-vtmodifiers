@@ -104,7 +104,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     
 
-    //对随机敌人背包道具词缀化
+    //词缀化来源：敌人生成
     [HarmonyPostfix]
     [HarmonyPatch(typeof(CharacterSpawnerRoot), "AddCreatedCharacter")]
     public static void CharacterSpawnerRoot_AddCreatedCharacter_PostFix(
@@ -133,7 +133,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    //对物资箱词缀化
+    //词缀化来源：物资箱
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LootBoxLoader), "Setup")]
     public static void LootBoxLoader_Setup_PostFix(LootBoxLoader __instance) {
@@ -162,6 +162,12 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
+    //词缀化来源：合成
+    private void OnItemCrafted(CraftingFormula formula, Item item) {
+        VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Craft);
+    }
+    
+    
     TextMeshProUGUI _text;
     TextMeshProUGUI Text
     {
@@ -285,6 +291,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // LevelManager.OnLevelInitialized += OnLevelInitialized;
         ItemHoveringUI.onSetupItem += OnSetupItemHoveringUI;
         ItemHoveringUI.onSetupMeta += OnSetupMeta;
+        CraftingManager.OnItemCrafted += OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
         ItemTreeData.OnItemLoaded += OnItemLoaded;
     }
@@ -293,6 +300,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // LevelManager.OnLevelInitialized -= OnLevelInitialized;
         ItemHoveringUI.onSetupItem -= OnSetupItemHoveringUI;
         ItemHoveringUI.onSetupMeta -= OnSetupMeta;
+        CraftingManager.OnItemCrafted -= OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory -= OnItemSentToPlayerInventory;
         ItemTreeData.OnItemLoaded -= OnItemLoaded;
     }
