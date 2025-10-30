@@ -242,26 +242,26 @@ public class VTModifiersCore {
                 ["Thrifty"] =                 new() { ModifierWeight = 150, AmmoSave = 0.3f, PriceMultiplier = 0.3f },
                 ["Fast"] =                    new() { ModifierWeight = 150, ReloadTimeMultiplier = -0.3f, ShootSpeedMultiplier = 0.2f, PriceMultiplier = 0.2f },
                
-                ["Alienated"] =               new() { ModifierWeight = 50, DamageMultiplier = -0.3f, ElementPoison = 0.3f, ShootSpeed = 0.4f, PriceMultiplier = 0.1f },
+                ["Alienated"] =               new() { ModifierWeight = 50, CritDamageMultiplier = -0.1f, ElementPoison = 0.3f, ShootSpeed = 0.4f, PriceMultiplier = 0.1f },
                 ["Scalding"] =                new() { ModifierWeight = 50, DamageMultiplier = 0.2f, Weight = 0.4f, ElementFire = 0.4f, ShootSpeed = -0.2f, PriceMultiplier = 0.1f },
                 ["Gauss"] =                   new() { ModifierWeight = 50, Penetrate = 3, ElementElectricity = 0.4f, ShootSpeed = 0.1f, PriceMultiplier = 0.7f },
-                ["Concentrated"] =            new() { ModifierWeight = 200, DamageMultiplier = -0.1f, RecoilScaleHMultiplier = -0.5f, ShootSpeed = 0.1f, PriceMultiplier = 0.1f },
+                ["Concentrated"] =            new() { ModifierWeight = 200, DamageMultiplier = -0.1f, RecoilScaleHMultiplier = -0.5f, ShootSpeed = 0.2f, PriceMultiplier = 0.1f },
                 ["Portable"] =                new() { ModifierWeight = 300, ScatterFactorMultiplier = -0.4f, ScatterFactorADSMultiplier = 0.2f, PriceMultiplier = 0.1f },
                 ["Brutal"] =                  new() { ModifierWeight = 300, DamageMultiplier = 0.4f, BleedChance = 0.3f, ShootSpeedMultiplier = -0.2f, PriceMultiplier = 0.2f },
                 ["Cheap"] =                   new() { ModifierWeight = 150, DamageMultiplier = -0.1f, AmmoSave = 0.3f, Weight = -0.3f, PriceMultiplier = -0.2f },
 
                 ["Apollyon"] =                new() { ModifierWeight = 10, ForceFixed = true, BulletSpeedMultiplier = 2f, PriceMultiplier = 0.2f },
-                ["Silent"] =                  new() { ModifierWeight = 200, DamageMultiplier = -0.1f, SoundRange = -0.4f, PriceMultiplier = 0.1f },
+                ["Silent"] =                  new() { ModifierWeight = 200, ShootDistanceMultiplier = -0.1f, SoundRange = -0.5f, PriceMultiplier = 0.1f },
                 ["Violent"] =                 new() { ModifierWeight = 200, DamageMultiplier = 0.35f, SoundRange = 0.8f, PriceMultiplier = 0.2f },
 
                 
-                ["Broken"] =                  new() { ModifierWeight = 250, DamageMultiplier = -0.2f, ShootDistanceMultiplier = -0.2f, PriceMultiplier = -0.5f },
+                ["Broken"] =                  new() { ModifierWeight = 200, DamageMultiplier = -0.2f, ShootDistanceMultiplier = -0.2f, PriceMultiplier = -0.5f },
                 
                 
-                ["WithElectricity"] =         new() { ModifierWeight = 100, ElementElectricity = 0.5f, DamageMultiplier = -0.15f, PriceMultiplier = 0.5f },
-                ["WithFire"] =                new() { ModifierWeight = 100, ElementFire = 0.5f, DamageMultiplier = -0.15f, PriceMultiplier = 0.5f },
-                ["WithSpace"] =               new() { ModifierWeight = 100, ElementSpace = 0.5f, DamageMultiplier = -0.15f, PriceMultiplier = 0.5f },
-                ["WithPoison"] =              new() { ModifierWeight = 100, ElementPoison = 0.5f, DamageMultiplier = -0.15f, PriceMultiplier = 0.5f },
+                ["WithElectricity"] =         new() { ModifierWeight = 100, ElementElectricity = 0.5f, PriceMultiplier = 0.5f },
+                ["WithFire"] =                new() { ModifierWeight = 100, ElementFire = 0.5f, PriceMultiplier = 0.5f },
+                ["WithSpace"] =               new() { ModifierWeight = 100, ElementSpace = 0.5f, PriceMultiplier = 0.5f },
+                ["WithPoison"] =              new() { ModifierWeight = 100, ElementPoison = 0.5f, PriceMultiplier = 0.5f },
                 
                 
                 ["Debug"] =                   new() { ModifierWeight = 0, CritDamageMultiplier = 0.7f, Penetrate = 2, PriceMultiplier = 9f},
@@ -320,6 +320,7 @@ public class VTModifiersCore {
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Sighted", "精准");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Light", "轻便");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Heavy", "重量级");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Deadly", "致命");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Eagle-Eye", "鹰眼");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Legendary", "传说");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Silver", "银质");
