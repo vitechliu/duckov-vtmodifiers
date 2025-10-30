@@ -15,10 +15,13 @@ public class VTModifiersCore {
     //通用
 
     public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
+    public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
 
     public const bool DEBUG = false;
 
-    
+    public static bool IsModifierFixed(VTModifiersCore.VtModifier modifier) {
+        return modifier.ForceFixed ? true : false;
+    }
     public static string? GetAModifierByWeight() {
         int totalWeight = 0;
         foreach (VtModifier modifier in ModifierData.Values) {
@@ -50,11 +53,16 @@ public class VTModifiersCore {
                     return false;
                 }
 
+                float finalVal = (float)val;
+                if (!IsModifierFixed(vtModifier)) {
+                    finalVal = finalVal * Random.Range(0.5f, 1f);
+                }
+
                 ModifierDescription md = new ModifierDescription(
                     ModifierTarget.Self,
                     vtp.Item1,
                     vtp.Item2,
-                    (float)val,
+                    finalVal,
                     false,
                     MAGIC_ORDER
                 );
@@ -133,13 +141,26 @@ public class VTModifiersCore {
         if (modifier == null) return;
         VtModifier vtModifier = ModifierData[modifier];
         bool flag = false;
+        Random.State originalState = Random.state;
+        if (!IsModifierFixed(vtModifier)) {
+            int modifierSeed = item.GetInt(VariableVtModifierSeedHashCode, -1);
+            if (modifierSeed == -1) {
+                modifierSeed = Random.Range(0, 1000000);
+                item.SetInt(VariableVtModifierSeedHashCode, modifierSeed);
+            }
+            Random.InitState(modifierSeed);
+        }
+        
         foreach (string vtm in Vtms) {
             if (TryPatchModifier(item, vtModifier, vtm)) {
                 flag = true;
                 // ModBehaviour.LogStatic($"注入了Modifier:{item.DisplayName}_{vtm}");
             }
         }
-        if (flag) item.Modifiers.ReapplyModifiers();
+        if (flag) {
+            item.Modifiers.ReapplyModifiers();
+        }
+        Random.state = originalState;
     }
     
     public static string PatchItem(Item item, Sources source, string modifier) {
@@ -198,7 +219,7 @@ public class VTModifiersCore {
         if (ModifierData == null) {
             ModifierData = new () {
                 ["Legendary"] =               new() { ModifierWeight = 50, ShootSpeedMultiplier = 0.2f, Weight = -0.3f, DamageMultiplier = 0.5f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 3f },
-                ["Unreal"] =                  new() { ModifierWeight = 100, ShootSpeedMultiplier = 0.1f, DamageMultiplier = 0.15f, BulletSpeedMultiplier = 0.1f, CritRate = 0.05f, PriceMultiplier = 2.0985f },
+                ["Unreal"] =                  new() { ModifierWeight = 100, ForceFixed = true, ShootSpeedMultiplier = 0.1f, DamageMultiplier = 0.15f, BulletSpeedMultiplier = 0.1f, CritRate = 0.05f, PriceMultiplier = 2.0985f },
                 ["Sighted"] =                 new() { ModifierWeight = 300, CritRate = 0.03f, ScatterFactorADSMultiplier = -0.1f, PriceMultiplier = 0.2f },
                 ["Light"] =                   new() { ModifierWeight = 300, Weight = -0.4f, DamageMultiplier = -0.05f, ReloadTimeMultiplier = -0.2f, PriceMultiplier = 0.2f },
                 ["Heavy"] =                   new() { ModifierWeight = 300, Weight = 0.4f, RecoilScaleVMultiplier = -0.1f, DamageMultiplier = 0.4f, PriceMultiplier = 0.3f },
@@ -212,7 +233,7 @@ public class VTModifiersCore {
                 ["Portable"] =                new() { ModifierWeight = 300, ScatterFactorMultiplier = -0.4f, ScatterFactorADSMultiplier = 0.2f, PriceMultiplier = 0.1f },
                 ["Brutal"] =                  new() { ModifierWeight = 300, DamageMultiplier = 0.4f, BleedChance = 0.3f, ShootSpeedMultiplier = -0.2f, PriceMultiplier = 0.2f },
                
-                ["Apollyon"] =                new() { ModifierWeight = 10, BulletSpeedMultiplier = 2f, PriceMultiplier = 0.2f },
+                ["Apollyon"] =                new() { ModifierWeight = 10, ForceFixed = true, BulletSpeedMultiplier = 2f, PriceMultiplier = 0.2f },
                 ["Silent"] =                  new() { ModifierWeight = 200, DamageMultiplier = -0.1f, SoundRange = -0.4f, PriceMultiplier = 0.1f },
                 ["Violent"] =                 new() { ModifierWeight = 200, DamageMultiplier = 0.4f, SoundRange = 0.8f, PriceMultiplier = 0.2f },
 
@@ -380,8 +401,9 @@ public class VTModifiersCore {
     public struct VtModifier {
         public int ModifierWeight = 0; //出现的权重
         public int ModifierLevel = 1; //等级从-6到6(10+) 负的代表负面的
+        
         public float Weight = 0f;
-        public float PriceMultiplier = 1f; //不展示
+        public float PriceMultiplier = 0f; //不展示
         
         public float Damage = 0f;
         public float DamageMultiplier = 0f;
@@ -408,6 +430,8 @@ public class VTModifiersCore {
 
         public bool ApplyOnGuns = true;
         public bool ApplyOnHelmets = false;
+
+        public bool ForceFixed = false;
         public VtModifier() { }
 
         public readonly float? GetVal(string vtm) {
