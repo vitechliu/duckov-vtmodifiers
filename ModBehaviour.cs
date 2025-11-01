@@ -6,10 +6,10 @@ using HarmonyLib;
 using Duckov.UI;
 using Duckov.Utilities;
 using ItemStatsSystem.Data;
+using ItemStatsSystem.Items;
 using SodaCraft.Localizations;
 using TMPro;
 using VTModifiers.VTLib;
-using UnityEngine.UI;
 // ReSharper disable Unity.PerformanceCriticalCodeInvocation
 
 namespace VTModifiers;
@@ -27,6 +27,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     private static ModBehaviour _instance;
     public static ModBehaviour Instance => _instance;
 
+    public VTModifiersUI modUI;
+
     private Harmony _harmony;
 
     protected virtual void Awake() {
@@ -39,27 +41,30 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    
-    
+
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ItemAgent_Gun), "ShootOneBullet")]
     public static void ItemAgentGun_ShootOneBullet_PostFix(ItemAgent_Gun __instance) {
         Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
-        temp.context.element_Electricity = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementElectricity, temp.context.element_Electricity);
-        temp.context.element_Fire = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementFire, temp.context.element_Fire);
-        temp.context.element_Poison = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementPoison, temp.context.element_Poison);
-        temp.context.element_Space = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementSpace, temp.context.element_Space);
-        
-        temp.context.bleedChance = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
+        temp.context.element_Electricity = VTModifiersCore.Modify(__instance.Item,
+            VTModifiersCore.VtmElementElectricity, temp.context.element_Electricity);
+        temp.context.element_Fire =
+            VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementFire, temp.context.element_Fire);
+        temp.context.element_Poison = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementPoison,
+            temp.context.element_Poison);
+        temp.context.element_Space = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementSpace,
+            temp.context.element_Space);
 
-        if (VTModifiersCore.DEBUG) {
-            LogStatic($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
-                      $"ArmorPiercing:{temp.context.armorPiercing}, " +
-                      $"ArmorBreak:{temp.context.armorBreak}");
-        }
+        temp.context.bleedChance =
+            VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
+
+        // if (VTModifiersCore.DEBUG) {
+        //     LogStatic($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
+        //               $"ArmorPiercing:{temp.context.armorPiercing}, " +
+        //               $"ArmorBreak:{temp.context.armorBreak}");
+        // }
     }
-    
-    
+
 
     //重量Patch
     [HarmonyPostfix]
@@ -67,7 +72,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     public static void Item_SelfWeight_PostFix(Item __instance, ref float __result) {
         __result = VTModifiersCore.Modify(__instance, VTModifiersCore.VtmWeight, __result);
     }
-    
+
     //MD:DisplayName patch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ModifierDescription), "get_DisplayName")]
@@ -80,31 +85,32 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             if (VTModifiersCore.Vtms.Contains("VTMC_" + __instance.Key)) {
                 //是特殊词缀
                 __result = "VTMC_" + __result;
-            } else {
+            }
+            else {
                 __result = "VTM_" + __result;
             }
         }
     }
-    
+
     //try DisplayName patch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Item), "get_DisplayName")]
     public static void Item_DisplayName_PostFix(Item __instance, ref string __result) {
         __result = VTModifiersCore.PatchItemDisplayName(__instance, __result);
     }
-    
+
     //弹药节省Patch
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ItemSetting_Gun), "UseABullet")]
     public static bool ItemSettingGun_UseABullet_PreFix(ItemSetting_Gun __instance) {
-
         float? ammoSaveChance = VTModifiersCore.GetItemVtm(__instance.Item, VTModifiersCore.VtmAmmoSave);
         if (ammoSaveChance.HasValue) {
-            return !VTLib.VTLib.Probability(ammoSaveChance.Value);
+            return !VT.Probability(ammoSaveChance.Value);
         }
+
         return true;
     }
-    
+
     //物品价值Patch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Item), "GetTotalRawValue")]
@@ -119,7 +125,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // }
     }
 
-    
 
     //词缀化来源：敌人生成
     [HarmonyPostfix]
@@ -131,17 +136,29 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         int csrInstanceId = __instance.GetInstanceID();
         if (c.CharacterItem && c.CharacterItem.Inventory) {
             Inventory inventory = c.CharacterItem.Inventory;
-            int itemCount = inventory.Count();
-            if (c.PrimWeaponSlot() != null && c.PrimWeaponSlot().Content != null) {
-                itemCount++;
-                VTModifiersCore.PatchItem(c.PrimWeaponSlot().Content, VTModifiersCore.Sources.Enemy);
-            }
-            if (c.MeleeWeaponSlot() != null && c.MeleeWeaponSlot().Content != null) {
-                itemCount++;
-                VTModifiersCore.PatchItem(c.MeleeWeaponSlot().Content, VTModifiersCore.Sources.Enemy);
-            }
+            // int itemCount = inventory.Count();
+            // if (c.PrimWeaponSlot() != null && c.PrimWeaponSlot().Content != null) {
+            //     itemCount++;
+            //     VTModifiersCore.PatchItem(c.PrimWeaponSlot().Content, VTModifiersCore.Sources.Enemy);
+            // }
+            //
+            // if (c.MeleeWeaponSlot() != null && c.MeleeWeaponSlot().Content != null) {
+            //     itemCount++;
+            //     VTModifiersCore.PatchItem(c.MeleeWeaponSlot().Content, VTModifiersCore.Sources.Enemy);
+            // }
+            //
+            // if (c.MeleeWeaponSlot() != null && c.MeleeWeaponSlot().Content != null) {
+            //     itemCount++;
+            //     VTModifiersCore.PatchItem(c.MeleeWeaponSlot().Content, VTModifiersCore.Sources.Enemy);
+            // }
+
             foreach (Item item in inventory) {
                 VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Enemy);
+            }
+
+            foreach (Slot slot in c.CharacterItem.Slots) {
+                if (slot.Content == null) continue;
+                VTModifiersCore.PatchItem(slot.Content, VTModifiersCore.Sources.Enemy);
             }
             // LogStatic($"CSRSetup:{csrInstanceId}, itemCount:{itemCount}");
         }
@@ -167,8 +184,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
                 foreach (Item item in inventory) {
                     VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.LootBox);
                 }
-                Traverse.Create(lootbox).Field("inventoryReference").SetValue(inventory);
-                Traverse.Create(__instance).Field("_lootBox").SetValue(lootbox);
+                // Traverse.Create(lootbox).Field("inventoryReference").SetValue(inventory);
+                // Traverse.Create(__instance).Field("_lootBox").SetValue(lootbox);
             }
             else {
                 // LogStatic($"LBLSetupFailed:{lootBoxLoaderId}, name:{lootBoxName},, nullInventory");
@@ -183,26 +200,24 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     private void OnItemCrafted(CraftingFormula formula, Item item) {
         VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Craft);
     }
-    
-    
+
+
     TextMeshProUGUI _text;
-    TextMeshProUGUI Text
-    {
-        get
-        {
-            if (_text == null)
-            {
+
+    TextMeshProUGUI Text {
+        get {
+            if (_text == null) {
                 _text = Instantiate(GameplayDataSettings.UIStyle.TemplateTextUGUI);
             }
+
             return _text;
         }
     }
-    
-    private void OnSetupMeta(ItemHoveringUI uI, ItemMetaData data)
-    {
+
+    private void OnSetupMeta(ItemHoveringUI uI, ItemMetaData data) {
         // Text.gameObject.SetActive(false);
     }
-    
+
     //物品悬停UI改变物品名
     private void OnSetupItemHoveringUI(ItemHoveringUI uiInstance, Item item) {
         if (item == null) {
@@ -210,12 +225,13 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             return;
         }
     }
-    
+
     static Color VTLabelColor = Color.magenta;
-    static Color VTLabelColorLight = new Color(247/255, 82/255, 228/255);
+    static Color VTLabelColorLight = new Color(1f, 0.6f, 0.9f);
     static Color VTLabelColorDefault = Color.white;
-    
-    
+
+
+    //修复整数被保留多位小数
     //物品InventoryView键值对UI改颜色
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ItemModifierEntry), "Refresh")]
@@ -224,20 +240,23 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         TextMeshProUGUI labelGUI = t.Field("displayName").GetValue<TextMeshProUGUI>();
         TextMeshProUGUI valueGUI = t.Field("value").GetValue<TextMeshProUGUI>();
         string label = labelGUI.text;
+        valueGUI.text = VT.RoundToOneDecimalIfNeeded(valueGUI.text);
         if (label.StartsWith("VTM_")) {
             labelGUI.color = VTLabelColorLight;
             labelGUI.text = labelGUI.text.Substring(4);
             valueGUI.color = VTLabelColorLight;
-        } else if (label.StartsWith("VTMC_")) {
+        }
+        else if (label.StartsWith("VTMC_")) {
             labelGUI.color = VTLabelColorLight;
             labelGUI.text = labelGUI.text.Substring(5);
             valueGUI.color = VTLabelColorLight;
-        } else {
+        }
+        else {
             labelGUI.color = VTLabelColorDefault;
             valueGUI.color = VTLabelColorDefault;
         }
     }
-    
+
     //物品HoveringUI参数键值对UI改颜色
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LabelAndValue), "Setup")]
@@ -245,20 +264,23 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         Traverse t = Traverse.Create(__instance);
         TextMeshProUGUI labelGUI = t.Field("labelText").GetValue<TextMeshProUGUI>();
         TextMeshProUGUI valueGUI = t.Field("valueText").GetValue<TextMeshProUGUI>();
+        valueGUI.text = VT.RoundToOneDecimalIfNeeded(valueGUI.text);
         if (label.StartsWith("VTM_")) {
             labelGUI.color = VTLabelColor;
             labelGUI.text = labelGUI.text.Substring(4);
             valueGUI.color = VTLabelColor;
-        } else if (label.StartsWith("VTMC_")) {
+        }
+        else if (label.StartsWith("VTMC_")) {
             labelGUI.color = VTLabelColor;
             labelGUI.text = labelGUI.text.Substring(5);
             valueGUI.color = VTLabelColor;
-        } else{
+        }
+        else {
             labelGUI.color = VTLabelColorDefault;
             valueGUI.color = VTLabelColorDefault;
         }
     }
-    
+
     // //物品操作菜单Patch
     // [HarmonyPostfix]
     // [HarmonyPatch(typeof(ItemOperationMenu), "Setup")]
@@ -268,7 +290,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     //     TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("nameText").GetValue<TextMeshProUGUI>();
     //     itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
     // }
-    
+
     // //物品自定义菜单Patch
     // [HarmonyPostfix]
     // [HarmonyPatch(typeof(ItemCustomizeSelectionView), "RefreshSelectedItemInfo")]
@@ -278,7 +300,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     //     TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("selectedItemName").GetValue<TextMeshProUGUI>();
     //     itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
     // }
-    
+
     protected override void OnAfterSetup() {
         if (!_isInitialized) {
             _dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -288,6 +310,10 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             VTModifiersCore.InitData();
             RegisterEvents();
             _isInitialized = true;
+            
+            GameObject uiObject = new GameObject("VTModifier_ModUI_Instance");
+            modUI = uiObject.AddComponent<VTModifiersUI>();
+            DontDestroyOnLoad(uiObject);
         }
     }
 
@@ -299,7 +325,12 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             if (VTModifiersCore.ModifierData.Count > 0) {
                 VTModifiersCore.ModifierData.Clear();
             }
+
             if (_text != null) Destroy(_text);
+            
+            if (modUI != null && modUI.gameObject != null) {
+                Destroy(modUI.gameObject);
+            }
             Log("模组已卸载");
         }
     }
@@ -310,6 +341,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         ItemHoveringUI.onSetupMeta += OnSetupMeta;
         CraftingManager.OnItemCrafted += OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
+        ItemUIUtilities.OnSelectionChanged += OnSelectionChanged;
         ItemTreeData.OnItemLoaded += OnItemLoaded;
     }
 
@@ -319,6 +351,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         ItemHoveringUI.onSetupMeta -= OnSetupMeta;
         CraftingManager.OnItemCrafted -= OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory -= OnItemSentToPlayerInventory;
+        ItemUIUtilities.OnSelectionChanged -= OnSelectionChanged;
         ItemTreeData.OnItemLoaded -= OnItemLoaded;
     }
 
@@ -326,6 +359,19 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // LogStatic($"OnItemSentToPlayerInventory: {item.DisplayName}");
         VTModifiersCore.CalcItemModifiers(item);
     }
+
+    private void OnSelectionChanged() {
+        if (VTModifiersCore.Setting.Debug) {
+            Item selectingItem = ItemUIUtilities.SelectedItem;
+            if (selectingItem != null) {
+                string selectingItemTags = VT.DebugItemTags(selectingItem);
+                Log("SelectingItemTags:" + selectingItemTags);
+            }
+        }
+    }
+
+    //修复
+    
     //从存档等地方加载Item后，需要更新Modifier
     private void OnItemLoaded(Item item) {
         // LogStatic($"OnItemLoaded: {item.DisplayName}");
@@ -339,68 +385,93 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
 
     void Update() {
-        if (VTModifiersCore.DEBUG && _isInitialized) {
+        if (VTModifiersCore.Setting.Debug && _isInitialized) {
+            //随机附加
             if (Input.GetKeyDown(KeyCode.G)) {
                 KeyDownG();
             }
-            
+            //显示信息
             if (Input.GetKeyDown(KeyCode.H)) {
                 KeyDownH();
+            }
+            //移除词缀
+            if (Input.GetKeyDown(KeyCode.J)) {
+                KeyDownJ();
+            }
+            //附加Debug
+            if (Input.GetKeyDown(KeyCode.K)) {
+                KeyDownK();
             }
         }
     }
 
     void KeyDownG() {
-        Item weapon = MainCharacterWeapon();
-        if (weapon != null) {
-            VTModifiersCore.TryUnpatchItem(weapon);
-            VTModifiersCore.PatchItem(weapon, VTModifiersCore.Sources.Debug, "Debug");
-            Log($"KeyCodeG PatchMainCharacterWeapon: {weapon.DisplayName}");
+        // Item weapon = MainCharacterWeapon();
+        Item item = ItemUIUtilities.SelectedItem;
+        if (item != null) {
+            VTModifiersCore.TryUnpatchItem(item);
+            // VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug, "Debug");
+            VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug);
+            Log($"KeyCodeG PatchItem: {item.DisplayName}");
         }
-        
     }
 
     void KeyDownH() {
-        Item item = MainCharacterWeapon();
+        Item item = ItemUIUtilities.SelectedItem;
         if (item != null) {
             StringBuilder stringBuilder = new StringBuilder();
-            if (item.Variables != null)
-            {
-                foreach (CustomData variable in item.Variables)
-                {
-                    if (variable.Display)
-                        stringBuilder.AppendLine(variable.Key + "\t" + variable.DisplayName + "\t" + variable.GetValueDisplayString());
+            if (item.Variables != null) {
+                foreach (CustomData variable in item.Variables) {
+                    stringBuilder.AppendLine("Variable:" + variable.Key + "\t" + variable.DisplayName + "\t" +
+                                             variable.GetValueDisplayString());
                 }
             }
-            if (item.Constants != null)
-            {
-                foreach (CustomData constant in item.Constants)
-                {
-                    if (constant.Display)
-                        stringBuilder.AppendLine(constant.Key + "\t" + constant.DisplayName + "\t" + constant.GetValueDisplayString());
+
+            if (item.Constants != null) {
+                foreach (CustomData constant in item.Constants) {
+                    stringBuilder.AppendLine("Constant:" + constant.Key + "\t" + constant.DisplayName + "\t" +
+                                             constant.GetValueDisplayString());
                 }
             }
-            if ((UnityEngine.Object) item.Stats != (UnityEngine.Object) null)
-            {
-                foreach (Stat stat in item.Stats)
-                {
-                    if (stat.Display)
-                        stringBuilder.AppendLine(stat.Key + "\t" + string.Format("{0}\t{1}", (object) stat.DisplayName, (object) stat.Value));
+
+            if ((UnityEngine.Object)item.Stats != (UnityEngine.Object)null) {
+                foreach (Stat stat in item.Stats) {
+                    stringBuilder.AppendLine("Stat:" + stat.Key + "\t" +
+                                             string.Format("{0}\t{1}", (object)stat.DisplayName,
+                                                 (object)stat.Value));
                 }
             }
-            if ((UnityEngine.Object) item.Modifiers != (UnityEngine.Object) null)
-            {
-                foreach (ModifierDescription modifier in item.Modifiers)
-                {
-                    if (modifier.Display)
-                        stringBuilder.AppendLine(modifier.Key + "\t" + modifier.DisplayName + "\t" + modifier.GetDisplayValueString());
+
+            if ((UnityEngine.Object)item.Modifiers != (UnityEngine.Object)null) {
+                foreach (ModifierDescription modifier in item.Modifiers) {
+                    ModifierTarget mt = Traverse.Create(modifier).Field("target").GetValue<ModifierTarget>();
+                    string mts = mt.ToString();
+                    stringBuilder.AppendLine("Modifier:" + modifier.Key + "\t" + modifier.DisplayName + "\t" +
+                                             "MT:" + mts + "\t" + modifier.GetDisplayValueString());
                 }
             }
-            Log($"ItemPropertiesDisplay:{item.DisplayName}");
+
+            Log($"ItemSelecting:{item.DisplayName}");
             Log(stringBuilder.ToString());
         }
     }
-    
+
+    void KeyDownJ() {
+        Item item = ItemUIUtilities.SelectedItem;
+        if (item != null) {
+            VTModifiersCore.TryUnpatchItem(item);
+        }
+    }
+
+    void KeyDownK() {
+        Item item = ItemUIUtilities.SelectedItem;
+        if (item != null) {
+            VTModifiersCore.TryUnpatchItem(item);
+            // VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug, "Debug");
+            VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug, "Apollyon");
+            Log($"KeyCodeG PatchItem: {item.DisplayName}");
+        }
+    }
     Item MainCharacterWeapon() {
         return CharacterMainControl.Main?.PrimWeaponSlot()?.Content;
     }
