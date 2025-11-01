@@ -21,7 +21,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     protected string _modName = "VTModifiers";
 
-    protected string _version = "0.0.1";
+    protected string _version = "0.3.1";
     protected bool _isInitialized = false;
 
     private static ModBehaviour _instance;
@@ -311,9 +311,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             RegisterEvents();
             _isInitialized = true;
             
-            GameObject uiObject = new GameObject("VTModifier_ModUI_Instance");
-            modUI = uiObject.AddComponent<VTModifiersUI>();
-            DontDestroyOnLoad(uiObject);
+            // GameObject uiObject = new GameObject("VTModifier_ModUI_Instance");
+            // modUI = uiObject.AddComponent<VTModifiersUI>();
+            // DontDestroyOnLoad(uiObject);
         }
     }
 
@@ -411,7 +411,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (item != null) {
             VTModifiersCore.TryUnpatchItem(item);
             // VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug, "Debug");
-            VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug);
+            VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug, "WithFire");
             Log($"KeyCodeG PatchItem: {item.DisplayName}");
         }
     }

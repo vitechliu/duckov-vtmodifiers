@@ -250,12 +250,17 @@ public class VTModifiersCore {
     private static bool TryPatchModifier(Item item, VtModifier vtModifier, string vtm) {
         ModifierTarget mt = ModifierTarget.Character; //枪械是self
         Dictionary<string, ValueTuple<string, ModifierType>>? ml = null!;
+        int polarity = 1;
         if (item.Tags.Contains(ItemTagGun)) {
             mt = ModifierTarget.Self;
             ml = ModifierLogicGun;
         }
         else {
             ml = ModifierLogicEquipment;
+            string[] elements = { VtmElementElectricity, VtmElementFire, VtmElementPoison, VtmElementSpace };
+            if (elements.Contains(vtm)) {
+                polarity = -1;
+            }
         }
         if (vtm == VtmBodyArmor && (item.Tags.Contains(ItemTagHelmet) || item.Tags.Contains(ItemTagMask))) {
             return false;
@@ -265,6 +270,7 @@ public class VTModifiersCore {
         }
         float? val = vtModifier.GetVal(vtm);
         if (val.HasValue) {
+            val *= polarity;
             if (ml != null && ml.TryGetValue(vtm, out var vtp)) {
                 if (item.Modifiers == null) item.CreateModifiersComponent();
                 if (item.Modifiers == null) return false;
