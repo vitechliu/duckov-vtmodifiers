@@ -1,7 +1,15 @@
 using System.Globalization;
+using Duckov;
+using Duckov.UI;
 using Duckov.UI.DialogueBubbles;
 using Duckov.Utilities;
+using HarmonyLib;
 using ItemStatsSystem;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.UI.ProceduralImage;
+using Object = System.Object;
 
 namespace VTModifiers.VTLib;
 
@@ -16,6 +24,32 @@ public static class VT {
         return UnityEngine.Random.value < probability;
     }
 
+    public static void SetButtonText(Button button, string text) {
+        foreach (TextMeshProUGUI componentsInChild in button.GetComponentsInChildren<TextMeshProUGUI>()) {
+            if (componentsInChild) ((TMP_Text)componentsInChild).text = text;
+        }
+        //
+        // foreach (Text componentsInChild in button.GetComponentsInChildren<Text>()) {
+        //     if (componentsInChild) componentsInChild.text = text;
+        // }
+    }
+    public static void SetButtonColor(Button button, Color color) {
+        foreach (ProceduralImage image in button.GetComponentsInChildren<ProceduralImage>()) {
+            image.color = color;
+        }
+    }
+
+    public static void ForceUpdateItemDisplayName(ItemDisplay itemDisplay) {
+       Traverse.Create(itemDisplay).Field("nameText").GetValue<TextMeshProUGUI>().text 
+                = itemDisplay.Target.DisplayName;
+    }
+    public static void PostCustomSFX(string sfxName, GameObject gameObject = null, bool loop = false) {
+        string path = Path.Combine(ModBehaviour.Instance._sfxDirectory, sfxName);
+        AudioManager.PostCustomSFX(path, gameObject, loop);
+    }
+    
+    public static void HookItemOperationMenuAdd() { }
+
     public static string DebugItemTags(Item item) {
         string res = "";
         foreach (Tag tag in item.Tags) {
@@ -26,10 +60,10 @@ public static class VT {
         return item.DisplayName + " " + res;
     }
 
-    public static void BubbleUserDebug(string word) {
-        if (!VTModifiersCore.Setting.Debug) return;
+    public static void BubbleUserDebug(string word, bool debug = true) {
+        if (debug && !VTModifiersCore.Setting.Debug) return;
         CharacterMainControl c = CharacterMainControl.Main;
-        if (c != null) DialogueBubblesManager.Show("Hello world!", c.characterModel.transform);
+        if (c != null) DialogueBubblesManager.Show(word, c.transform);
     }
 
     public static string RoundToOneDecimalIfNeeded(string input) {

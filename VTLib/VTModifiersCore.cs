@@ -23,7 +23,7 @@ public class VTModifiersCore {
         if (ModifierData == null || ModifierData.Count == 0) {
             //Debug
             ModifierData = new () {
-                ["Debug"] =                   new() { ApplyOnGuns = true, ApplyOnArmor = true, ModifierWeight = 0, CritDamageMultiplier = 0.7f, Penetrate = 2},
+                ["Debug"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ForceFixed = true, ModifierWeight = 0, Penetrate = 2, ArmorPiercing = 2},
                 
                 //头盔
                 ["Open"] =                    new() { ApplyOnHelmet = true, ModifierWeight = 200, ViewAngle = 0.4f, PriceMultiplier = 0.2f},
@@ -83,6 +83,14 @@ public class VTModifiersCore {
                 
                 ["Broken"] =                  new() { ApplyOnGuns = true, ModifierWeight = 200, DamageMultiplier = -0.2f, ShootDistanceMultiplier = -0.2f, PriceMultiplier = -0.5f },
             };
+
+            // VtModifier fm = new VtModifier();
+            //
+            // fm.ForceFixed = true;
+            // fm.ModifierWeight = 0;
+            // fm.Armor = 1f;
+            // fm.Weight = 1f;
+            // ModifierData["Full"] = fm;
         }
 
         if (ModifierLogicGun == null) {
@@ -211,7 +219,11 @@ public class VTModifiersCore {
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Debug", "测试");
             
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("VTMC_FIX", "修正");
-            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Tag_vttag", "词缀化");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Tag_vttag", "词缀");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Btn_reforge", "重铸");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Btn_forge", "词缀附加");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Bubble_lack_of_coin", "重铸需求的金额不足");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Bubble_reforge_success", "重铸成功!");
         }
         else {
             //todo english more
@@ -220,11 +232,17 @@ public class VTModifiersCore {
             }
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("VTMC_FIX", "Fix");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Tag_vttag", "VtModifier");
-
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Btn_reforge", "Reforge");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Btn_forge", "Forge");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Bubble_lack_of_coin", "Reforge missing money!");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Bubble_reforge_success", "Reforge Success!");
         }
     }
 
-    
+
+    public static bool IsPatchedItem(Item item) {
+        return item.GetString(VariableVtModifierHashCode) != null;
+    }
     
     public static bool IsModifierFixed(VTModifiersCore.VtModifier modifier) {
         return modifier.ForceFixed ? true : false;
@@ -312,6 +330,12 @@ public class VTModifiersCore {
     }
 
     public const int MAGIC_ORDER = -1145141919;
+
+    public static int ReforgePrice(Item item) {
+        int plus = IsPatchedItem(item) ? 1 : 5; //词缀化需要5倍
+        return Mathf.RoundToInt(Modify(item, VTModifiersCore.VtmPriceMultiplier, item.Value) * Setting.reforgePriceFactor) 
+               * plus;
+    }
     public static void TryUnpatchItem(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier == null) return;
@@ -344,23 +368,25 @@ public class VTModifiersCore {
     public static void Log(string message, bool isError = false) {
         ModBehaviour.LogStatic(message, isError);
     }
+
+    public static bool ItemCanBePatched(Item item) {
+        return item.Tags.Contains(ItemTagGun)
+               || item.Tags.Contains(ItemTagHelmet)
+               || item.Tags.Contains(ItemTagArmor)
+               || item.Tags.Contains(ItemTagMask)
+               || item.Tags.Contains(ItemTagBackpack);
+    }
     public static string PatchItem(Item item, Sources source) {
-        if (
-            item.Tags.Contains(ItemTagGun)
-            || item.Tags.Contains(ItemTagHelmet)
-            || item.Tags.Contains(ItemTagArmor)
-            || item.Tags.Contains(ItemTagMask)
-            || item.Tags.Contains(ItemTagBackpack)
-        ) {
+        if (ItemCanBePatched(item)) {
             switch (source) {
                 case Sources.LootBox:
-                    if (!VT.Probability(0.75f)) return null;
+                    if (!VT.Probability(Setting.lootBoxPatchedPercentage)) return null;
                     break;
                 case Sources.Enemy:
-                    if (!VT.Probability(0.4f)) return null;
+                    if (!VT.Probability(Setting.enemyPatchedPercentage)) return null;
                     break;
                 case Sources.Craft:
-                    if (!VT.Probability(0.75f)) return null;
+                    if (!VT.Probability(Setting.craftPatchedPercentage)) return null;
                     break;
             }
             string? modifier = GetAModifierByWeight(item);
@@ -466,6 +492,7 @@ public class VTModifiersCore {
         Enemy, //敌人AI
         Debug, //测试用
         Craft, //制作的
+        Reforge, //重铸的
     }
 
     
@@ -721,7 +748,19 @@ public class VTModifiersCore {
 
     public struct VtModifierSetting {
         public bool Debug = false;
+        
+        public bool RemoveAllBadModifiers = false;
 
+        public bool allowReforge = true; //实装+UI
+        public bool allowForge = true; //实装+UI
+
+        public float reforgePriceFactor = 2f; //实装+UI
+
+        public float enemyPatchedPercentage = 0.4f; //实装+UI
+        public float lootBoxPatchedPercentage = 0.75f; //实装+UI
+        public float craftPatchedPercentage = 0.75f; //实装+UI
+        
+        
         public VtModifierSetting() { }
     }
 }
