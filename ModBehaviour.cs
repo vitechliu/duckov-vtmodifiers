@@ -21,6 +21,7 @@ namespace VTModifiers;
 public class ModBehaviour : Duckov.Modding.ModBehaviour {
     public string _logFilePath;
     public string _dllDirectory;
+    public string _cfgDirectory;
     public string _sfxDirectory;
 
     public static string _modName = "VTModifiers";
@@ -334,6 +335,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     static Color VTLabelColorLight = new Color(1f, 0.6f, 0.9f);
     static Color VTLabelColorDefault = Color.white;
 
+    static Color LabelColorDefaultNegative = new Color(0.973f, 0.333f, 0.400f);
+
 
     //修复整数被保留多位小数
     //物品InventoryView键值对UI改颜色
@@ -355,20 +358,21 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             labelGUI.text = labelGUI.text.Substring(5);
             valueGUI.color = VTLabelColorLight;
         }
-        else {
-            labelGUI.color = VTLabelColorDefault;
-            valueGUI.color = VTLabelColorDefault;
-        }
+        // else {
+        //     labelGUI.color = VTLabelColorDefault;
+        //     valueGUI.color = VTLabelColorDefault;
+        // }
     }
 
     //物品HoveringUI参数键值对UI改颜色
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LabelAndValue), "Setup")]
-    public static void LabelAndValue_Setup_PostFix(LabelAndValue __instance, string label) {
+    public static void LabelAndValue_Setup_PostFix(LabelAndValue __instance, string label, Polarity valuePolarity) {
         Traverse t = Traverse.Create(__instance);
         TextMeshProUGUI labelGUI = t.Field("labelText").GetValue<TextMeshProUGUI>();
         TextMeshProUGUI valueGUI = t.Field("valueText").GetValue<TextMeshProUGUI>();
         valueGUI.text = VT.RoundToOneDecimalIfNeeded(valueGUI.text);
+        
         if (label.StartsWith("VTM_")) {
             labelGUI.color = VTLabelColor;
             labelGUI.text = labelGUI.text.Substring(4);
@@ -381,9 +385,16 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
         else {
             labelGUI.color = VTLabelColorDefault;
-            valueGUI.color = VTLabelColorDefault;
+            if (Polarity.Negative == valuePolarity) {
+                valueGUI.color = LabelColorDefaultNegative;
+            }
+            else {
+                valueGUI.color = VTLabelColorDefault;
+            }
         }
     }
+
+    public static bool loggedIMEColor = false;
 
     // //物品操作菜单Patch
     // [HarmonyPostfix]
