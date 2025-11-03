@@ -25,7 +25,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     public string _sfxDirectory;
 
     public static string _modName = "VTModifiers";
-    public static string _version = "0.4.1";
+    public static string _version = "0.4.2";
     
     protected bool _isInitialized = false;
 
@@ -46,28 +46,34 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-
+    //
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ItemAgent_Gun), "ShootOneBullet")]
     public static void ItemAgentGun_ShootOneBullet_PostFix(ItemAgent_Gun __instance) {
-        Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
-        temp.context.element_Electricity = VTModifiersCore.Modify(__instance.Item,
-            VTModifiersCore.VtmElementElectricity, temp.context.element_Electricity);
-        temp.context.element_Fire =
-            VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementFire, temp.context.element_Fire);
-        temp.context.element_Poison = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementPoison,
-            temp.context.element_Poison);
-        temp.context.element_Space = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementSpace,
-            temp.context.element_Space);
-
-        temp.context.bleedChance =
-            VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
-
-        // if (VTModifiersCore.DEBUG) {
-        //     LogStatic($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
-        //               $"ArmorPiercing:{temp.context.armorPiercing}, " +
-        //               $"ArmorBreak:{temp.context.armorBreak}");
-        // }
+        if (!__instance) return;
+        try {
+            Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
+            if (!temp) return;
+            temp.context.element_Electricity = VTModifiersCore.Modify(__instance.Item,
+                VTModifiersCore.VtmElementElectricity, temp.context.element_Electricity);
+            temp.context.element_Fire =
+                VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementFire, temp.context.element_Fire);
+            temp.context.element_Poison = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementPoison,
+                temp.context.element_Poison);
+            temp.context.element_Space = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementSpace,
+                temp.context.element_Space);
+        
+            temp.context.bleedChance =
+                VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
+        
+            if (VTSettingManager.Setting.Debug) {
+                LogStatic($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
+                          $"ArmorPiercing:{temp.context.armorPiercing}, " +
+                          $"ArmorBreak:{temp.context.armorBreak}");
+            }
+        } catch (Exception ex) {
+            LogStatic($"PatchFailed: {ex.Message}\n{ex.StackTrace}");
+        }
     }
 
 
@@ -123,8 +129,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
                 Item targetItem = Traverse.Create(__instance).Property("TargetItem").GetValue<Item>();
                 if (targetItem && VTModifiersCore.ItemCanBePatched(targetItem)) {
                     bool patched = VTModifiersCore.IsPatchedItem(targetItem);
-                    if ((patched && VTModifiersCore.Setting.allowReforge)
-                        || (!patched && VTModifiersCore.Setting.allowForge)) {
+                    if ((patched && VTSettingManager.Setting.AllowReforge)
+                        || (!patched && VTSettingManager.Setting.AllowForge)) {
                         btn_Reforge.gameObject.SetActive(true);
                         EnsureButtonStyle(targetItem);
                         return;
@@ -142,8 +148,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
                 Item targetItem = Traverse.Create(__instance).Property("TargetItem").GetValue<Item>();
                 if (targetItem && VTModifiersCore.ItemCanBePatched(targetItem)) {
                     bool patched = VTModifiersCore.IsPatchedItem(targetItem);
-                    if ((patched && VTModifiersCore.Setting.allowReforge)
-                        || (!patched && VTModifiersCore.Setting.allowForge)) {
+                    if ((patched && VTSettingManager.Setting.AllowReforge)
+                        || (!patched && VTSettingManager.Setting.AllowForge)) {
                         EnsureButtonStyle(targetItem);
                     }
                 }
@@ -210,9 +216,10 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     public static bool ItemSettingGun_UseABullet_PreFix(ItemSetting_Gun __instance) {
         float? ammoSaveChance = VTModifiersCore.GetItemVtm(__instance.Item, VTModifiersCore.VtmAmmoSave);
         if (ammoSaveChance.HasValue) {
-            return !VT.Probability(ammoSaveChance.Value);
+            bool prob = !VT.Probability(ammoSaveChance.Value);
+            // if (VTSettingManager.Setting.Debug) LogStatic("UseABullet:" + prob);
+            return prob;
         }
-
         return true;
     }
 
@@ -335,7 +342,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     static Color VTLabelColorLight = new Color(1f, 0.6f, 0.9f);
     static Color VTLabelColorDefault = Color.white;
 
-    static Color LabelColorDefaultNegative = new Color(0.973f, 0.333f, 0.400f);
 
 
     //修复整数被保留多位小数
@@ -351,17 +357,14 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (label.StartsWith("VTM_")) {
             labelGUI.color = VTLabelColorLight;
             labelGUI.text = labelGUI.text.Substring(4);
-            valueGUI.color = VTLabelColorLight;
         }
         else if (label.StartsWith("VTMC_")) {
             labelGUI.color = VTLabelColorLight;
             labelGUI.text = labelGUI.text.Substring(5);
-            valueGUI.color = VTLabelColorLight;
         }
-        // else {
-        //     labelGUI.color = VTLabelColorDefault;
-        //     valueGUI.color = VTLabelColorDefault;
-        // }
+        else {
+            labelGUI.color = VTLabelColorDefault;
+        }
     }
 
     //物品HoveringUI参数键值对UI改颜色
@@ -376,21 +379,13 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (label.StartsWith("VTM_")) {
             labelGUI.color = VTLabelColor;
             labelGUI.text = labelGUI.text.Substring(4);
-            valueGUI.color = VTLabelColor;
         }
         else if (label.StartsWith("VTMC_")) {
             labelGUI.color = VTLabelColor;
             labelGUI.text = labelGUI.text.Substring(5);
-            valueGUI.color = VTLabelColor;
         }
         else {
             labelGUI.color = VTLabelColorDefault;
-            if (Polarity.Negative == valuePolarity) {
-                valueGUI.color = LabelColorDefaultNegative;
-            }
-            else {
-                valueGUI.color = VTLabelColorDefault;
-            }
         }
     }
 
@@ -420,6 +415,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (!_isInitialized) {
             _dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             InitializeLogFile();
+            InitializeCfg();
             InitializeSfxFile();
             _harmony = new Harmony("com.vitech.duckov_vt_modifiers_patch");
             _harmony.PatchAll();
@@ -502,7 +498,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
 
     void Update() {
-        // if (VTModifiersCore.Setting.Debug && _isInitialized) {
+        // if (VTSettingManager.Setting.Debug && _isInitialized) {
         //     //随机附加
         //     if (Input.GetKeyDown(KeyCode.G)) {
         //         KeyDownG();
@@ -516,7 +512,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
 
     // void Awake() {
-    //     Debug.Log("fffff loaded!! v1");
+    //     
     // }
 
     protected void InitializeLogFile() {
@@ -530,6 +526,11 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     protected void InitializeSfxFile() {
         _sfxDirectory = Path.Combine(this._dllDirectory, "sfx");
         Directory.CreateDirectory(_sfxDirectory);
+    }
+    protected void InitializeCfg() {
+        _cfgDirectory = Path.Combine(this._dllDirectory, "cfg");
+        Directory.CreateDirectory(_cfgDirectory);
+        VTSettingManager.LoadSetting();
     }
     public static void LogStatic(string message, bool isError = false) {
         if (ModBehaviour.Instance) {

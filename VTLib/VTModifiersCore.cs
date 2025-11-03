@@ -16,7 +16,6 @@ public class VTModifiersCore {
     public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
     public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
 
-    public static VtModifierSetting Setting = new VtModifierSetting();
     
     public static void InitData() {
         //todo 从config加载
@@ -69,10 +68,10 @@ public class VTModifiersCore {
                 ["Heartbroken"] =             new() { ApplyOnGuns = true, ModifierWeight = 100, DamageMultiplier = 0.2f, ArmorPiercing = 3, PriceMultiplier = 0.8f },
                 ["Thrifty"] =                 new() { ApplyOnGuns = true, ModifierWeight = 150, AmmoSave = 0.3f, PriceMultiplier = 0.3f },
                
-                ["Alienated"] =               new() { ApplyOnGuns = true, ModifierWeight = 50, CritDamageMultiplier = -0.1f, ElementPoison = 0.3f, ShootSpeed = 0.4f, PriceMultiplier = 0.1f },
-                ["Scalding"] =                new() { ApplyOnGuns = true, ModifierWeight = 50, DamageMultiplier = 0.2f, Weight = 0.4f, ElementFire = 0.4f, ShootSpeed = -0.2f, PriceMultiplier = 0.1f },
-                ["Gauss"] =                   new() { ApplyOnGuns = true, ModifierWeight = 50, Penetrate = 3, ElementElectricity = 0.4f, ShootSpeed = 0.1f, PriceMultiplier = 0.7f },
-                ["Concentrated"] =            new() { ApplyOnGuns = true, ModifierWeight = 200, RecoilScaleHMultiplier = -0.5f, ShootSpeed = 0.2f, PriceMultiplier = 0.3f },
+                ["Alienated"] =               new() { ApplyOnGuns = true, ModifierWeight = 50, CritDamageMultiplier = -0.1f, ElementPoison = 0.3f, ShootSpeedMultiplier = 0.4f, PriceMultiplier = 0.1f },
+                ["Scalding"] =                new() { ApplyOnGuns = true, ModifierWeight = 50, DamageMultiplier = 0.2f, Weight = 0.4f, ElementFire = 0.4f, ShootSpeedMultiplier = -0.2f, PriceMultiplier = 0.1f },
+                ["Gauss"] =                   new() { ApplyOnGuns = true, ModifierWeight = 50, Penetrate = 3, ElementElectricity = 0.4f, ShootSpeedMultiplier = 0.1f, PriceMultiplier = 0.7f },
+                ["Concentrated"] =            new() { ApplyOnGuns = true, ModifierWeight = 200, RecoilScaleHMultiplier = -0.5f, ShootSpeedMultiplier = 0.2f, PriceMultiplier = 0.3f },
                 ["Portable"] =                new() { ApplyOnGuns = true, ModifierWeight = 300, ScatterFactorMultiplier = -0.4f, ScatterFactorADSMultiplier = 0.2f, PriceMultiplier = 0.1f },
                 ["Brutal"] =                  new() { ApplyOnGuns = true, ModifierWeight = 300, DamageMultiplier = 0.4f, BleedChance = 0.3f, ShootSpeedMultiplier = -0.2f, PriceMultiplier = 0.2f },
                 ["Cheap"] =                   new() { ApplyOnGuns = true, ModifierWeight = 150, DamageMultiplier = -0.1f, AmmoSave = 0.4f, Weight = -0.5f, PriceMultiplier = -0.2f },
@@ -332,9 +331,8 @@ public class VTModifiersCore {
     public const int MAGIC_ORDER = -1145141919;
 
     public static int ReforgePrice(Item item) {
-        int plus = IsPatchedItem(item) ? 1 : 5; //词缀化需要5倍
-        return Mathf.RoundToInt(Modify(item, VTModifiersCore.VtmPriceMultiplier, item.Value) * Setting.reforgePriceFactor) 
-               * plus;
+        float plus = IsPatchedItem(item) ? VTSettingManager.Setting.ReforgePriceFactor : VTSettingManager.Setting.ForgePriceFactor; //词缀化需要5倍
+        return Mathf.RoundToInt(Modify(item, VTModifiersCore.VtmPriceMultiplier, item.Value) * plus);
     }
     public static void TryUnpatchItem(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
@@ -380,13 +378,13 @@ public class VTModifiersCore {
         if (ItemCanBePatched(item)) {
             switch (source) {
                 case Sources.LootBox:
-                    if (!VT.Probability(Setting.lootBoxPatchedPercentage)) return null;
+                    if (!VT.Probability(VTSettingManager.Setting.LootBoxPatchedPercentage)) return null;
                     break;
                 case Sources.Enemy:
-                    if (!VT.Probability(Setting.enemyPatchedPercentage)) return null;
+                    if (!VT.Probability(VTSettingManager.Setting.EnemyPatchedPercentage)) return null;
                     break;
                 case Sources.Craft:
-                    if (!VT.Probability(Setting.craftPatchedPercentage)) return null;
+                    if (!VT.Probability(VTSettingManager.Setting.CraftPatchedPercentage)) return null;
                     break;
             }
             string? modifier = GetAModifierByWeight(item);
@@ -403,7 +401,7 @@ public class VTModifiersCore {
         // Tag vtTag = new Tag()
         // item.Tags.Add("vttag");
         string modifierDisplayName = modifier.ToPlainText();
-        if (Setting.Debug)
+        if (VTSettingManager.Setting.Debug)
             Log($"注入:{item.DisplayName}为{modifierDisplayName}, source:{source}");
         CalcItemModifiers(item);
         return modifier;
@@ -466,6 +464,7 @@ public class VTModifiersCore {
         return null;
     }
     public static float Modify(Item item, string vtm, float original) {
+        if (!item) return original;
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier != null && ModifierData.TryGetValue(modifier, out var modifierStruct)) {
             float? val = modifierStruct.GetVal(vtm);
@@ -744,23 +743,5 @@ public class VTModifiersCore {
 
             return null;
         }
-    }
-
-    public struct VtModifierSetting {
-        public bool Debug = false;
-        
-        public bool RemoveAllBadModifiers = false;
-
-        public bool allowReforge = true; //实装+UI
-        public bool allowForge = true; //实装+UI
-
-        public float reforgePriceFactor = 2f; //实装+UI
-
-        public float enemyPatchedPercentage = 0.4f; //实装+UI
-        public float lootBoxPatchedPercentage = 0.75f; //实装+UI
-        public float craftPatchedPercentage = 0.75f; //实装+UI
-        
-        
-        public VtModifierSetting() { }
     }
 }

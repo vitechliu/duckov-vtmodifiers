@@ -61,7 +61,7 @@ public static class VT {
     }
 
     public static void BubbleUserDebug(string word, bool debug = true) {
-        if (debug && !VTModifiersCore.Setting.Debug) return;
+        if (debug && !VTSettingManager.Setting.Debug) return;
         CharacterMainControl c = CharacterMainControl.Main;
         if (c != null) DialogueBubblesManager.Show(word, c.transform);
     }
