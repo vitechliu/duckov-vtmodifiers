@@ -77,6 +77,11 @@ public static class VTSettingManager {
         public bool AllowReforge = true; //实装+UI
         public bool AllowForge = true; //实装+UI
 
+        public float CommonGunsModifierThreshold = 1f;
+        public float CommonEquipmentModifierThreshold = 1f;
+        public float ArmorThreshold = 1f;
+        public float DamageThreshold = 1f;
+
         public float ReforgePriceFactor = 2f; //实装+UI
         public float ForgePriceFactor = 10f; //实装+UI
 

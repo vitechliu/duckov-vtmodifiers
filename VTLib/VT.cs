@@ -75,7 +75,7 @@ public static class VT {
         // 支持多种数字格式（包括负数、科学计数法等）
         if (decimal.TryParse(trimmedInput, NumberStyles.Any, CultureInfo.InvariantCulture, out decimal number)) {
             // 检查是否包含小数点且有足够的小数位数
-            if (HasEnoughDecimalPlaces(trimmedInput, 2)) {
+            if (HasEnoughDecimalPlaces(trimmedInput, 3)) {
                 // 四舍五入到1位小数
                 decimal rounded = Math.Round(number, 1, MidpointRounding.AwayFromZero);
                 return rounded.ToString("0.0", CultureInfo.InvariantCulture);

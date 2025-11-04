@@ -28,25 +28,25 @@ public class VTModifiersCore {
                 ["Open"] =                    new() { ApplyOnHelmet = true, ModifierWeight = 200, ViewAngle = 0.4f, PriceMultiplier = 0.2f},
 
                 //护甲
-                ["Hard"] =                    new() { ApplyOnEquipment = true, ModifierWeight = 300, Armor = 1f, PriceMultiplier = 0.1f},
-                ["Armored"] =                 new() { ApplyOnEquipment = true, ModifierWeight = 150, Armor = 2f, Weight = 0.5f, PriceMultiplier = 0.6f},
-                ["Warding"] =                 new() { ForceFixed = true, ApplyOnEquipment = true, ModifierWeight = 30, Armor = 4f, Weight = 1f, PriceMultiplier = 3f},
+                ["Hard"] =                    new() { ApplyOnEquipment = true, ModifierWeight = 300, Armor = 0.5f, PriceMultiplier = 0.1f},
+                ["Armored"] =                 new() { ApplyOnEquipment = true, ModifierWeight = 150, Armor = 1f, Weight = 0.5f, PriceMultiplier = 0.6f},
+                ["Warding"] =                 new() { ForceFixed = true, ApplyOnEquipment = true, ModifierWeight = 30, Armor = 2f, Weight = 1f, PriceMultiplier = 3f},
 
                 //面罩
                 // [""] =                new() { ApplyOnFaceMask = true, ModifierWeight = 500, ViewAngle = 2f, Weight = 2f},
                 
                 //背包
                 ["Huge"] =                    new() { ApplyOnBackpack = true, ModifierWeight = 80, InventoryCapacity = 12f, MaxWeight = 5f, PriceMultiplier = 1f},
-                ["Compressed"] =              new() { ApplyOnBackpack = true, ModifierWeight = 50, InventoryCapacity = -5, Armor = 3f, PriceMultiplier = 0.3f},
+                ["Compressed"] =              new() { ApplyOnBackpack = true, ModifierWeight = 50, InventoryCapacity = -4, Armor = 1.5f, PriceMultiplier = 0.3f},
                 ["Expanded"] =                new() { ApplyOnBackpack = true, ModifierWeight = 150, InventoryCapacity = 5, MaxWeight = 3f, PriceMultiplier = 0.4f},
                 ["High-Capacity"] =           new() { ApplyOnBackpack = true, ModifierWeight = 100, InventoryCapacity = 17, PriceMultiplier = 0.9f},
 
                 
                 //通用
-                ["High-Tech"] =               new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 70, Armor = 2f, ViewAngle = 0.2f, Weight = -0.5f, ShootSpeedMultiplier = 0.4f, PriceMultiplier = 3f},
+                ["High-Tech"] =               new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 70, Armor = 1.2f, ViewAngle = 0.2f, Weight = -0.5f, ShootSpeedMultiplier = 0.4f, PriceMultiplier = 3f},
                 ["Light"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 300, Weight = -0.7f, Armor = -0.1f, Moveability = 0.1f, DamageMultiplier = -0.05f, ReloadTimeMultiplier = -0.2f, PriceMultiplier = 0.2f },
-                ["Heavy"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 300, Weight = 0.3f, Armor = 2f, Moveability = -0.1f, RecoilScaleVMultiplier = -0.1f, RecoilScaleHMultiplier = 0.15f, DamageMultiplier = 0.35f, PriceMultiplier = 0.3f },
-                ["Legendary"] =               new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 20, Armor = 3f, InventoryCapacity = 5f, MaxWeight = 3f, ShootSpeedMultiplier = 0.2f, Weight = -0.3f, DamageMultiplier = 0.5f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 4f },
+                ["Heavy"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 300, Weight = 0.3f, Armor = 1.5f, Moveability = -0.1f, RecoilScaleVMultiplier = -0.1f, RecoilScaleHMultiplier = 0.15f, DamageMultiplier = 0.35f, PriceMultiplier = 0.4f },
+                ["Legendary"] =               new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 20, Armor = 1.5f, InventoryCapacity = 5f, MaxWeight = 3f, ShootSpeedMultiplier = 0.2f, Weight = -0.3f, DamageMultiplier = 0.5f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 4f },
                 ["Fast"] =                    new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 150, Moveability = 0.1f, ReloadTimeMultiplier = -0.3f, ShootSpeedMultiplier = 0.2f, PriceMultiplier = 0.2f },
 
                 ["WithElectricity"] =         new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 100, ElementElectricity = 0.5f, PriceMultiplier = 0.5f },
@@ -194,8 +194,6 @@ public class VTModifiersCore {
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Heartbroken", "碎心");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Thrifty", "节约");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Fast", "快速");
-            
-            
             
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Alienated", "异化");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Scalding", "高热");
@@ -674,7 +672,7 @@ public class VTModifiersCore {
                 case VtmDamage:
                     return this.Damage;
                 case VtmDamageMultiplier:
-                    return this.DamageMultiplier;
+                    return this.DamageMultiplier * VTSettingManager.Setting.DamageThreshold;
                 case VtmAmmoSave:
                     return this.AmmoSave;
                 case VtmSoundRange:
@@ -712,7 +710,7 @@ public class VTModifiersCore {
                     return this.MaxWeight;
                 case VtmBodyArmor:
                 case VtmHeadArmor:
-                    return this.Armor;
+                    return this.Armor * VTSettingManager.Setting.ArmorThreshold;
                 case VtmInventoryCapacity:
                     return this.InventoryCapacity;
                 case VtmViewAngle:

@@ -32,6 +32,10 @@ public class VTModifiersUI : MonoBehaviour {
                 show = !show;
             }
         }
+        if (Input.GetKeyDown(KeyCode.F7)) {
+            Log("F7 Pressed");
+            show = !show;
+        }
     }
 
     private bool toggleDebug = true;
@@ -64,35 +68,65 @@ public class VTModifiersUI : MonoBehaviour {
         toggleDebug = GUILayout.Toggle(VTSettingManager.Setting.Debug, "Debug 调试模式");
         VTSettingManager.Setting.Debug = toggleDebug;
 
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("护甲属性倍率(重启游戏生效)");
+        GUILayout.FlexibleSpace();
+        GUILayout.Label(VTSettingManager.Setting.ArmorThreshold.ToString(CultureInfo.InvariantCulture));
+        GUILayout.EndHorizontal();
+        VTSettingManager.Setting.ArmorThreshold = GUILayout.HorizontalScrollbar(
+            VTSettingManager.Setting.ArmorThreshold,
+            0.1f,
+            0.1f,
+            4f
+        );
+        
+        GUILayout.BeginHorizontal();
+        GUILayout.Label("伤害属性倍率(重启游戏生效)");
+        GUILayout.FlexibleSpace();
+        GUILayout.Label(VTSettingManager.Setting.DamageThreshold.ToString(CultureInfo.InvariantCulture));
+        GUILayout.EndHorizontal();
+        VTSettingManager.Setting.DamageThreshold = GUILayout.HorizontalScrollbar(
+            VTSettingManager.Setting.DamageThreshold,
+            0.1f,
+            0.1f,
+            4f
+        );
+        
         //重铸设定
         GUILayout.BeginHorizontal();
         VTSettingManager.Setting.AllowReforge = GUILayout.Toggle(VTSettingManager.Setting.AllowReforge, "右键重铸");
         VTSettingManager.Setting.AllowForge = GUILayout.Toggle(VTSettingManager.Setting.AllowForge, "右键词缀化");
         GUILayout.EndHorizontal();
 
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("重铸价格倍率");
-        GUILayout.FlexibleSpace();
-        GUILayout.Label(VTSettingManager.Setting.ReforgePriceFactor.ToString(CultureInfo.InvariantCulture));
-        GUILayout.EndHorizontal();
-        VTSettingManager.Setting.ReforgePriceFactor = GUILayout.HorizontalScrollbar(
-            VTSettingManager.Setting.ReforgePriceFactor,
-            0.1f,
-            0.1f,
-            10f
-        );
 
-        GUILayout.BeginHorizontal();
-        GUILayout.Label("词缀附加价格倍率");
-        GUILayout.FlexibleSpace();
-        GUILayout.Label(VTSettingManager.Setting.ForgePriceFactor.ToString(CultureInfo.InvariantCulture));
-        GUILayout.EndHorizontal();
-        VTSettingManager.Setting.ForgePriceFactor = GUILayout.HorizontalScrollbar(
-            VTSettingManager.Setting.ForgePriceFactor,
-            0.1f,
-            0.1f,
-            20f
-        );
+        if (VTSettingManager.Setting.AllowReforge) {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("重铸价格倍率");
+            GUILayout.FlexibleSpace();
+            GUILayout.Label(VTSettingManager.Setting.ReforgePriceFactor.ToString(CultureInfo.InvariantCulture));
+            GUILayout.EndHorizontal();
+            VTSettingManager.Setting.ReforgePriceFactor = GUILayout.HorizontalScrollbar(
+                VTSettingManager.Setting.ReforgePriceFactor,
+                0.1f,
+                0.1f,
+                10f
+            );
+        }
+
+        if (VTSettingManager.Setting.AllowForge) {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("词缀附加价格倍率");
+            GUILayout.FlexibleSpace();
+            GUILayout.Label(VTSettingManager.Setting.ForgePriceFactor.ToString(CultureInfo.InvariantCulture));
+            GUILayout.EndHorizontal();
+            VTSettingManager.Setting.ForgePriceFactor = GUILayout.HorizontalScrollbar(
+                VTSettingManager.Setting.ForgePriceFactor,
+                0.1f,
+                0.1f,
+                20f
+            );
+        }
+
 
         //概率
         GUILayout.BeginHorizontal();
