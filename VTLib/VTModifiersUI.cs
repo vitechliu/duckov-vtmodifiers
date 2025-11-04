@@ -32,10 +32,10 @@ public class VTModifiersUI : MonoBehaviour {
                 show = !show;
             }
         }
-        if (Input.GetKeyDown(KeyCode.F7)) {
-            Log("F7 Pressed");
-            show = !show;
-        }
+        // if (Input.GetKeyDown(KeyCode.F7)) {
+        //     Log("F7 Pressed");
+        //     show = !show;
+        // }
     }
 
     private bool toggleDebug = true;
