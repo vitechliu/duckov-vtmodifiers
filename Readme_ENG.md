@@ -1,5 +1,11 @@
+Equipment Modifers
+
 Loot boxes, enemy equipment, crafted equipment, etc. will now be randomly attached with Modifier! Start Farming!
 
+Update 0.4.3
+- Reduce all armor enhancement values by half;
+- About adjustment for armor and damage values has been added to the configuration menu. If you feel it is too strong/weak, you can manually adjust it. [b] You need to restart the game to take effect! [/b]
+- Fixed the situation where some original versions displayed two decimal places as one decimal place (totem)
 
 Update 0.4.2
 - Now press Ctrl+F3 to open the mod configuration menu
