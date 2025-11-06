@@ -325,9 +325,13 @@ public class VTModifiersCore {
         if (val.HasValue) {
             val *= polarity;
             if (ml != null && ml.TryGetValue(vtm, out var vtp)) {
-                if (item.Modifiers == null) item.CreateModifiersComponent();
+                if (item.Modifiers == null) {
+                    item.CreateModifiersComponent();
+                    ModifierDescriptionCollection mdc = item.Modifiers;
+                    Traverse.Create(mdc).Field("list").SetValue(new List<ModifierDescription>());
+                }
                 if (item.Modifiers == null) return false;
-
+                
                 if (item.Modifiers.Find(tmd => (tmd.Key == vtp.Item1 && IsModMD(tmd))) != null) {
                     //避免重复添加
                     return false;

@@ -53,6 +53,7 @@ public class VTModifiersUI : MonoBehaviour {
     }
 
     private static string modifierName = "Debug";
+    private static string itemId = "123";
     void WindowFunc(int id) {
         vt = GUILayout.BeginScrollView(vt);
         GUILayout.BeginHorizontal();
@@ -235,6 +236,15 @@ public class VTModifiersUI : MonoBehaviour {
             }
             GUILayout.EndHorizontal();
             
+            //自定义添加道具
+            GUILayout.BeginHorizontal();
+            itemId = GUILayout.TextField(itemId);
+            if (GUILayout.Button("发送到玩家", GUILayout.Width(80))) {
+                Item obj = ItemAssetsCollection.InstantiateSync(int.Parse(itemId));
+                if (obj) ItemUtilities.SendToPlayer(obj);
+            }
+            GUILayout.EndHorizontal();
+            
             //调试操作
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("输出物品信息", GUILayout.Width(80))) {
@@ -283,8 +293,6 @@ public class VTModifiersUI : MonoBehaviour {
             if (GUILayout.Button("$10000", GUILayout.Width(80))) {
                 EconomyManager.Add(10000);
             }
-
-            if (GUILayout.Button("尝试修复联机", GUILayout.Width(80))) { }
 
             // if (GUILayout.Button("测试对话", GUILayout.Width(80))) {
             //     string[] dialog = {
