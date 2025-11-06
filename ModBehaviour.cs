@@ -207,7 +207,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Item), "get_DisplayName")]
     public static void Item_DisplayName_PostFix(Item __instance, ref string __result) {
-        __result = VTModifiersCore.PatchItemDisplayName(__instance, __result);
+        if (!VTModifiersCore.IsPatchedItem(__instance)) return;
+        string key = Traverse.Create(__instance).Field("displayName").GetValue<string>();
+        __result = VTModifiersCore.PatchItemDisplayName(__instance, key.ToPlainText());
     }
 
     //弹药节省Patch
@@ -245,6 +247,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         CharacterSpawnerRoot __instance,
         CharacterMainControl c
     ) {
+        if (LevelManager.Instance.IsBaseLevel) return;
         int csrInstanceId = __instance.GetInstanceID();
         if (c.CharacterItem && c.CharacterItem.Inventory) {
             Inventory inventory = c.CharacterItem.Inventory;
@@ -429,6 +432,12 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
+    private void Start() {
+        if (_isInitialized) {
+            // VTModSettingConnector.Init();
+        }
+    }
+
     protected override void OnBeforeDeactivate() {
         if (_isInitialized) {
             _isInitialized = false;
@@ -456,6 +465,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
         ItemUIUtilities.OnSelectionChanged += OnSelectionChanged;
         ItemTreeData.OnItemLoaded += OnItemLoaded;
+        
+        VTModSettingConnector.Init();
     }
 
     protected void UnregisterEvents() {

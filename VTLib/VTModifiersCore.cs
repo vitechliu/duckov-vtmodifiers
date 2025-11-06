@@ -242,7 +242,7 @@ public class VTModifiersCore {
     }
     
     public static bool IsModifierFixed(VTModifiersCore.VtModifier modifier) {
-        return modifier.ForceFixed ? true : false;
+        return modifier.ForceFixed ? true : VTSettingManager.Setting.FixMode;
     }
     public static string? GetAModifierByWeight(Item item) {
         int totalWeight = 0;

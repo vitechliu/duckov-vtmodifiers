@@ -15,7 +15,7 @@ public class VTModifiersUI : MonoBehaviour {
 
     private bool show = false;
 
-    public Debouncer debouncer;
+    public static Debouncer? debouncer;
     private void Start() {
         if (mod == null) {
             mod = ModBehaviour.Instance;
@@ -91,6 +91,8 @@ public class VTModifiersUI : MonoBehaviour {
             0.1f,
             4f
         );
+        
+        VTSettingManager.Setting.FixMode = GUILayout.Toggle(VTSettingManager.Setting.FixMode, "词缀属性是否固定");
         
         //重铸设定
         GUILayout.BeginHorizontal();

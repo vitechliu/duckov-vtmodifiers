@@ -77,6 +77,8 @@ public static class VTSettingManager {
         public bool AllowReforge = true; //实装+UI
         public bool AllowForge = true; //实装+UI
 
+        public bool FixMode = false; //词缀属性是否固定为最大值
+
         public float CommonGunsModifierThreshold = 1f;
         public float CommonEquipmentModifierThreshold = 1f;
         public float ArmorThreshold = 1f;
