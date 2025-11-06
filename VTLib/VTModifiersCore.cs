@@ -22,7 +22,9 @@ public class VTModifiersCore {
         if (ModifierData == null || ModifierData.Count == 0) {
             //Debug
             ModifierData = new () {
-                ["Debug"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ForceFixed = true, ModifierWeight = 0, Penetrate = 2, ArmorPiercing = 2},
+                ["Debug"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ApplyOnMelee = true, 
+                    ForceFixed = true, ModifierWeight = 0, ArmorPiercing = 2, BleedChance = 0.5f, CritRate = 0.2f, 
+                    ShootSpeedMultiplier = 0.5f, ShootDistanceMultiplier = 3f},
                 
                 //头盔
                 ["Open"] =                    new() { ApplyOnHelmet = true, ModifierWeight = 200, ViewAngle = 0.4f, PriceMultiplier = 0.2f},
@@ -31,6 +33,11 @@ public class VTModifiersCore {
                 ["Hard"] =                    new() { ApplyOnEquipment = true, ModifierWeight = 300, Armor = 0.5f, PriceMultiplier = 0.1f},
                 ["Armored"] =                 new() { ApplyOnEquipment = true, ModifierWeight = 150, Armor = 1f, Weight = 0.5f, PriceMultiplier = 0.6f},
                 ["Warding"] =                 new() { ForceFixed = true, ApplyOnEquipment = true, ModifierWeight = 30, Armor = 2f, Weight = 1f, PriceMultiplier = 3f},
+
+                //近战专属
+                ["Sharp"] =                   new() { ApplyOnMelee = true, ModifierWeight = 150, CritRate = 0.6f, DamageMultiplier = 0.2f, Weight = -0.2f, PriceMultiplier = 0.8f},
+                ["Blunt"] =                   new() { ApplyOnMelee = true, ModifierWeight = 70, CritRate = -0.1f, DamageMultiplier = 0.6f, Weight = 0.6f, PriceMultiplier = 0.5f},
+                ["40m"] =                     new() { ApplyOnMelee = true, ModifierWeight = 50, Weight = 0.5f, ShootDistanceMultiplier = 4f, PriceMultiplier = 1.2f},
 
                 //面罩
                 // [""] =                new() { ApplyOnFaceMask = true, ModifierWeight = 500, ViewAngle = 2f, Weight = 2f},
@@ -43,11 +50,12 @@ public class VTModifiersCore {
 
                 
                 //通用
-                ["High-Tech"] =               new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 70, Armor = 1.2f, ViewAngle = 0.2f, Weight = -0.5f, ShootSpeedMultiplier = 0.4f, PriceMultiplier = 3f},
-                ["Light"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 300, Weight = -0.7f, Armor = -0.1f, Moveability = 0.1f, DamageMultiplier = -0.05f, ReloadTimeMultiplier = -0.2f, PriceMultiplier = 0.2f },
-                ["Heavy"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 300, Weight = 0.3f, Armor = 1.5f, Moveability = -0.1f, RecoilScaleVMultiplier = -0.1f, RecoilScaleHMultiplier = 0.15f, DamageMultiplier = 0.35f, PriceMultiplier = 0.4f },
-                ["Legendary"] =               new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 20, Armor = 1.5f, InventoryCapacity = 5f, MaxWeight = 3f, ShootSpeedMultiplier = 0.2f, Weight = -0.3f, DamageMultiplier = 0.5f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 4f },
-                ["Fast"] =                    new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 150, Moveability = 0.1f, ReloadTimeMultiplier = -0.3f, ShootSpeedMultiplier = 0.2f, PriceMultiplier = 0.2f },
+                ["Legendary"] =               new() { ApplyOnGuns = true, ApplyOnEquipment = true, ApplyOnMelee = true, ModifierWeight = 20, Armor = 1.5f, InventoryCapacity = 5f, MaxWeight = 3f, ShootSpeedMultiplier = 0.2f, 
+                    Weight = -0.3f, DamageMultiplier = 0.5f, ShootDistanceMultiplier = 0.3f, StaminaCost = -0.4f, PriceMultiplier = 4f },
+                ["High-Tech"] =               new() { ApplyOnGuns = true, ApplyOnEquipment = true, ApplyOnMelee = true, ModifierWeight = 70, Armor = 1.2f, ViewAngle = 0.2f, StaminaCost = -0.2f, Weight = -0.5f, ShootSpeedMultiplier = 0.4f, PriceMultiplier = 3f},
+                ["Light"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ApplyOnMelee = true, ModifierWeight = 300, StaminaCost = -0.6f, Weight = -0.7f, Armor = -0.1f, Moveability = 0.1f, DamageMultiplier = -0.05f, ReloadTimeMultiplier = -0.2f, PriceMultiplier = 0.2f },
+                ["Heavy"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ApplyOnMelee = true, ModifierWeight = 300, StaminaCost = 0.2f, Weight = 0.3f, Armor = 1.5f, Moveability = -0.1f, RecoilScaleVMultiplier = -0.1f, RecoilScaleHMultiplier = 0.15f, DamageMultiplier = 0.35f, PriceMultiplier = 0.4f },
+                ["Fast"] =                    new() { ApplyOnGuns = true, ApplyOnEquipment = true, ApplyOnMelee = true, ModifierWeight = 150, StaminaCost = -0.2f, Moveability = 0.1f, ReloadTimeMultiplier = -0.3f, ShootSpeedMultiplier = 0.2f, PriceMultiplier = 0.2f },
 
                 ["WithElectricity"] =         new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 100, ElementElectricity = 0.5f, PriceMultiplier = 0.5f },
                 ["WithFire"] =                new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 100, ElementFire = 0.5f, PriceMultiplier = 0.5f },
@@ -56,16 +64,16 @@ public class VTModifiersCore {
                 ["Chaos"] =                   new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 50, ElementElectricity = 0.2f, ElementFire = 0.2f, ElementSpace = 0.2f, ElementPoison = 0.2f, PriceMultiplier = 0.8f },
                 ["Apollyon"] =                new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 10, ForceFixed = true, BulletSpeedMultiplier = 2f, PriceMultiplier = 0.2f },
 
-                ["Broken"] =                  new() { ApplyOnGuns = true, ApplyOnEquipment = true, ModifierWeight = 200, Armor = -1f, DamageMultiplier = -0.2f, ShootDistanceMultiplier = -0.2f, PriceMultiplier = -0.5f },
+                ["Broken"] =                  new() { ApplyOnGuns = true, ApplyOnEquipment = true, ApplyOnMelee = true, ModifierWeight = 200, Armor = -1f, DamageMultiplier = -0.2f, ShootDistanceMultiplier = -0.2f, PriceMultiplier = -0.5f },
                 
                 //枪械专属
                 ["Unreal"] =                  new() { ApplyOnGuns = true, ModifierWeight = 100, ForceFixed = true, ShootSpeedMultiplier = 0.1f, DamageMultiplier = 0.15f, BulletSpeedMultiplier = 0.1f, CritDamageMultiplier = 0.15f, PriceMultiplier = 2.0985f },
                 ["Sighted"] =                 new() { ApplyOnGuns = true, ModifierWeight = 300, ScatterFactorADSMultiplier = -0.2f, RecoilScaleHMultiplier = -0.2f, PriceMultiplier = 0.2f },
-                ["Deadly"] =                  new() { ApplyOnGuns = true, ModifierWeight = 200, DamageMultiplier = 0.25f, CritDamageMultiplier = 0.25f, PriceMultiplier = 0.6f },
+                ["Deadly"] =                  new() { ApplyOnGuns = true, ApplyOnMelee = true, ModifierWeight = 200, DamageMultiplier = 0.25f, CritDamageMultiplier = 0.25f, PriceMultiplier = 0.6f },
                 ["Eagle-Eye"] =               new() { ApplyOnGuns = true, ModifierWeight = 100, DamageMultiplier = 0.1f, ShootDistanceMultiplier = 0.3f, PriceMultiplier = 0.2f },
-                ["Silver"] =                  new() { ApplyOnGuns = true, ModifierWeight = 100, DamageMultiplier = 0.05f, BleedChance = 0.2f, ElementPoison = 0.1f, PriceMultiplier = 0.5f },
+                ["Silver"] =                  new() { ApplyOnGuns = true, ApplyOnMelee = true, ModifierWeight = 100, DamageMultiplier = 0.05f, BleedChance = 0.2f, ElementPoison = 0.1f, PriceMultiplier = 0.5f },
                 ["Penetrating"] =             new() { ApplyOnGuns = true, ModifierWeight = 150, Penetrate = 1, ArmorPiercing = 1, PriceMultiplier = 0.5f },
-                ["Heartbroken"] =             new() { ApplyOnGuns = true, ModifierWeight = 100, DamageMultiplier = 0.2f, ArmorPiercing = 3, PriceMultiplier = 0.8f },
+                ["Heartbroken"] =             new() { ApplyOnGuns = true, ApplyOnMelee = true, ModifierWeight = 100, DamageMultiplier = 0.2f, ArmorPiercing = 3, PriceMultiplier = 0.8f },
                 ["Thrifty"] =                 new() { ApplyOnGuns = true, ModifierWeight = 150, AmmoSave = 0.3f, PriceMultiplier = 0.3f },
                
                 ["Alienated"] =               new() { ApplyOnGuns = true, ModifierWeight = 50, CritDamageMultiplier = -0.1f, ElementPoison = 0.3f, ShootSpeedMultiplier = 0.4f, PriceMultiplier = 0.1f },
@@ -154,6 +162,28 @@ public class VTModifiersCore {
             };
         }
         
+        if (ModifierLogicMelee == null) {
+            //这里的int对应Item Stat的Hash
+            ModifierLogicMelee = new () {
+                [VtmDamage] = (nameof (ItemAgent_MeleeWeapon.Damage), ModifierType.Add),
+                [VtmDamageMultiplier] = (nameof (ItemAgent_MeleeWeapon.Damage), ModifierType.PercentageAdd),
+                [VtmShootDistance] = (nameof (ItemAgent_MeleeWeapon.AttackRange), ModifierType.Add),
+                [VtmShootDistanceMultiplier] = (nameof (ItemAgent_MeleeWeapon.AttackRange), ModifierType.PercentageAdd),
+                [VtmCritRate] = (nameof (ItemAgent_MeleeWeapon.CritRate), ModifierType.Add),
+                [VtmCritDamageMultiplier] = (nameof (ItemAgent_MeleeWeapon.CritDamageFactor), ModifierType.Add),
+                [VtmArmorPiercing] = (nameof (ItemAgent_MeleeWeapon.ArmorPiercing), ModifierType.Add),
+                [VtmShootSpeedMultiplier] = (nameof (ItemAgent_MeleeWeapon.AttackSpeed), ModifierType.PercentageAdd),
+                [VtmBleedChance] = (nameof (ItemAgent_MeleeWeapon.BleedChance), ModifierType.PercentageAdd),
+                [VtmStaminaCost] = (nameof (ItemAgent_MeleeWeapon.StaminaCost), ModifierType.PercentageAdd),
+                
+                //自定义的
+                [VtmWeight] = ("VTMC_" + VtmWeight, ModifierType.PercentageAdd),
+                // [VtmElementElectricity] = ("VTMC_" + VtmElementElectricity, ModifierType.Add),
+                // [VtmElementFire] = ("VTMC_" + VtmElementFire, ModifierType.Add),
+                // [VtmElementSpace] = ("VTMC_" + VtmElementSpace, ModifierType.Add),
+                // [VtmElementPoison] = ("VTMC_" + VtmElementPoison, ModifierType.Add),
+            };
+        }
         //初始化Language
         SystemLanguage language = SodaCraft.Localizations.LocalizationManager.CurrentLanguage;
         if (
@@ -211,6 +241,11 @@ public class VTModifiersCore {
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("WithSpace", "空间");
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("WithPoison", "剧毒");
             
+            //近战
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Sharp", "锐利");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("Blunt", "钝重");
+            SodaCraft.Localizations.LocalizationManager.SetOverrideText("40m", "40米的");
+
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Broken", "破损");
             
             SodaCraft.Localizations.LocalizationManager.SetOverrideText("Debug", "测试");
@@ -269,6 +304,9 @@ public class VTModifiersCore {
         if (item.Tags.Contains(ItemTagGun)) {
             mt = ModifierTarget.Self;
             ml = ModifierLogicGun;
+        } else if (item.Tags.Contains(ItemTagMelee)) {
+            mt = ModifierTarget.Self;
+            ml = ModifierLogicMelee;
         }
         else {
             ml = ModifierLogicEquipment;
@@ -367,6 +405,7 @@ public class VTModifiersCore {
 
     public static bool ItemCanBePatched(Item item) {
         return item.Tags.Contains(ItemTagGun)
+               || item.Tags.Contains(ItemTagMelee)
                || item.Tags.Contains(ItemTagHelmet)
                || item.Tags.Contains(ItemTagArmor)
                || item.Tags.Contains(ItemTagMask)
@@ -500,6 +539,7 @@ public class VTModifiersCore {
             VtModifier vtm = kvp.Value;
             if (
                 (item.Tags.Contains(ItemTagGun) && vtm.ApplyOnGuns)
+                || (item.Tags.Contains(ItemTagMelee) && vtm.ApplyOnMelee)
                 || (item.Tags.Contains(ItemTagArmor) && (vtm.ApplyOnArmor || vtm.ApplyOnEquipment))
                 || (item.Tags.Contains(ItemTagHelmet) && (vtm.ApplyOnHelmet || vtm.ApplyOnEquipment))
                 || (item.Tags.Contains(ItemTagMask) && (vtm.ApplyOnFaceMask || vtm.ApplyOnEquipment))
@@ -514,6 +554,7 @@ public class VTModifiersCore {
     // public static readonly VtModifier DefaultModifier = new VtModifier();
     public static Dictionary<string, VtModifier> ModifierData;
     public static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicGun;
+    public static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicMelee;
     public static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicEquipment; //身体类
     // public static Dictionary<string, string> ModifierDisplayName; //暂时用于翻译部分字段
     
@@ -525,8 +566,7 @@ public class VTModifiersCore {
     public const string VtmBulletSpeedMultiplier = "BulletSpeedMultiplier";
     public const string VtmShootDistance = "ShootDistance"; //射程 加算
     public const string VtmShootDistanceMultiplier = "ShootDistanceMultiplier"; //射程 加算
-    public const string VtmShootSpeedMultiplier = "ShootSpeedMultiplier";
-    // public const string VtmCritRate = "CritRate"; //暴击率,暂未使用，因为官方写死了爆头才算暴击
+    public const string VtmShootSpeedMultiplier = "ShootSpeedMultiplier"; //射速/使用速度(近战)
     public const string VtmCritDamageMultiplier = "CritDamageMultiplier"; //爆伤因子,乘算
     public const string VtmArmorPiercing = "ArmorPiercing"; //穿甲等级 实际用整数
     public const string VtmPenetrate = "Penetrate"; //穿透 实际证书
@@ -537,6 +577,7 @@ public class VTModifiersCore {
     public const string VtmRecoilVMultiplier = "RecoilVMultiplier";
     public const string VtmRecoilHMultiplier = "RecoilHMultiplier";
     
+    
     //护甲
     public const string VtmArmor = "Armor";
     public const string VtmBodyArmor = "BodyArmor";
@@ -546,7 +587,6 @@ public class VTModifiersCore {
     public const string VtmInventoryCapacity = "InventoryCapacity";
     public const string VtmMaxWeight = "MaxWeight";
     public const string VtmMoveability = "Moveability";
-
     
     public const string VtmBleedChance = "BleedChance"; //流血几率
     public const string VtmWeight = "Weight"; 
@@ -559,6 +599,9 @@ public class VTModifiersCore {
     public const string VtmElementPoison = "ElementPoison";
     public const string VtmElementElectricity = "ElementElectricit";
     
+    //近战
+    public const string VtmStaminaCost = "StaminaCost";
+    public const string VtmCritRate = "CritRate"; //暴击率,枪械暂未使用，因为官方写死了爆头才算暴击
 
     //不浮动的
     public static string[] FixedVtms = {
@@ -577,6 +620,7 @@ public class VTModifiersCore {
         VtmDamageMultiplier,
         VtmBulletSpeed,
         VtmBulletSpeedMultiplier,
+        VtmCritRate,
         VtmShootDistance,
         VtmShootDistanceMultiplier,
         VtmReloadTime,
@@ -587,7 +631,7 @@ public class VTModifiersCore {
         VtmScatterADSAMultiplier,
         VtmArmorPiercing,
         VtmPenetrate,
-        // VtmCritRate,
+        VtmCritRate,
         VtmCritDamageMultiplier,
         VtmSoundRange,
         VtmBleedChance,
@@ -598,6 +642,8 @@ public class VTModifiersCore {
         VtmElementSpace,
         VtmElementPoison,
         VtmElementElectricity,
+        
+        VtmStaminaCost,
         
         VtmBodyArmor,
         VtmHeadArmor,
@@ -613,6 +659,7 @@ public class VTModifiersCore {
     public const string ItemTagHelmet = "Helmat";    
     public const string ItemTagBackpack = "Backpack";
     public const string ItemTagGun = "Gun";
+    public const string ItemTagMelee = "MeleeWeapon";
     
     public struct VtModifier {
         public int ModifierWeight = 0; //出现的权重
@@ -637,7 +684,7 @@ public class VTModifiersCore {
         public float? RecoilScaleHMultiplier = null;
         public float? ScatterFactorADSMultiplier = null;
         public float? ScatterFactorMultiplier = null;
-        // public float CritRate;
+        public float? CritRate = null;
         public float? CritDamageMultiplier = null;
         public float? BleedChance = null;
         public float? SoundRange = null;
@@ -656,7 +703,10 @@ public class VTModifiersCore {
         public float? GasMask = null;
         public float? Moveability = null;
 
+        public float? StaminaCost = null; //耐力消耗
+
         public bool ApplyOnGuns = false; //如果该项为true,则所有gun都会满足
+        public bool ApplyOnMelee = false; //近战
         public bool ApplyOnEquipment = false; //如果该项为true,所有其他护甲（面罩背包图腾）都会满足
         public bool ApplyOnHelmet = false;
         public bool ApplyOnArmor = false;
@@ -693,8 +743,8 @@ public class VTModifiersCore {
                     return this.ArmorPiercing;
                 case VtmPenetrate:
                     return this.Penetrate;
-                // case VtmCritRate:
-                //     return this.CritRate;
+                case VtmCritRate:
+                    return this.CritRate;
                 case VtmCritDamageMultiplier:
                     return this.CritDamageMultiplier;
                 case VtmScatterMultiplier:
@@ -730,6 +780,9 @@ public class VTModifiersCore {
                     return this.ElementPoison;
                 case VtmElementSpace:
                     return this.ElementSpace;
+                
+                case VtmStaminaCost:
+                    return this.StaminaCost;
                 
                 
                 

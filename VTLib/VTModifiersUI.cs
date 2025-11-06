@@ -52,6 +52,7 @@ public class VTModifiersUI : MonoBehaviour {
         return $"x{(float)(value * 100.0):0.##}%";
     }
 
+    private static string modifierName = "Debug";
     void WindowFunc(int id) {
         vt = GUILayout.BeginScrollView(vt);
         GUILayout.BeginHorizontal();
@@ -212,8 +213,28 @@ public class VTModifiersUI : MonoBehaviour {
             }
 
             GUILayout.EndHorizontal();
-
-
+            
+            
+            //自定义词缀
+            GUILayout.BeginHorizontal();
+            modifierName = GUILayout.TextField(modifierName);
+            if (GUILayout.Button("+词缀", GUILayout.Width(80))) {
+                if (VTModifiersCore.ModifierData.ContainsKey(modifierName)) {
+                    Item item = ItemUIUtilities.SelectedItem;
+                    if (item != null) {
+                        VTModifiersCore.TryUnpatchItem(item);
+                        VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug, modifierName);
+                    }
+                    else {
+                        VT.BubbleUserDebug("未选中道具");
+                    }
+                } 
+                else {
+                    VT.BubbleUserDebug("未找到词缀:" + modifierName);
+                }
+            }
+            GUILayout.EndHorizontal();
+            
             //调试操作
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("输出物品信息", GUILayout.Width(80))) {

@@ -1,7 +1,6 @@
 using ItemStatsSystem;
 using UnityEngine;
 using System.Reflection;
-using System.Text;
 using Duckov.Economy;
 using HarmonyLib;
 using Duckov.UI;
@@ -10,7 +9,6 @@ using ItemStatsSystem.Data;
 using ItemStatsSystem.Items;
 using SodaCraft.Localizations;
 using TMPro;
-using UnityEngine.Events;
 using UnityEngine.UI;
 using VTModifiers.VTLib;
 // ReSharper disable Unity.PerformanceCriticalCodeInvocation
@@ -25,7 +23,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     public string _sfxDirectory;
 
     public static string _modName = "VTModifiers";
-    public static string _version = "0.4.2";
+    public static string _version = "0.5.0";
     
     protected bool _isInitialized = false;
 
@@ -46,7 +44,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    //
+    //枪械Patch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ItemAgent_Gun), "ShootOneBullet")]
     public static void ItemAgentGun_ShootOneBullet_PostFix(ItemAgent_Gun __instance) {
@@ -75,7 +73,40 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             LogStatic($"PatchFailed: {ex.Message}\n{ex.StackTrace}");
         }
     }
-
+    //近战Patch
+    // [HarmonyPostfix]
+    // [HarmonyPatch(typeof(ItemAgent_MeleeWeapon), "CheckCollidersInRange")]
+    // public static void ItemAgentMeleeWeapon_CheckCollidersInRange_PostFix(ItemAgent_MeleeWeapon __instance) {
+    //     if (!__instance || !__instance.Holder) return;
+    //     if (!__instance.Holder.IsMainCharacter) return;
+    //     LogStatic("辉及");
+    //     CharacterMainControl main = __instance.Holder;
+    //     GameObject[] list = main.gameObject.GetComponentsInChildren<GameObject>();
+    //     foreach (var gameObj in list) {
+    //         LogStatic("找到obj:" + gameObj.name);   
+    //     }
+    // }
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(CA_Attack), "OnStart")]
+    public static void CAAttack_OnStart_PostFix(CA_Attack __instance) {
+        if (!__instance.characterController.IsMainCharacter) return;
+        ItemAgent_MeleeWeapon weapon = Traverse.Create(__instance).Field("meleeWeapon").GetValue<ItemAgent_MeleeWeapon>();
+        if (!weapon) return;
+        if (!VTModifiersCore.IsPatchedItem(weapon.Item)) return;
+        float? length = VTModifiersCore.GetItemVtm(weapon.Item, VTModifiersCore.VtmShootDistanceMultiplier);
+        if (!length.HasValue) return;
+        GameObject sfx = Traverse.Create(weapon).Field("slashFx").GetValue<GameObject>();
+        sfx.transform.localScale *= (1f + (float)length);
+    }
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(CA_Attack), "OnStop")]
+    public static void CAAttack_OnStop_PostFix(CA_Attack __instance) {
+        if (!__instance.characterController.IsMainCharacter) return;
+        ItemAgent_MeleeWeapon weapon = Traverse.Create(__instance).Field("meleeWeapon").GetValue<ItemAgent_MeleeWeapon>();
+        if (!weapon) return;
+        GameObject sfx = Traverse.Create(weapon).Field("slashFx").GetValue<GameObject>();
+        sfx.transform.localScale = new Vector3(1.92f, 1.92f, 1.92f);
+    }
 
     //重量Patch
     [HarmonyPostfix]
