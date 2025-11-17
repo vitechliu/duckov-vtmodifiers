@@ -10,6 +10,7 @@ using ItemStatsSystem.Items;
 using SodaCraft.Localizations;
 using TMPro;
 using UnityEngine.UI;
+using VTModifiers.ThirdParty;
 using VTModifiers.VTLib;
 // ReSharper disable Unity.PerformanceCriticalCodeInvocation
 
@@ -64,11 +65,11 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             temp.context.bleedChance =
                 VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
         
-            if (VTSettingManager.Setting.Debug) {
-                LogStatic($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
-                          $"ArmorPiercing:{temp.context.armorPiercing}, " +
-                          $"ArmorBreak:{temp.context.armorBreak}");
-            }
+            // if (VTSettingManager.Setting.Debug) {
+            //     LogStatic($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
+            //               $"ArmorPiercing:{temp.context.armorPiercing}, " +
+            //               $"ArmorBreak:{temp.context.armorBreak}");
+            // }
         } catch (Exception ex) {
             LogStatic($"PatchFailed: {ex.Message}\n{ex.StackTrace}");
         }
@@ -444,7 +445,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     //     TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("selectedItemName").GetValue<TextMeshProUGUI>();
     //     itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
     // }
-
+    private LootBoxEventListener SCAV_Listener = null!;
     protected override void OnAfterSetup() {
         if (!_isInitialized) {
             _dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
@@ -460,6 +461,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             GameObject uiObject = new GameObject("VTModifier_ModUI_Instance");
             modUI = uiObject.AddComponent<VTModifiersUI>();
             DontDestroyOnLoad(uiObject);
+
+            SCAV_Listener = LootBoxEventListener.Instance;
         }
     }
 
@@ -483,6 +486,10 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             
             if (modUI != null && modUI.gameObject != null) {
                 Destroy(modUI.gameObject);
+            }
+
+            if (SCAV_Listener) {
+                Destroy(SCAV_Listener);
             }
             Log("模组已卸载");
         }

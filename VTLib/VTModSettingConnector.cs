@@ -75,7 +75,18 @@ public class VTModSettingConnector {
                 OnSettingChanged();
             });
     }
-
+    public static void InitSCAV() {
+        bool success = ModSettingAPI.Init(ModBehaviour.Instance.info);
+        if (!success) {
+            return;
+        }
+        
+        ModSettingAPI.AddSlider("SCAVPercentage", "SCAV模式生成词缀概率", VTSettingManager.Setting.SCAVPercentage, 
+            new Vector2(0f, 1f), f => {
+                VTSettingManager.Setting.SCAVPercentage = f;
+                OnSettingChanged();
+            });
+    }
     static void OnSettingChanged() {
         if (VTModifiersUI.debouncer != null) {
             VTModifiersUI.debouncer.Invoke();

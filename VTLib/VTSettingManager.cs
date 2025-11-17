@@ -69,6 +69,9 @@ public static class VTSettingManager {
 
     public static VtModifierSetting Setting = new VtModifierSetting();
 
+    public static bool _scavLoaded = false;
+
+    public static bool SCAVLoaded => _scavLoaded;
     public struct VtModifierSetting {
         public bool Debug = false;
 
@@ -90,6 +93,7 @@ public static class VTSettingManager {
         public float EnemyPatchedPercentage = 0.4f; //实装+UI
         public float LootBoxPatchedPercentage = 0.75f; //实装+UI
         public float CraftPatchedPercentage = 0.75f; //实装+UI
+        public float SCAVPercentage = 0.75f; //SCAV
 
 
         public VtModifierSetting() { }

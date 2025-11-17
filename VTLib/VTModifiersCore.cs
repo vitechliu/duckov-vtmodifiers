@@ -427,6 +427,9 @@ public class VTModifiersCore {
                 case Sources.Craft:
                     if (!VT.Probability(VTSettingManager.Setting.CraftPatchedPercentage)) return null;
                     break;
+                case Sources.SCAV:
+                    if (!VT.Probability(VTSettingManager.Setting.SCAVPercentage)) return null;
+                    break;
             }
             string? modifier = GetAModifierByWeight(item);
             if (modifier != null) {
@@ -532,6 +535,7 @@ public class VTModifiersCore {
         Enemy, //敌人AI
         Debug, //测试用
         Craft, //制作的
+        SCAV, //SCAV
         Reforge, //重铸的
     }
 

@@ -169,6 +169,20 @@ public class VTModifiersUI : MonoBehaviour {
             1.01f
         );
 
+        if (VTSettingManager.SCAVLoaded) {
+            GUILayout.BeginHorizontal();
+            GUILayout.Label("SCAV附带词缀概率");
+            GUILayout.FlexibleSpace();
+            GUILayout.Label(float2Percentage(VTSettingManager.Setting.SCAVPercentage));
+            GUILayout.EndHorizontal();
+            VTSettingManager.Setting.SCAVPercentage = GUILayout.HorizontalScrollbar(
+                VTSettingManager.Setting.SCAVPercentage,
+                0.01f,
+                0f,
+                1.01f
+            );
+        }
+
         if (GUI.changed && debouncer != null) {
             debouncer.Invoke();
         }
