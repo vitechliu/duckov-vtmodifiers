@@ -24,7 +24,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     public string _sfxDirectory;
 
     public static string _modName = "VTModifiers";
-    public static string _version = "0.5.0";
+    public static string _version = "0.6.0";
     
     protected bool _isInitialized = false;
 
