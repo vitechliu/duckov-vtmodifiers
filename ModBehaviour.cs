@@ -53,17 +53,17 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         try {
             Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
             if (!temp) return;
-            temp.context.element_Electricity = VTModifiersCore.Modify(__instance.Item,
-                VTModifiersCore.VtmElementElectricity, temp.context.element_Electricity);
+            temp.context.element_Electricity = VTModifiersCoreV2.Modify(__instance.Item,
+                VTModifiersCoreV2.VtmElementElectricity, temp.context.element_Electricity);
             temp.context.element_Fire =
-                VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementFire, temp.context.element_Fire);
-            temp.context.element_Poison = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementPoison,
+                VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementFire, temp.context.element_Fire);
+            temp.context.element_Poison = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementPoison,
                 temp.context.element_Poison);
-            temp.context.element_Space = VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmElementSpace,
+            temp.context.element_Space = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementSpace,
                 temp.context.element_Space);
         
             temp.context.bleedChance =
-                VTModifiersCore.Modify(__instance.Item, VTModifiersCore.VtmBleedChance, temp.context.bleedChance);
+                VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmBleedChance, temp.context.bleedChance);
         
             // if (VTSettingManager.Setting.Debug) {
             //     LogStatic($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
@@ -93,8 +93,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (!__instance.characterController.IsMainCharacter) return;
         ItemAgent_MeleeWeapon weapon = Traverse.Create(__instance).Field("meleeWeapon").GetValue<ItemAgent_MeleeWeapon>();
         if (!weapon) return;
-        if (!VTModifiersCore.IsPatchedItem(weapon.Item)) return;
-        float? length = VTModifiersCore.GetItemVtm(weapon.Item, VTModifiersCore.VtmShootDistanceMultiplier);
+        if (!VTModifiersCoreV2.IsPatchedItem(weapon.Item)) return;
+        float? length = VTModifiersCoreV2.GetItemVtmKey(weapon.Item, VTModifiersCoreV2.VtmShootDistanceMultiplier);
         if (!length.HasValue) return;
         GameObject sfx = Traverse.Create(weapon).Field("slashFx").GetValue<GameObject>();
         sfx.transform.localScale *= (1f + (float)length);
@@ -113,7 +113,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Item), "get_SelfWeight")]
     public static void Item_SelfWeight_PostFix(Item __instance, ref float __result) {
-        __result = VTModifiersCore.Modify(__instance, VTModifiersCore.VtmWeight, __result);
+        __result = VTModifiersCoreV2.Modify(__instance, VTModifiersCoreV2.VtmWeight, __result);
     }
 
     //MD:DisplayName patch
@@ -121,17 +121,11 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     [HarmonyPatch(typeof(ModifierDescription), "get_DisplayName")]
     public static void ModifierDescription_DisplayName_PostFix(ModifierDescription __instance, ref string __result) {
         if (
-            VTModifiersCore.IsModMD(__instance)
+            VTModifiersCoreV2.IsModMD(__instance)
             && !__result.StartsWith("VTMC_")
             && !__result.StartsWith("VTM_")
         ) {
-            if (VTModifiersCore.Vtms.Contains("VTMC_" + __instance.Key)) {
-                //是特殊词缀
-                __result = "VTMC_" + __result;
-            }
-            else {
-                __result = "VTM_" + __result;
-            }
+            __result = "VTM_" + __result;
         }
     }
 
@@ -159,8 +153,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (btn_Reforge) {
             if (LevelManager.Instance.IsBaseLevel) {
                 Item targetItem = Traverse.Create(__instance).Property("TargetItem").GetValue<Item>();
-                if (targetItem && VTModifiersCore.ItemCanBePatched(targetItem)) {
-                    bool patched = VTModifiersCore.IsPatchedItem(targetItem);
+                if (targetItem && VTModifiersCoreV2.ItemCanBePatched(targetItem)) {
+                    bool patched = VTModifiersCoreV2.IsPatchedItem(targetItem);
                     if ((patched && VTSettingManager.Setting.AllowReforge)
                         || (!patched && VTSettingManager.Setting.AllowForge)) {
                         btn_Reforge.gameObject.SetActive(true);
@@ -178,8 +172,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (btn_Reforge) {
             if (LevelManager.Instance.IsBaseLevel) {
                 Item targetItem = Traverse.Create(__instance).Property("TargetItem").GetValue<Item>();
-                if (targetItem && VTModifiersCore.ItemCanBePatched(targetItem)) {
-                    bool patched = VTModifiersCore.IsPatchedItem(targetItem);
+                if (targetItem && VTModifiersCoreV2.ItemCanBePatched(targetItem)) {
+                    bool patched = VTModifiersCoreV2.IsPatchedItem(targetItem);
                     if ((patched && VTSettingManager.Setting.AllowReforge)
                         || (!patched && VTSettingManager.Setting.AllowForge)) {
                         EnsureButtonStyle(targetItem);
@@ -189,8 +183,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
     static void EnsureButtonStyle(Item targetItem) {
-        bool patched = VTModifiersCore.IsPatchedItem(targetItem);
-        int price = VTModifiersCore.ReforgePrice(targetItem);
+        bool patched = VTModifiersCoreV2.IsPatchedItem(targetItem);
+        int price = VTModifiersCoreV2.ReforgePrice(targetItem);
         long userMoney = EconomyManager.Money;
         string buttonText = patched ? "Btn_reforge".ToPlainText() : "Btn_forge".ToPlainText();
         VT.SetButtonText(btn_Reforge, buttonText + $"(${price})");
@@ -212,16 +206,16 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (!__instance) return;
         Item targetItem = Traverse.Create(__instance).Property("TargetItem").GetValue<Item>();
         if (!targetItem) return;
-        if (!VTModifiersCore.ItemCanBePatched(targetItem)) return;
+        if (!VTModifiersCoreV2.ItemCanBePatched(targetItem)) return;
         
-        int price = VTModifiersCore.ReforgePrice(targetItem);
+        int price = VTModifiersCoreV2.ReforgePrice(targetItem);
         if (!EconomyManager.Pay(new Cost(price))) {
             VT.BubbleUserDebug("Bubble_lack_of_coin".ToPlainText(), false);
             __instance.Close();
             return;
         }
-        VTModifiersCore.TryUnpatchItem(targetItem);
-        VTModifiersCore.PatchItem(targetItem, VTModifiersCore.Sources.Reforge);
+        VTModifiersCoreV2.TryUnpatchItem(targetItem);
+        VTModifiersCoreV2.PatchItem(targetItem, VTModifiersCoreV2.Sources.Reforge);
         VT.PostCustomSFX("Terraria_reforging.wav");
         VT.BubbleUserDebug("Bubble_reforge_success".ToPlainText(), false);
         __instance.Close();
@@ -239,16 +233,16 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Item), "get_DisplayName")]
     public static void Item_DisplayName_PostFix(Item __instance, ref string __result) {
-        if (!VTModifiersCore.IsPatchedItem(__instance)) return;
+        if (!VTModifiersCoreV2.IsPatchedItem(__instance)) return;
         string key = Traverse.Create(__instance).Field("displayName").GetValue<string>();
-        __result = VTModifiersCore.PatchItemDisplayName(__instance, key.ToPlainText());
+        __result = VTModifiersCoreV2.PatchItemDisplayName(__instance, key.ToPlainText());
     }
 
     //弹药节省Patch
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ItemSetting_Gun), "UseABullet")]
     public static bool ItemSettingGun_UseABullet_PreFix(ItemSetting_Gun __instance) {
-        float? ammoSaveChance = VTModifiersCore.GetItemVtm(__instance.Item, VTModifiersCore.VtmAmmoSave);
+        float? ammoSaveChance = VTModifiersCoreV2.GetItemVtmKey(__instance.Item, VTModifiersCoreV2.VtmAmmoSave);
         if (ammoSaveChance.HasValue) {
             bool prob = !VT.Probability(ammoSaveChance.Value);
             // if (VTSettingManager.Setting.Debug) LogStatic("UseABullet:" + prob);
@@ -262,13 +256,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     [HarmonyPatch(typeof(Item), "GetTotalRawValue")]
     public static void Item_GetTotalRawValue_PostFix(Item __instance, ref int __result) {
         // LogStatic($"ItemPriceModify: {__instance.DisplayName}");
-        int beforePrice = __result;
         __result = Mathf.RoundToInt(
-            VTModifiersCore.Modify(__instance, VTModifiersCore.VtmPriceMultiplier, (float)__result)
+            VTModifiersCoreV2.Modify(__instance, VTModifiersCoreV2.VtmPriceMultiplier, (float)__result)
         );
-        // if (__result != beforePrice) {
-        //     LogStatic($"ItemPriceModify: {__instance.DisplayName}: {beforePrice} -> {__result}");
-        // }
     }
 
 
@@ -283,29 +273,14 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         int csrInstanceId = __instance.GetInstanceID();
         if (c.CharacterItem && c.CharacterItem.Inventory) {
             Inventory inventory = c.CharacterItem.Inventory;
-            // int itemCount = inventory.Count();
-            // if (c.PrimWeaponSlot() != null && c.PrimWeaponSlot().Content != null) {
-            //     itemCount++;
-            //     VTModifiersCore.PatchItem(c.PrimWeaponSlot().Content, VTModifiersCore.Sources.Enemy);
-            // }
-            //
-            // if (c.MeleeWeaponSlot() != null && c.MeleeWeaponSlot().Content != null) {
-            //     itemCount++;
-            //     VTModifiersCore.PatchItem(c.MeleeWeaponSlot().Content, VTModifiersCore.Sources.Enemy);
-            // }
-            //
-            // if (c.MeleeWeaponSlot() != null && c.MeleeWeaponSlot().Content != null) {
-            //     itemCount++;
-            //     VTModifiersCore.PatchItem(c.MeleeWeaponSlot().Content, VTModifiersCore.Sources.Enemy);
-            // }
 
             foreach (Item item in inventory) {
-                VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Enemy);
+                VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Enemy);
             }
 
             foreach (Slot slot in c.CharacterItem.Slots) {
                 if (slot.Content == null) continue;
-                VTModifiersCore.PatchItem(slot.Content, VTModifiersCore.Sources.Enemy);
+                VTModifiersCoreV2.PatchItem(slot.Content, VTModifiersCoreV2.Sources.Enemy);
             }
             // LogStatic($"CSRSetup:{csrInstanceId}, itemCount:{itemCount}");
         }
@@ -329,7 +304,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
                 int inventoryCount = inventory.Count();
                 // LogStatic($"LBLSetup:{lootBoxLoaderId}, name:{lootBoxName}, count:{inventoryCount}");
                 foreach (Item item in inventory) {
-                    VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.LootBox);
+                    VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.LootBox);
                 }
                 // Traverse.Create(lootbox).Field("inventoryReference").SetValue(inventory);
                 // Traverse.Create(__instance).Field("_lootBox").SetValue(lootbox);
@@ -345,7 +320,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     //词缀化来源：合成
     private void OnItemCrafted(CraftingFormula formula, Item item) {
-        VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Craft);
+        VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Craft);
     }
 
 
@@ -426,25 +401,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     public static bool loggedIMEColor = false;
 
-    // //物品操作菜单Patch
-    // [HarmonyPostfix]
-    // [HarmonyPatch(typeof(ItemOperationMenu), "Setup")]
-    // public static void ItemOperationMenu_Setup_PostPatch(ItemOperationMenu __instance) {
-    //     Item item = Traverse.Create(__instance).Field("TargetItem").GetValue<Item>();
-    //     if (item == null) return;
-    //     TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("nameText").GetValue<TextMeshProUGUI>();
-    //     itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
-    // }
 
-    // //物品自定义菜单Patch
-    // [HarmonyPostfix]
-    // [HarmonyPatch(typeof(ItemCustomizeSelectionView), "RefreshSelectedItemInfo")]
-    // public static void ItemCustomizeSelectionView_RefreshSelectedItemInfo_PostPatch(ItemCustomizeSelectionView __instance) {
-    //     Item item = ItemUIUtilities.SelectedItem;
-    //     if (item == null) return;
-    //     TextMeshProUGUI itemNameUGUI = Traverse.Create(__instance).Field("selectedItemName").GetValue<TextMeshProUGUI>();
-    //     itemNameUGUI.text = VTModifiersCore.PatchItemDisplayName(item);
-    // }
     private LootBoxEventListener SCAV_Listener = null!;
     protected override void OnAfterSetup() {
         if (!_isInitialized) {
@@ -452,8 +409,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             InitializeLogFile();
             InitializeDirectories();
             LocalizationUtil.ReadLang();
-            VTModifiersCore.InitData();
-            // VTModifiersCore.ExportCurrent();
+            VTModifiersCoreV2.InitData();
+
             RegisterEvents();
             _isInitialized = true;
             _harmony = new Harmony("com.vitech.duckov_vt_modifiers_patch");
@@ -516,12 +473,12 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     private void OnItemSentToPlayerInventory(Item item) {
         // LogStatic($"OnItemSentToPlayerInventory: {item.DisplayName}");
-        VTModifiersCore.CalcItemModifiers(item);
+        VTModifiersCoreV2.CalcItemModifiers(item);
     }
 
     private async void OnSelectionChanged() {
         // Item selectingItem = ItemUIUtilities.SelectedItem;
-        // if (selectingItem && VTModifiersCore.IsPatchedItem(selectingItem)) {
+        // if (selectingItem && VTModifiersCoreV2.IsPatchedItem(selectingItem)) {
         //     string[] dialog = {
         //         "a1", "a2"
         //     };
@@ -534,7 +491,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     //从存档等地方加载Item后，需要更新Modifier
     private void OnItemLoaded(Item item) {
         // LogStatic($"OnItemLoaded: {item.DisplayName}");
-        VTModifiersCore.CalcItemModifiers(item);
+        VTModifiersCoreV2.CalcItemModifiers(item);
     }
 
     //初始化地图后，扫描该地图的敌人和物资箱，为其中的武器等道具异步加入词缀

@@ -203,8 +203,8 @@ public class VTModifiersUI : MonoBehaviour {
             if (GUILayout.Button("+随机词缀", GUILayout.Width(80))) {
                 Item item = ItemUIUtilities.SelectedItem;
                 if (item != null) {
-                    VTModifiersCore.TryUnpatchItem(item);
-                    VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug);
+                    VTModifiersCoreV2.TryUnpatchItem(item);
+                    VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Debug);
                 }
                 else {
                     VT.BubbleUserDebug("未选中道具");
@@ -214,8 +214,8 @@ public class VTModifiersUI : MonoBehaviour {
             if (GUILayout.Button("+Debug词缀", GUILayout.Width(80))) {
                 Item item = ItemUIUtilities.SelectedItem;
                 if (item != null) {
-                    VTModifiersCore.TryUnpatchItem(item);
-                    VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug, "Debug");
+                    VTModifiersCoreV2.TryUnpatchItem(item);
+                    VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Debug, "Debug");
                 }
                 else {
                     VT.BubbleUserDebug("未选中道具");
@@ -225,7 +225,7 @@ public class VTModifiersUI : MonoBehaviour {
             if (GUILayout.Button("-词缀", GUILayout.Width(80))) {
                 Item item = ItemUIUtilities.SelectedItem;
                 if (item != null) {
-                    VTModifiersCore.TryUnpatchItem(item);
+                    VTModifiersCoreV2.TryUnpatchItem(item);
                 }
                 else {
                     VT.BubbleUserDebug("未选中道具");
@@ -239,11 +239,11 @@ public class VTModifiersUI : MonoBehaviour {
             GUILayout.BeginHorizontal();
             modifierName = GUILayout.TextField(modifierName);
             if (GUILayout.Button("+词缀", GUILayout.Width(80))) {
-                if (VTModifiersCore.ModifierData.ContainsKey(modifierName)) {
+                if (VTModifiersCoreV2.ModifierData.ContainsKey(modifierName)) {
                     Item item = ItemUIUtilities.SelectedItem;
-                    if (item != null) {
-                        VTModifiersCore.TryUnpatchItem(item);
-                        VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.Debug, modifierName);
+                    if (item) {
+                        VTModifiersCoreV2.TryUnpatchItem(item);
+                        VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Debug, modifierName);
                     }
                     else {
                         VT.BubbleUserDebug("未选中道具");

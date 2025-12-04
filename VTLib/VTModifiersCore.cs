@@ -11,11 +11,12 @@ using Random = UnityEngine.Random;
 
 namespace VTModifiers.VTLib;
 
+[Obsolete("已废弃，使用V2", true)]
 public class VTModifiersCore {
     //通用
 
-    public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
-    public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
+    static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
+    static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
 
     //测试用，导出当前的
     static void ExportCurrent() {
@@ -25,7 +26,7 @@ public class VTModifiersCore {
             tmp.key = mkey;
             exports[mkey] = tmp;
         }
-        VTModifierGroup group = new VTModifierGroup("default") {
+        VTModifierGroupV1 groupV1 = new VTModifierGroupV1("default") {
             modifiers = exports
         };
         
@@ -35,11 +36,11 @@ public class VTModifiersCore {
             Formatting = Formatting.Indented // Optional: for readable output
         };
         File.WriteAllText(Path.Combine(ModBehaviour.Instance._resourceDirectory, "default_0_5_1.json"),
-            JsonConvert.SerializeObject(group, settings));
+            JsonConvert.SerializeObject(groupV1, settings));
     }
     
 
-    public static void LoadFromConfig() {
+    static void LoadFromConfig() {
         ModifierData.Clear();
         ModifierGroups.Clear();
         string directoryPath = Path.Combine(ModBehaviour.Instance._resourceDirectory, "modifiers");
@@ -48,10 +49,10 @@ public class VTModifiersCore {
         foreach (string path in jsonFiles) { 
             try {
                 string jsonContent = File.ReadAllText(path);
-                VTModifierGroup group = JsonConvert.DeserializeObject<VTModifierGroup>(jsonContent);
-                ModifierGroups.Add(group);
-                VT.Log($"加载来自{group.author}的{group.key}词缀组...");
-                foreach (VtModifier vtModifier in group.modifiers.Values) {
+                VTModifierGroupV1 groupV1 = JsonConvert.DeserializeObject<VTModifierGroupV1>(jsonContent);
+                ModifierGroups.Add(groupV1);
+                VT.Log($"加载来自{groupV1.author}的{groupV1.key}词缀组...");
+                foreach (VtModifier vtModifier in groupV1.modifiers.Values) {
                     if (ModifierData.ContainsKey(vtModifier.key)) {
                         VT.Log($"词缀键重复:{vtModifier.key}");
                         continue;
@@ -66,6 +67,8 @@ public class VTModifiersCore {
         }
         
     }
+
+    
     public static void InitData() {
         if (ModifierData.Count == 0) {
             LoadFromConfig();
@@ -73,7 +76,6 @@ public class VTModifiersCore {
         if (ModifierLogicGun == null) {
             //这里的int对应Item Stat的Hash
             ModifierLogicGun = new() {
-                [VtmDamage] = (nameof(ItemAgent_Gun.Damage), ModifierType.Add),
                 [VtmDamageMultiplier] = (nameof(ItemAgent_Gun.Damage), ModifierType.PercentageAdd),
                 [VtmBulletSpeedMultiplier] = (nameof(ItemAgent_Gun.BulletSpeed), ModifierType.PercentageAdd),
                 [VtmShootDistanceMultiplier] = (nameof(ItemAgent_Gun.BulletDistance), ModifierType.PercentageAdd),
@@ -130,7 +132,7 @@ public class VTModifiersCore {
         if (ModifierLogicMelee == null) {
             //这里的int对应Item Stat的Hash
             ModifierLogicMelee = new() {
-                [VtmDamage] = (nameof(ItemAgent_MeleeWeapon.Damage), ModifierType.Add),
+               
                 [VtmDamageMultiplier] = (nameof(ItemAgent_MeleeWeapon.Damage), ModifierType.PercentageAdd),
                 [VtmShootDistanceMultiplier] = (nameof(ItemAgent_MeleeWeapon.AttackRange), ModifierType.PercentageAdd),
                 [VtmCritRate] = (nameof(ItemAgent_MeleeWeapon.CritRate), ModifierType.Add),
@@ -151,11 +153,11 @@ public class VTModifiersCore {
     }
 
 
-    public static bool IsPatchedItem(Item item) {
+    static bool IsPatchedItem(Item item) {
         return item.GetString(VariableVtModifierHashCode) != null;
     }
 
-    static bool IsModifierFixed(VTModifiersCore.VtModifier modifier) {
+    static bool IsModifierFixed(VtModifier modifier) {
         return modifier.ForceFixed ? true : VTSettingManager.Setting.FixMode;
     }
 
@@ -180,7 +182,7 @@ public class VTModifiersCore {
         return null;
     }
 
-    private static bool TryPatchModifier(Item item, VtModifier vtModifier, string vtm) {
+    static bool TryPatchModifier(Item item, VtModifier vtModifier, string vtm) {
         ModifierTarget mt = ModifierTarget.Character; //枪械是self
         Dictionary<string, ValueTuple<string, ModifierType>>? ml = null!;
         int polarity = 1;
@@ -260,16 +262,16 @@ public class VTModifiersCore {
         return false;
     }
 
-    public const int MAGIC_ORDER = -1145141919;
+    const int MAGIC_ORDER = -1145141919;
 
-    public static int ReforgePrice(Item item) {
+    static int ReforgePrice(Item item) {
         float plus = IsPatchedItem(item)
             ? VTSettingManager.Setting.ReforgePriceFactor
             : VTSettingManager.Setting.ForgePriceFactor; //词缀化需要5倍
-        return Mathf.RoundToInt(Modify(item, VTModifiersCore.VtmPriceMultiplier, item.Value) * plus);
+        return Mathf.RoundToInt(Modify(item, VtmPriceMultiplier, item.Value) * plus);
     }
 
-    public static void TryUnpatchItem(Item item) {
+    static void TryUnpatchItem(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier == null) return;
         CustomDataCollection variables = Traverse.Create(item).Field("variables").GetValue<CustomDataCollection>();
@@ -301,11 +303,11 @@ public class VTModifiersCore {
         Log($"移除词缀:{item.DisplayName}成功，同时移除了{removedModifiersCount}个原生Modifier");
     }
 
-    public static void Log(string message, bool isError = false) {
+    static void Log(string message, bool isError = false) {
         ModBehaviour.LogStatic(message, isError);
     }
 
-    public static bool ItemCanBePatched(Item item) {
+    static bool ItemCanBePatched(Item item) {
         return item.Tags.Contains(ItemTagGun)
                || item.Tags.Contains(ItemTagMelee)
                || item.Tags.Contains(ItemTagHelmet)
@@ -314,7 +316,7 @@ public class VTModifiersCore {
                || item.Tags.Contains(ItemTagBackpack);
     }
 
-    public static string PatchItem(Item item, Sources source) {
+    static string PatchItem(Item item, Sources source) {
         if (ItemCanBePatched(item)) {
             switch (source) {
                 case Sources.LootBox:
@@ -341,7 +343,7 @@ public class VTModifiersCore {
         return null;
     }
 
-    public static string PatchItem(Item item, Sources source, string modifier) {
+    static string PatchItem(Item item, Sources source, string modifier) {
         item.SetString(VariableVtModifierHashCode, modifier, true);
         // Tag vtTag = new Tag()
         // item.Tags.Add("vttag");
@@ -352,12 +354,12 @@ public class VTModifiersCore {
         return modifier;
     }
 
-    public static bool IsModMD(ModifierDescription modifierDescription) {
+    static bool IsModMD(ModifierDescription modifierDescription) {
         return modifierDescription.Order == MAGIC_ORDER;
     }
 
     //为Item Patch Modifier
-    public static void CalcItemModifiers(Item item) {
+    static void CalcItemModifiers(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier == null) return;
         if (ModifierData.TryGetValue(modifier, out VtModifier vtModifier)) {
@@ -391,11 +393,11 @@ public class VTModifiersCore {
         }
     }
 
-    public static string PatchItemDisplayName(Item item) {
+    static string PatchItemDisplayName(Item item) {
         return PatchItemDisplayName(item, item.DisplayName);
     }
 
-    public static string PatchItemDisplayName(Item item, string before) {
+    static string PatchItemDisplayName(Item item, string before) {
         if (item == null) return "";
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier != null) {
@@ -406,7 +408,7 @@ public class VTModifiersCore {
         return before;
     }
 
-    public static float? GetItemVtm(Item item, string vtm) {
+    static float? GetItemVtm(Item item, string vtm) {
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier != null && ModifierData.TryGetValue(modifier, out var modifierStruct)) {
             return modifierStruct.GetVal(vtm);
@@ -414,7 +416,7 @@ public class VTModifiersCore {
         return null;
     }
 
-    public static float Modify(Item item, string vtm, float original) {
+    static float Modify(Item item, string vtm, float original) {
         if (!item) return original;
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier != null && ModifierData.TryGetValue(modifier, out var modifierStruct)) {
@@ -438,7 +440,7 @@ public class VTModifiersCore {
     }
 
     //生成来源
-    public enum Sources {
+    enum Sources {
         LootBox, //物资
         Enemy, //敌人AI
         Debug, //测试用
@@ -470,14 +472,13 @@ public class VTModifiersCore {
 
     // public static readonly VtModifier DefaultModifier = new VtModifier();
     public static Dictionary<string, VtModifier> ModifierData = new ();
-    public static List<VTModifierGroup> ModifierGroups = new ();
-    public static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicGun;
-    public static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicMelee;
-    public static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicEquipment; //身体类
+    static List<VTModifierGroupV1> ModifierGroups = new ();
+    static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicGun;
+    static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicMelee;
+    static Dictionary<string, ValueTuple<string, ModifierType>>? ModifierLogicEquipment; //身体类
     // public static Dictionary<string, string> ModifierDisplayName; //暂时用于翻译部分字段
 
 
-    public const string VtmDamage = "Damage"; //伤害修正
     public const string VtmDamageMultiplier = "DamageMultiplier"; //乘算的
 
     public const string VtmBulletSpeedMultiplier = "BulletSpeedMultiplier";
@@ -522,23 +523,22 @@ public class VTModifiersCore {
 
     
     //这类强制ModifierType为Character
-    public static string[] ForceCharacterVtms = {
+    static string[] ForceCharacterVtms = {
         VtmMoveability,
     };
     //不浮动的
-    public static string[] FixedVtms = {
+    static string[] FixedVtms = {
     };
 
     //变成整型的
-    public static string[] RoundedVtms = {
+    static string[] RoundedVtms = {
         VtmArmorPiercing,
         VtmPenetrate,
         // VtmMaxWeight,
         VtmInventoryCapacity,
     };
 
-    public static string[] Vtms = {
-        VtmDamage,
+    static string[] Vtms = {
         VtmDamageMultiplier,
         VtmBulletSpeedMultiplier,
         VtmCritRate,
@@ -575,32 +575,25 @@ public class VTModifiersCore {
         VtmMoveability,
     };
 
-    public const string ItemTagMask = "FaceMask";
-    public const string ItemTagArmor = "Armor";
-    public const string ItemTagHelmet = "Helmat";
-    public const string ItemTagBackpack = "Backpack";
-    public const string ItemTagGun = "Gun";
-    public const string ItemTagMelee = "MeleeWeapon";
+    const string ItemTagMask = "FaceMask";
+    const string ItemTagArmor = "Armor";
+    const string ItemTagHelmet = "Helmat";
+    const string ItemTagBackpack = "Backpack";
+    const string ItemTagGun = "Gun";
+    const string ItemTagMelee = "MeleeWeapon";
 
     
-    public struct VTModifierGroup {
+    struct VTModifierGroupV1 {
         public string author = "Official";
         public string version = "0.0.1";
         public bool isCommunity = false;
         public string key;
         public Dictionary<string, VtModifier> modifiers = new();
 
-        public VTModifierGroup(string key) {
+        public VTModifierGroupV1(string key) {
             this.key = key;
         }
     }
-    
-    
-    //2.0
-    
-    
-    
-    
     
     public struct VtModifier {
         public string key; //唯一键
@@ -610,17 +603,12 @@ public class VTModifiersCore {
 
         public float? Weight = null; //重量修正
         public float? PriceMultiplier = null; //价格倍率
-
-        public float? Damage = null; 
         public float? DamageMultiplier = null;
         public float? AmmoSave = null; //弹药节省率
         public float? ArmorPiercing = null; //穿甲等级(实际为整数)
         public float? Penetrate = null; //穿透(实际为整数)
-        // public float? ShootSpeed = null;
         public float? ShootSpeedMultiplier = null; //射速倍率
-        // public float? BulletSpeed = null; 
         public float? BulletSpeedMultiplier = null;
-        // public float? ShootDistance = null;
         public float? ShootDistanceMultiplier = null;
         public float? ReloadTimeMultiplier = null;
         public float? RecoilScaleVMultiplier = null;
@@ -631,25 +619,19 @@ public class VTModifiersCore {
         public float? CritDamageMultiplier = null;
         public float? BleedChance = null;
         public float? SoundRange = null;
-
         public float? ElementFire = null;
         public float? ElementSpace = null;
         public float? ElementPoison = null;
         public float? ElementElectricity = null;
-
         public float? Armor = null; //灵活的
-
-        // public float? BodyArmor = null;
-        // public float? HeadArmor = null;
         public float? InventoryCapacity = null;
         public float? MaxWeight = null; //最大负重
         public float? ViewAngle = null;
         public float? GasMask = null;
         public float? Moveability = null;
-
         public float? StaminaCost = null; //耐力消耗
         public float? MaxStamina = null; //最大耐力
-
+        
         public bool ApplyOnGuns = false; //如果该项为true,则所有gun都会满足
         public bool ApplyOnMelee = false; //近战
         public bool ApplyOnEquipment = false; //如果该项为true,所有其他护甲（面罩背包图腾）都会满足
@@ -666,8 +648,6 @@ public class VTModifiersCore {
 
         public readonly float? GetVal(string vtm) {
             switch (vtm) {
-                case VtmDamage:
-                    return this.Damage;
                 case VtmDamageMultiplier:
                     return this.DamageMultiplier * VTSettingManager.Setting.DamageThreshold;
                 case VtmAmmoSave:

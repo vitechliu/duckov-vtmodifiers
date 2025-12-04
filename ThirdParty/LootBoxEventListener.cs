@@ -107,7 +107,7 @@ namespace VTModifiers.ThirdParty {
             try {
                 if (lootBox.Inventory) {
                     foreach (Item item in lootBox.Inventory) {
-                        VTModifiersCore.PatchItem(item, VTModifiersCore.Sources.SCAV);
+                        VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.SCAV);
                     }
                 }
                 // ModBehaviour.LogStatic($"[LootBoxEventListener] 已获取lootbox");

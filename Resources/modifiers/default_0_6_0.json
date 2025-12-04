@@ -1,0 +1,25 @@
+{
+  "author": "Official",
+  "version": "0.6.0",
+  "isCommunity": false,
+  "key": "default060",
+  "modifiers": {
+    "Feathering": {
+      "key": "Feathering",
+      "weight": 50,
+      "quality": 5,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": true,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 3,
+        "Moveability": 0.7
+      }
+    }
+  }
+}
