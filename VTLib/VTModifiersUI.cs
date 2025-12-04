@@ -27,7 +27,12 @@ public class VTModifiersUI : MonoBehaviour {
 
 
     void Update() {
-        if (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl)) {
+        if (
+            Input.GetKey(KeyCode.LeftControl) 
+            || Input.GetKey(KeyCode.RightControl)
+            || Input.GetKey(KeyCode.LeftCommand)
+            || Input.GetKey(KeyCode.RightCommand)
+            ) {
             if (Input.GetKeyDown(KeyCode.F3)) {
                 show = !show;
             }
@@ -307,7 +312,10 @@ public class VTModifiersUI : MonoBehaviour {
             if (GUILayout.Button("$10000", GUILayout.Width(80))) {
                 EconomyManager.Add(10000);
             }
-
+            if (GUILayout.Button("移除基地回血buff", GUILayout.Width(80))) {
+                CharacterMainControl c = CharacterMainControl.Main;
+                c.RemoveBuff(GameplayDataSettings.Buffs.BaseBuff.ID, false);
+            }
             // if (GUILayout.Button("测试对话", GUILayout.Width(80))) {
             //     string[] dialog = {
             //         "a1", "a2"

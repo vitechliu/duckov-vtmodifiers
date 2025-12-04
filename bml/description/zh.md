@@ -4,14 +4,14 @@ qq交流群群号1042906424
 
 更新日志
 ### 0.5.1
-- 现在部分兼容mod:Scav模式，在Scav模式中敌人掉落的装备也会有词缀。[b]请确保Scav模式的加载位置在本mod之前！[/b]
+- 现在部分兼容mod:Scav模式，在Scav模式中敌人掉落的装备也会有词缀。**请确保Scav模式的加载位置在本mod之前！**
 - 更新ModSetting API
 
 ### 0.5.0
 - 现在近战武器也支持了词缀！
 - 加入了"词缀属性是否固定"开关，开启后词缀属性将固定为最大值
 - 修复了基地里假人身上的护甲也会有随机词缀的问题（怪不得测试穿甲会不准）
-- 现在兼容[url=https://steamcommunity.com/sharedfiles/filedetails/?id=3595729494]ModSetting[/url]模组，可以更方便的修改参数
+- 现在兼容[ModSetting](https://steamcommunity.com/sharedfiles/filedetails/?id=3595729494)模组，可以更方便的修改参数
 - 对于出现重复词缀显示的情况（如 精准 精准 AK47)，加了补丁以避免，但请注意这不是bug，如果你出现这个问题，代表你的mod打太多了！有的mod导致了重复加载问题
 
 ### 0.4.3

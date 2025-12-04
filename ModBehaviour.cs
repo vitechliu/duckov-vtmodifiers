@@ -21,7 +21,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     public string _logFilePath;
     public string _dllDirectory;
     public string _cfgDirectory;
-    public string _sfxDirectory;
+    public string _resourceDirectory;
 
     public static string _modName = "VTModifiers";
     public static string _version = "0.6.0";
@@ -450,14 +450,14 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (!_isInitialized) {
             _dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             InitializeLogFile();
-            InitializeCfg();
-            InitializeSfxFile();
-            _harmony = new Harmony("com.vitech.duckov_vt_modifiers_patch");
-            _harmony.PatchAll();
+            InitializeDirectories();
+            LocalizationUtil.ReadLang();
             VTModifiersCore.InitData();
+            // VTModifiersCore.ExportCurrent();
             RegisterEvents();
             _isInitialized = true;
-            
+            _harmony = new Harmony("com.vitech.duckov_vt_modifiers_patch");
+            _harmony.PatchAll();
             GameObject uiObject = new GameObject("VTModifier_ModUI_Instance");
             modUI = uiObject.AddComponent<VTModifiersUI>();
             DontDestroyOnLoad(uiObject);
@@ -477,9 +477,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             _isInitialized = false;
             _harmony.UnpatchAll();
             UnregisterEvents();
-            if (VTModifiersCore.ModifierData.Count > 0) {
-                VTModifiersCore.ModifierData.Clear();
-            }
 
             if (_text != null) Destroy(_text);
             if (btn_Reforge != null) Destroy(btn_Reforge);
@@ -545,25 +542,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         Log("地图已初始化");
     }
 
-
-    void Update() {
-        // if (VTSettingManager.Setting.Debug && _isInitialized) {
-        //     //随机附加
-        //     if (Input.GetKeyDown(KeyCode.G)) {
-        //         KeyDownG();
-        //     }
-        //     //显示信息
-        //     if (Input.GetKeyDown(KeyCode.H)) {
-        //         KeyDownH();
-        //     }
-        // }
-    }
-
-
-    // void Awake() {
-    //     
-    // }
-
     protected void InitializeLogFile() {
         string str = Path.Combine(this._dllDirectory, "logs");
         Directory.CreateDirectory(str);
@@ -572,12 +550,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         Log("模组启动，开始初始化，版本:" + _version);
         Log("日志路径: " + _logFilePath);
     }
-    protected void InitializeSfxFile() {
-        _sfxDirectory = Path.Combine(this._dllDirectory, "sfx");
-        Directory.CreateDirectory(_sfxDirectory);
-    }
-    protected void InitializeCfg() {
+    protected void InitializeDirectories() {
         _cfgDirectory = Path.Combine(this._dllDirectory, "cfg");
+        _resourceDirectory = Path.Combine(this._dllDirectory, "resources");
         Directory.CreateDirectory(_cfgDirectory);
         VTSettingManager.LoadSetting();
     }

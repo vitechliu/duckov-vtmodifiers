@@ -75,15 +75,11 @@ public static class VTSettingManager {
     public struct VtModifierSetting {
         public bool Debug = false;
 
-        public bool RemoveAllBadModifiers = false;
-
         public bool AllowReforge = true; //实装+UI
         public bool AllowForge = true; //实装+UI
 
         public bool FixMode = false; //词缀属性是否固定为最大值
 
-        public float CommonGunsModifierThreshold = 1f;
-        public float CommonEquipmentModifierThreshold = 1f;
         public float ArmorThreshold = 1f;
         public float DamageThreshold = 1f;
 
@@ -94,6 +90,8 @@ public static class VTSettingManager {
         public float LootBoxPatchedPercentage = 0.75f; //实装+UI
         public float CraftPatchedPercentage = 0.75f; //实装+UI
         public float SCAVPercentage = 0.75f; //SCAV
+
+        public bool EnableCommunityModifiers = true; //是否支持社区词缀
 
 
         public VtModifierSetting() { }

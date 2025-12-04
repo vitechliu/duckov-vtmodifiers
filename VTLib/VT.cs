@@ -23,6 +23,10 @@ public static class VT {
     public static bool Probability(float probability) {
         return UnityEngine.Random.value < probability;
     }
+    
+    public static void Log(string message, bool isError = false) {
+        VTModifiersUI.Log(message, isError);
+    }
 
     public static void SetButtonText(Button button, string text) {
         foreach (TextMeshProUGUI componentsInChild in button.GetComponentsInChildren<TextMeshProUGUI>()) {
@@ -44,7 +48,7 @@ public static class VT {
                 = itemDisplay.Target.DisplayName;
     }
     public static void PostCustomSFX(string sfxName, GameObject gameObject = null, bool loop = false) {
-        string path = Path.Combine(ModBehaviour.Instance._sfxDirectory, sfxName);
+        string path = Path.Combine(ModBehaviour.Instance._resourceDirectory, "sfx", sfxName);
         AudioManager.PostCustomSFX(path, gameObject, loop);
     }
     

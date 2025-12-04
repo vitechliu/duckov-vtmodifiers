@@ -37,7 +37,7 @@ namespace VTModifiers.ThirdParty {
                 }
 
                 if (randomNpcAssembly == null) {
-                    ModBehaviour.LogStatic("用户未安装SCAV mod");
+                    // ModBehaviour.LogStatic("用户未安装SCAV mod");
                     VTSettingManager._scavLoaded = false;
                     return;
                 }
