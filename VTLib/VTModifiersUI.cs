@@ -7,6 +7,7 @@ using HarmonyLib;
 using ItemStatsSystem;
 using TMPro;
 using UnityEngine;
+using VTModifiers.ThirdParty;
 
 namespace VTModifiers.VTLib;
 
@@ -196,6 +197,7 @@ public class VTModifiersUI : MonoBehaviour {
         if (toggleDebug) {
             GUILayout.Label("");
             GUILayout.Label("");
+            GUILayout.Label("秘法纪元已连接:" + MagicConnector.Connected);
             //词缀操作
             GUILayout.Label("测试功能(会极大影响游戏体验，慎重使用！）");
 

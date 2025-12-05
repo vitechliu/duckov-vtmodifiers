@@ -105,6 +105,7 @@ public class VTModifiersCoreV2 {
         Dictionary<string, VtModifierV2> filtered = new();
         foreach (VTModifierGroup group in ModifierGroups) {
             if (group.isCommunity && !VTSettingManager.Setting.EnableCommunityModifiers) continue;
+            if (group.key == "vt_magic" && !VTSettingManager.Setting.EnableArcaneModifiers) continue;
             foreach (VtModifierV2 vtm in group.modifiers.Values) {
                 if (
                     (item.Tags.Contains(ItemTagGun) && vtm.applyOnGuns)
@@ -356,7 +357,7 @@ public class VTModifiersCoreV2 {
     }
     
     
-    public const string VtmDamage = "Damage"; //伤害修正
+    // public const string VtmDamage = "Damage"; //伤害修正
     public const string VtmDamageMultiplier = "DamageMultiplier"; //乘算的
 
     public const string VtmBulletSpeedMultiplier = "BulletSpeedMultiplier";

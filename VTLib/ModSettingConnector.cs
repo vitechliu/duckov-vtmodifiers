@@ -11,7 +11,7 @@ using VTModifiers.ThirdParty;
 
 namespace VTModifiers.VTLib;
 
-public class VTModSettingConnector {
+public static class ModSettingConnector {
     public static void Init() {
         bool success = ModSettingAPI.Init(ModBehaviour.Instance.info);
         if (!success) {
@@ -72,6 +72,17 @@ public class VTModSettingConnector {
         ModSettingAPI.AddSlider("CraftPatchedPercentage", "合成道具附带词缀概率", VTSettingManager.Setting.CraftPatchedPercentage, 
             new Vector2(0f, 1f), f => {
                 VTSettingManager.Setting.CraftPatchedPercentage = f;
+                OnSettingChanged();
+            });
+        
+        ModSettingAPI.AddToggle("EnableCommunityModifiers", "支持社区词缀", VTSettingManager.Setting.EnableCommunityModifiers, 
+            b => {
+                VTSettingManager.Setting.EnableCommunityModifiers = b;
+                OnSettingChanged();
+            });
+        ModSettingAPI.AddToggle("EnableArcaneModifiers", "支持[秘法纪元]词缀", VTSettingManager.Setting.EnableArcaneModifiers, 
+            b => {
+                VTSettingManager.Setting.EnableArcaneModifiers = b;
                 OnSettingChanged();
             });
     }

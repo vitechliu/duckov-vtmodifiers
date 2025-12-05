@@ -2,6 +2,7 @@ using ItemStatsSystem;
 using UnityEngine;
 using System.Reflection;
 using Duckov.Economy;
+using Duckov.Modding;
 using HarmonyLib;
 using Duckov.UI;
 using Duckov.Utilities;
@@ -418,11 +419,37 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             GameObject uiObject = new GameObject("VTModifier_ModUI_Instance");
             modUI = uiObject.AddComponent<VTModifiersUI>();
             DontDestroyOnLoad(uiObject);
-
+            TryConnectVtMagic();
+            TryInitSetting();
             SCAV_Listener = LootBoxEventListener.Instance;
         }
     }
 
+    static void TryConnectVtMagic() {
+        foreach (ModInfo mi in ModManager.modInfos) {
+            if (mi.name == "VTMagic") {
+                MagicConnector.TryConnect();
+            }
+        }
+    }
+    private void ModManager_OnModActivated(ModInfo arg1, Duckov.Modding.ModBehaviour arg2) {
+        if (arg1.name == "VTMagic") MagicConnector.TryConnect();
+        if (ModSettingAPI.IsInit) return;
+        if (arg1.name != ModSettingAPI.MOD_NAME || !ModSettingAPI.Init(info)) return;
+        ModSettingConnector.Init();
+    }
+    private void ModManager_OnModWillBeDeactivated(ModInfo arg1, Duckov.Modding.ModBehaviour arg2) {
+        if (arg1.name == "VTMagic") MagicConnector.OnVtMagicDeactivated();
+        if (arg1.name != ModSettingAPI.MOD_NAME || !ModSettingAPI.Init(info)) return;
+        // //禁用ModSetting的时候移除监听
+        // Setting.OnSlider1ValueChanged -= Setting_OnSlider1ValueChanged;
+    }
+    void TryInitSetting() {
+        if (!ModSettingAPI.IsInit) {
+            if (!ModSettingAPI.Init(info)) return;
+            ModSettingConnector.Init();
+        }
+    }
     private void Start() {
         if (_isInitialized) {
             // VTModSettingConnector.Init();
@@ -457,8 +484,10 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
         ItemUIUtilities.OnSelectionChanged += OnSelectionChanged;
         ItemTreeData.OnItemLoaded += OnItemLoaded;
+        ModManager.OnModActivated += ModManager_OnModActivated;
+        ModManager.OnModWillBeDeactivated += ModManager_OnModWillBeDeactivated;
+
         
-        VTModSettingConnector.Init();
     }
 
     protected void UnregisterEvents() {
@@ -469,6 +498,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         ItemUtilities.OnItemSentToPlayerInventory -= OnItemSentToPlayerInventory;
         ItemUIUtilities.OnSelectionChanged -= OnSelectionChanged;
         ItemTreeData.OnItemLoaded -= OnItemLoaded;
+        ModManager.OnModActivated -= ModManager_OnModActivated;
+        ModManager.OnModWillBeDeactivated -= ModManager_OnModWillBeDeactivated;
+
     }
 
     private void OnItemSentToPlayerInventory(Item item) {
