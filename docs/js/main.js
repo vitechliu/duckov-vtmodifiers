@@ -591,7 +591,7 @@ function addDataField(container) {
             <div class="col-md-5">
                 <select class="form-select data-key">
                     <option value="">选择键...</option>
-                    ${vtms.map((value, key) => `<option value="${key}">${value}</option>`).join('')}
+                    ${Object.keys(vtms).map(key => `<option value="${key}">${vtms[key]}</option>`).join('')}
                     <option value="custom">自定义...</option>
                 </select>
             </div>
