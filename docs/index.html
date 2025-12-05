@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VT Modifier Groups 管理器</title>
+    
+    <!-- Bootstrap 5 CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Bootstrap Icons -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.8.1/font/bootstrap-icons.css">
+    <!-- 自定义样式 -->
+    <link rel="stylesheet" href="css/style.css">
+    
+    <!-- 代码高亮（用于JSON预览） -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/styles/github.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.7.0/highlight.min.js"></script>
+</head>
+<body>
+    <!-- 导航栏 -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">
+                <i class="bi bi-file-earmark-code me-2"></i>
+                VT Modifier Groups
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav me-auto">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="showListBtn">
+                            <i class="bi bi-list-ul me-1"></i> 文件列表
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="createNewBtn">
+                            <i class="bi bi-plus-circle me-1"></i> 新建 Group
+                        </a>
+                    </li>
+                </ul>
+                <div class="navbar-text">
+                    <small>基于 VTModifierGroup C# 结构</small>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- 主容器 -->
+    <div class="container-fluid mt-4">
+        <div class="row">
+            <!-- 左侧：JSON文件列表 -->
+            <div class="col-lg-4 col-md-5 mb-4">
+                <div class="card shadow">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0">
+                            <i class="bi bi-folder me-2"></i> Modifier Groups
+                        </h5>
+                        <button class="btn btn-sm btn-outline-primary" id="refreshListBtn">
+                            <i class="bi bi-arrow-clockwise"></i>
+                        </button>
+                    </div>
+                    <div class="card-body p-0">
+                        <div class="p-3 border-bottom">
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="bi bi-search"></i>
+                                </span>
+                                <input type="text" class="form-control" id="searchInput" placeholder="搜索文件名或作者...">
+                            </div>
+                        </div>
+                        <div id="loadingIndicator" class="text-center p-4">
+                            <div class="spinner-border text-primary" role="status">
+                                <span class="visually-hidden">加载中...</span>
+                            </div>
+                            <p class="mt-2 text-muted">正在加载文件列表...</p>
+                        </div>
+                        <div class="list-group list-group-flush" id="jsonList" style="display: none;">
+                            <!-- JSON文件列表将动态加载到这里 -->
+                        </div>
+                        <div id="emptyListMessage" class="text-center p-4" style="display: none;">
+                            <i class="bi bi-folder-x text-muted" style="font-size: 2rem;"></i>
+                            <p class="mt-2 text-muted">暂无文件</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 操作指南 -->
+                <div class="card shadow mt-4">
+                    <div class="card-header bg-light">
+                        <h6 class="mb-0">
+                            <i class="bi bi-info-circle me-2"></i> 使用说明
+                        </h6>
+                    </div>
+                    <div class="card-body">
+                        <ol class="small ps-3">
+                            <li class="mb-2">点击左侧文件查看内容</li>
+                            <li class="mb-2">点击"新建 Group"创建新的Modifier Group</li>
+                            <li class="mb-2">填写表单后点击"预览JSON"查看结果</li>
+                            <li class="mb-2">点击"下载JSON"保存到本地</li>
+                            <li>将下载的JSON文件放到仓库的<code>resources/modifiers</code>目录</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 右侧：内容查看/编辑器 -->
+            <div class="col-lg-8 col-md-7">
+                <!-- 欢迎消息 -->
+                <div id="welcomeMessage" class="card shadow">
+                    <div class="card-body text-center py-5">
+                        <i class="bi bi-file-earmark-text text-primary" style="font-size: 3rem;"></i>
+                        <h3 class="mt-3">VT Modifier Groups 管理器</h3>
+                        <p class="text-muted mt-3">
+                            这是一个用于查看和创建 VTModifierGroup JSON 文件的工具。<br>
+                            请从左侧选择一个文件查看，或点击"新建 Group"创建新的文件。
+                        </p>
+                        <button class="btn btn-primary btn-lg mt-3" id="createNewWelcomeBtn">
+                            <i class="bi bi-plus-circle me-2"></i> 创建新的 Modifier Group
+                        </button>
+                    </div>
+                </div>
+
+                <!-- JSON详情查看器 -->
+                <div id="jsonViewer" class="card shadow" style="display: none;">
+                    <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                        <h5 class="mb-0" id="viewerTitle">
+                            <i class="bi bi-file-earmark-text me-2"></i>
+                            <span id="fileNamePlaceholder">文件名</span>
+                        </h5>
+                        <div>
+                            <button class="btn btn-sm btn-outline-primary" id="editCurrentBtn">
+                                <i class="bi bi-pencil me-1"></i> 编辑
+                            </button>
+                            <button class="btn btn-sm btn-outline-success" id="downloadCurrentBtn">
+                                <i class="bi bi-download me-1"></i> 下载
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card-body">
+                        <div id="jsonViewerContent">
+                            <!-- JSON内容将动态加载到这里 -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- JSON编辑器 -->
+                <div id="jsonEditor" class="card shadow" style="display: none;">
+                    <div class="card-header bg-light">
+                        <h5 class="mb-0">
+                            <i class="bi bi-pencil-square me-2"></i>
+                            <span id="editorTitle">创建新的 Modifier Group</span>
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <form id="modifierGroupForm">
+                            <!-- Modifier Group 基本信息 -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light-subtle">
+                                    <h6 class="mb-0">Modifier Group 基本信息</h6>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label for="key" class="form-label">Key <span class="text-danger">*</span></label>
+                                            <input type="text" class="form-control" id="key" name="key" required placeholder="例如: default070">
+                                            <div class="form-text">Modifier Group的唯一标识符</div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="author" class="form-label">作者</label>
+                                            <input type="text" class="form-control" id="author" name="author" value="Official">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label for="version" class="form-label">版本</label>
+                                            <input type="text" class="form-control" id="version" name="version" value="0.0.1">
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label">是否社区内容</label>
+                                            <div class="form-check mt-2">
+                                                <input class="form-check-input" type="checkbox" id="isCommunity" name="isCommunity">
+                                                <label class="form-check-label" for="isCommunity">
+                                                    是社区创建的 Modifier Group
+                                                </label>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Modifiers 列表 -->
+                            <div class="card mb-4">
+                                <div class="card-header bg-light-subtle d-flex justify-content-between align-items-center">
+                                    <h6 class="mb-0">Modifiers</h6>
+                                    <button type="button" class="btn btn-sm btn-primary" id="addModifierBtn">
+                                        <i class="bi bi-plus-circle me-1"></i> 添加 Modifier
+                                    </button>
+                                </div>
+                                <div class="card-body">
+                                    <div id="modifiersContainer">
+                                        <!-- Modifier 表单将动态添加到这里 -->
+                                        <div class="alert alert-info">
+                                            点击"添加 Modifier"按钮开始添加第一个 Modifier。
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- 操作按钮 -->
+                            <div class="d-flex justify-content-between">
+                                <div>
+                                    <button type="button" class="btn btn-secondary" id="cancelEditBtn">
+                                        <i class="bi bi-arrow-left me-1"></i> 返回
+                                    </button>
+                                </div>
+                                <div>
+                                    <button type="button" class="btn btn-outline-primary me-2" id="previewJsonBtn">
+                                        <i class="bi bi-eye me-1"></i> 预览 JSON
+                                    </button>
+                                    <button type="button" class="btn btn-success" id="downloadJsonBtn">
+                                        <i class="bi bi-download me-1"></i> 下载 JSON
+                                    </button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- JSON 预览模态框 -->
+                <div class="modal fade" id="jsonPreviewModal" tabindex="-1">
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">JSON 预览</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body">
+                                <pre class="m-0"><code class="language-json" id="jsonPreviewCode"></code></pre>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">关闭</button>
+                                <button type="button" class="btn btn-success" id="downloadFromPreviewBtn">
+                                    <i class="bi bi-download me-1"></i> 下载 JSON
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modifier 表单模板（隐藏，用于克隆） -->
+    <template id="modifierTemplate">
+        <div class="modifier-form card mb-3">
+            <div class="card-header bg-light-subtle d-flex justify-content-between align-items-center">
+                <h6 class="mb-0 modifier-title">Modifier</h6>
+                <button type="button" class="btn btn-sm btn-danger remove-modifier">
+                    <i class="bi bi-trash"></i>
+                </button>
+            </div>
+            <div class="card-body">
+                <!-- 基础信息 -->
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <label class="form-label">Key <span class="text-danger">*</span></label>
+                        <input type="text" class="form-control modifier-key" name="modifierKey" required placeholder="例如: Feathering">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">权重 (weight)</label>
+                        <input type="number" class="form-control" name="weight" value="0" min="-100" max="100">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label">等级 (quality)</label>
+                        <select class="form-select" name="quality">
+                            <option value="-6">-6 (非常负面)</option>
+                            <option value="-5">-5</option>
+                            <option value="-4">-4</option>
+                            <option value="-3">-3</option>
+                            <option value="-2">-2</option>
+                            <option value="-1">-1</option>
+                            <option value="0" selected>0 (中性)</option>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                            <option value="5">5</option>
+                            <option value="6">6</option>
+                            <option value="7">7</option>
+                            <option value="8">8</option>
+                            <option value="9">9</option>
+                            <option value="10">10 (非常正面)</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">作者 (可选)</label>
+                        <input type="text" class="form-control" name="author" placeholder="留空则使用Group的作者">
+                    </div>
+                    <div class="col-md-6">
+                        <label class="form-label">强制固定</label>
+                        <div class="form-check mt-2">
+                            <input class="form-check-input" type="checkbox" name="forceFixed">
+                            <label class="form-check-label">强制固定此Modifier</label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 应用目标 -->
+                <div class="mt-4">
+                    <label class="form-label">应用到:</label>
+                    <div class="row">
+                        <div class="col-md-3 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="applyOnGuns">
+                                <label class="form-check-label">枪械</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="applyOnMelee">
+                                <label class="form-check-label">近战武器</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="applyOnEquipment">
+                                <label class="form-check-label">装备</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="applyOnHelmet">
+                                <label class="form-check-label">头盔</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="applyOnArmor">
+                                <label class="form-check-label">护甲</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="applyOnFaceMask">
+                                <label class="form-check-label">面罩</label>
+                            </div>
+                        </div>
+                        <div class="col-md-3 col-6">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" name="applyOnBackpack">
+                                <label class="form-check-label">背包</label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Data字段 -->
+                <div class="mt-4">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label class="form-label mb-0">Data字段 (Key-Value对)</label>
+                        <button type="button" class="btn btn-sm btn-outline-primary add-data-field">
+                            <i class="bi bi-plus-circle me-1"></i> 添加字段
+                        </button>
+                    </div>
+                    <div class="data-fields">
+                        <!-- Data字段将动态添加到这里 -->
+                        <div class="data-field-item row g-2 mb-2">
+                            <div class="col-md-5">
+                                <select class="form-select data-key">
+                                    <option value="">选择键...</option>
+
+                                    <option value="DamageMultiplier">伤害倍率</option>
+                                    <option value="BulletSpeedMultiplier">弹速倍率</option>
+                                    <option value="ShootDistanceMultiplier">射程/攻击距离倍率</option>
+                                    <option value="ShootSpeedMultiplier">射速/挥舞速度倍率</option>
+                                    <option value="CritDamageMultiplier">暴伤加成</option>
+                                    <option value="ArmorPiercing">穿甲</option>
+                                    <option value="Penetrate">穿透</option>
+                                    <option value="SoundRange">声音范围</option>
+                                    <option value="ReloadTimeMultiplier">换弹时间</option>
+                                    <option value="ScatterMultiplier">瞄准精度</option>
+                                    <option value="ScatterADSMultiplier">腰射精度</option>
+                                    <option value="RecoilVMultiplier">垂直后坐力</option>
+                                    <option value="RecoilHMultiplier">水平后坐力</option>
+                                    <option value="Armor">护甲加成</option>
+                                    <option value="ViewAngle">视野范围</option>
+                                    <option value="GasMask">毒气防护</option>
+                                    <option value="InventoryCapacity">背包容量</option>
+                                    <option value="MaxWeight">负重</option>
+                                    <option value="Moveability">移动能力(移动速度系数)</option>
+
+                                    <option value="BleedChance">流血概率</option>
+                                    <option value="Weight">重量修正</option>
+                                    <option value="AmmoSave">弹药节省率</option>
+                                    <option value="PriceMultiplier">价格倍率</option>
+
+                                    <option value="ElementFire">火元素加成</option>
+                                    <option value="ElementSpace">空间元素加成</option>
+                                    <option value="ElementPoison">毒元素加成</option>
+                                    <option value="ElementElectricity">电元素加成</option>
+                                    <option value="ElementGhost">灵元素加成</option>
+
+
+                                    <option value="StaminaCost">耐力消耗</option>
+                                    <option value="MaxStamina">耐力上限</option>
+                                    <option value="CritRate">暴击率</option>
+                                    <option value="custom">自定义...</option>
+                                </select>
+                            </div>
+                            <div class="col-md-5">
+                                <input type="number" class="form-control data-value" step="0.01" placeholder="数值" value="1.0">
+                            </div>
+                            <div class="col-md-2">
+                                <button type="button" class="btn btn-sm btn-outline-danger w-100 remove-data-field">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-text">Data字段的键必须是有效的选择，值可以是浮点数。</div>
+                </div>
+            </div>
+        </div>
+    </template>
+
+    <!-- Bootstrap JS Bundle with Popper -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
+    <!-- 自定义JS -->
+    <script src="js/main.js"></script>
+</body>
+</html>

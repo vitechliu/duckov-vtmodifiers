@@ -356,7 +356,7 @@ public class VTModifiersCoreV2 {
     }
     
     
-    public const string VtmDamage = "Damage"; //伤害修正
+    // public const string VtmDamage = "Damage"; //伤害修正
     public const string VtmDamageMultiplier = "DamageMultiplier"; //乘算的
 
     public const string VtmBulletSpeedMultiplier = "BulletSpeedMultiplier";
@@ -385,7 +385,7 @@ public class VTModifiersCoreV2 {
 
     public const string VtmBleedChance = "BleedChance"; //流血几率
     public const string VtmWeight = "Weight";
-    public const string VtmAmmoSave = "AmmoSave"; //暂未实装
+    public const string VtmAmmoSave = "AmmoSave";
     public const string VtmPriceMultiplier = "PriceMultiplier";
 
     //元素

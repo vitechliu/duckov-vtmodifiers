@@ -1,0 +1,769 @@
+{
+  "author": "Official",
+  "version": "0.5.1",
+  "isCommunity": false,
+  "key": "default051",
+  "modifiers": {
+    "Debug": {
+      "key": "Debug",
+      "weight": 0,
+      "quality": 0,
+      "forceFixed": true,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Moveability": 5
+      }
+    },
+    "Open": {
+      "key": "Open",
+      "weight": 200,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": true,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.1,
+        "ViewAngle": 0.4
+      }
+    },
+    "Hard": {
+      "key": "Hard",
+      "weight": 300,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.1,
+        "Armor": 0.5
+      }
+    },
+    "Armored": {
+      "key": "Armored",
+      "weight": 150,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": 0.5,
+        "PriceMultiplier": 0.6,
+        "Armor": 1.0
+      }
+    },
+    "Warding": {
+      "key": "Warding",
+      "weight": 30,
+      "quality": 4,
+      "forceFixed": true,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": 1.0,
+        "PriceMultiplier": 3.0,
+        "Armor": 2.0
+      }
+    },
+    "Sharp": {
+      "key": "Sharp",
+      "weight": 150,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": -0.2,
+        "PriceMultiplier": 0.8,
+        "DamageMultiplier": 0.2,
+        "CritRate": 0.6
+      }
+    },
+    "Blunt": {
+      "key": "Blunt",
+      "weight": 70,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": 0.6,
+        "PriceMultiplier": 0.5,
+        "DamageMultiplier": 0.6,
+        "CritRate": -0.1
+      }
+    },
+    "40m": {
+      "key": "40m",
+      "weight": 50,
+      "quality": 5,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": 0.5,
+        "PriceMultiplier": 2,
+        "ShootDistanceMultiplier": 4.0
+      }
+    },
+    "Huge": {
+      "key": "Huge",
+      "weight": 80,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": true,
+      "data": {
+        "PriceMultiplier": 1.0,
+        "InventoryCapacity": 12.0,
+        "MaxWeight": 5.0
+      }
+    },
+    "Compressed": {
+      "key": "Compressed",
+      "weight": 50,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": true,
+      "data": {
+        "PriceMultiplier": 0.3,
+        "Armor": 1.5,
+        "InventoryCapacity": -4.0
+      }
+    },
+    "Expanded": {
+      "key": "Expanded",
+      "weight": 150,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": true,
+      "data": {
+        "PriceMultiplier": 0.4,
+        "InventoryCapacity": 5.0,
+        "MaxWeight": 3.0
+      }
+    },
+    "High-Capacity": {
+      "key": "High-Capacity",
+      "weight": 100,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": true,
+      "data": {
+        "PriceMultiplier": 0.9,
+        "InventoryCapacity": 17.0
+      }
+    },
+    "Legendary": {
+      "key": "Legendary",
+      "weight": 20,
+      "quality": 6,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": -0.3,
+        "PriceMultiplier": 4.0,
+        "DamageMultiplier": 0.5,
+        "ShootSpeedMultiplier": 0.2,
+        "ShootDistanceMultiplier": 0.3,
+        "Armor": 1.5,
+        "InventoryCapacity": 5.0,
+        "MaxWeight": 3.0,
+        "StaminaCost": -0.4
+      }
+    },
+    "High-Tech": {
+      "key": "High-Tech",
+      "weight": 70,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": -0.5,
+        "PriceMultiplier": 3.0,
+        "ShootSpeedMultiplier": 0.4,
+        "Armor": 1.2,
+        "ViewAngle": 0.2,
+        "StaminaCost": -0.2
+      }
+    },
+    "Light": {
+      "key": "Light",
+      "weight": 300,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": -0.7,
+        "PriceMultiplier": 0.4,
+        "DamageMultiplier": -0.05,
+        "ReloadTimeMultiplier": -0.2,
+        "Armor": -0.1,
+        "Moveability": 0.15,
+        "StaminaCost": -0.6
+      }
+    },
+    "Heavy": {
+      "key": "Heavy",
+      "weight": 300,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": 0.3,
+        "PriceMultiplier": 0.4,
+        "DamageMultiplier": 0.35,
+        "RecoilVMultiplier": -0.1,
+        "RecoilHMultiplier": 0.15,
+        "Armor": 2.5,
+        "Moveability": -0.05,
+        "StaminaCost": 0.2
+      }
+    },
+    "Fast": {
+      "key": "Fast",
+      "weight": 150,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.2,
+        "ShootSpeedMultiplier": 0.2,
+        "ReloadTimeMultiplier": -0.3,
+        "Moveability": 0.1,
+        "StaminaCost": -0.2
+      }
+    },
+    "WithElectricity": {
+      "key": "WithElectricity",
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "ElementElectricity": 0.5
+      }
+    },
+    "WithFire": {
+      "key": "WithFire",
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "ElementFire": 0.5
+      }
+    },
+    "WithSpace": {
+      "key": "WithSpace",
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "ElementSpace": 0.5
+      }
+    },
+    "WithPoison": {
+      "key": "WithPoison",
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "ElementPoison": 0.5
+      }
+    },
+    "Chaos": {
+      "key": "Chaos",
+      "weight": 50,
+      "quality": 5,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.8,
+        "ElementFire": 0.2,
+        "ElementSpace": 0.2,
+        "ElementPoison": 0.2,
+        "ElementElectricity": 0.2
+      }
+    },
+    "Apollyon": {
+      "key": "Apollyon",
+      "weight": 10,
+      "quality": 2,
+      "forceFixed": true,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.2,
+        "BulletSpeedMultiplier": 2.0
+      }
+    },
+    "Broken": {
+      "key": "Broken",
+      "weight": 200,
+      "quality": -2,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": -0.5,
+        "DamageMultiplier": -0.2,
+        "ShootDistanceMultiplier": -0.2
+      }
+    },
+    "Unreal": {
+      "key": "Unreal",
+      "weight": 100,
+      "quality": 5,
+      "forceFixed": true,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 2.0985,
+        "DamageMultiplier": 0.15,
+        "ShootSpeedMultiplier": 0.1,
+        "BulletSpeedMultiplier": 0.1,
+        "CritDamageMultiplier": 0.15
+      }
+    },
+    "Sighted": {
+      "key": "Sighted",
+      "weight": 300,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.2,
+        "RecoilHMultiplier": -0.2,
+        "ScatterADSMultiplier": -0.2
+      }
+    },
+    "Deadly": {
+      "key": "Deadly",
+      "weight": 200,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.6,
+        "DamageMultiplier": 0.25,
+        "CritDamageMultiplier": 0.25
+      }
+    },
+    "Eagle-Eye": {
+      "key": "Eagle-Eye",
+      "weight": 100,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.2,
+        "DamageMultiplier": 0.1,
+        "ShootDistanceMultiplier": 0.3
+      }
+    },
+    "Silver": {
+      "key": "Silver",
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "DamageMultiplier": 0.05,
+        "BleedChance": 0.2,
+        "ElementPoison": 0.1
+      }
+    },
+    "Penetrating": {
+      "key": "Penetrating",
+      "weight": 150,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "ArmorPiercing": 1.0,
+        "Penetrate": 1.0
+      }
+    },
+    "Heartbroken": {
+      "key": "Heartbroken",
+      "weight": 100,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.8,
+        "DamageMultiplier": 0.2,
+        "ArmorPiercing": 3.0
+      }
+    },
+    "Thrifty": {
+      "key": "Thrifty",
+      "weight": 100,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.3,
+        "AmmoSave": 0.3
+      }
+    },
+    "Alienated": {
+      "key": "Alienated",
+      "weight": 50,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.1,
+        "ShootSpeedMultiplier": 0.4,
+        "CritDamageMultiplier": -0.1,
+        "ElementPoison": 0.3
+      }
+    },
+    "Scalding": {
+      "key": "Scalding",
+      "weight": 50,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": 0.4,
+        "PriceMultiplier": 0.1,
+        "DamageMultiplier": 0.2,
+        "ShootSpeedMultiplier": -0.2,
+        "ElementFire": 0.4
+      }
+    },
+    "Gauss": {
+      "key": "Gauss",
+      "weight": 50,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.7,
+        "Penetrate": 3.0,
+        "ShootSpeedMultiplier": 0.1,
+        "ElementElectricity": 0.4
+      }
+    },
+    "Concentrated": {
+      "key": "Concentrated",
+      "weight": 200,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.3,
+        "ShootSpeedMultiplier": 0.2,
+        "RecoilHMultiplier": -0.5
+      }
+    },
+    "Portable": {
+      "key": "Portable",
+      "weight": 300,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.1,
+        "Moveability": 0.05,
+        "ScatterMultiplier": -0.4,
+        "ScatterADSMultiplier": 0.2
+      }
+    },
+    "Brutal": {
+      "key": "Brutal",
+      "weight": 300,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.2,
+        "DamageMultiplier": 0.4,
+        "ShootSpeedMultiplier": -0.2,
+        "BleedChance": 0.3
+      }
+    },
+    "Cheap": {
+      "key": "Cheap",
+      "weight": 150,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "Weight": -0.5,
+        "PriceMultiplier": -0.2,
+        "DamageMultiplier": -0.1,
+        "AmmoSave": 0.7
+      }
+    },
+    "Silent": {
+      "key": "Silent",
+      "weight": 200,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.1,
+        "ShootDistanceMultiplier": -0.1,
+        "SoundRange": -0.8
+      }
+    },
+    "Violent": {
+      "key": "Violent",
+      "weight": 200,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.2,
+        "DamageMultiplier": 0.35,
+        "SoundRange": 0.8
+      }
+    }
+  }
+}
