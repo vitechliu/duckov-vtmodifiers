@@ -714,7 +714,17 @@ public class VTModifiersCoreV2 {
     // }
     
     
-    
+    public struct VTModifierGroup {
+        public string key;
+        public string author = "Official";
+        public string version = "0.0.1"; 
+        public bool isCommunity = false; 
+        public Dictionary<string, VtModifierV2> modifiers = new();
+
+        public VTModifierGroup(string key) {
+            this.key = key;
+        }
+    }
     public struct VtModifierV2 {
         public string key;
         public string? author = null; //作者名
@@ -722,29 +732,20 @@ public class VTModifiersCoreV2 {
         public int quality = 1; //等级从-6到10 0代表不强不弱 负的代表负面的
         public bool forceFixed = false;
 
-        public bool applyOnGuns = false; //如果该项为true,则所有gun都会满足
-        public bool applyOnMelee = false; //近战
-        public bool applyOnEquipment = false; //如果该项为true,所有其他护甲（面罩背包图腾）都会满足
+        public bool applyOnGuns = false; 
+        public bool applyOnMelee = false; 
+        public bool applyOnEquipment = false; 
         public bool applyOnHelmet = false;
         public bool applyOnArmor = false;
         public bool applyOnFaceMask = false;
         public bool applyOnBackpack = false;
         
+        //核心数据，需要注意，这里面的键不能手动输入，而是一个固定的select
         public Dictionary<string, float> data = new();
 
         public VtModifierV2(string key) {
             this.key = key;
         }
     }
-    public struct VTModifierGroup {
-        public string author = "Official";
-        public string version = "0.0.1";
-        public bool isCommunity = false;
-        public string key;
-        public Dictionary<string, VtModifierV2> modifiers = new();
-
-        public VTModifierGroup(string key) {
-            this.key = key;
-        }
-    }
+    
 }
