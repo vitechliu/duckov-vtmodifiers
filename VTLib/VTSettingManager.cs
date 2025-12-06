@@ -1,4 +1,6 @@
 using Newtonsoft.Json;
+using UnityEngine;
+
 namespace VTModifiers.VTLib;
 
 public static class VTSettingManager {
@@ -81,7 +83,7 @@ public static class VTSettingManager {
         public bool EnableCommunityModifiers = true; //是否支持社区词缀
         public bool EnableArcaneModifiers = true; //是否支持秘法纪元词缀
 
-
+        public KeyCode ReforgeKey = KeyCode.Keypad9;
         public VtModifierSetting() { }
     }
 }

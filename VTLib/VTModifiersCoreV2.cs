@@ -5,6 +5,7 @@ using ItemStatsSystem.Stats;
 using Newtonsoft.Json;
 using SodaCraft.Localizations;
 using UnityEngine;
+using VTModifiers.ThirdParty;
 using Random = UnityEngine.Random;
 
 // ReSharper disable All
@@ -36,6 +37,7 @@ public class VTModifiersCoreV2 {
 
     public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
     public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
+    public static readonly string VariableVtModifierDisplayHashCode = "Top1_词缀";
     public static Dictionary<string, VtModifierV2> ModifierData = new();
 
     public static void PatchItemDisplayInfo(Item item, string modifier) {
@@ -112,7 +114,9 @@ public class VTModifiersCoreV2 {
         Dictionary<string, VtModifierV2> filtered = new();
         foreach (VTModifierGroup group in ModifierGroups) {
             if (group.isCommunity && !VTSettingManager.Setting.EnableCommunityModifiers) continue;
-            if (group.key == "vt_magic" && !VTSettingManager.Setting.EnableArcaneModifiers) continue;
+            if (group.key == "vt_magic" && (
+                !VTSettingManager.Setting.EnableArcaneModifiers || !MagicConnector.Connected
+            )) continue;
             foreach (VtModifierV2 vtm in group.modifiers.Values) {
                 if (
                     (item.Tags.Contains(ItemTagGun) && vtm.applyOnGuns)
@@ -168,10 +172,9 @@ public class VTModifiersCoreV2 {
         if (modifier == null) return;
         CustomDataCollection variables = Traverse.Create(item).Field("variables").GetValue<CustomDataCollection>();
         if (variables != null) {
-            CustomData cd = variables.GetEntry(VariableVtModifierHashCode);
-            if (cd != null) variables.Remove(cd);
-            CustomData seedCd = variables.GetEntry(VariableVtModifierSeedHashCode);
-            if (seedCd != null) variables.Remove(seedCd);
+            VT.RemoveItemVariable(variables, VariableVtModifierHashCode);
+            VT.RemoveItemVariable(variables, VariableVtModifierSeedHashCode);
+            VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCode);
         }
 
         int removedModifiersCount = 0;
@@ -237,7 +240,6 @@ public class VTModifiersCoreV2 {
             string modifierDisplayText = modifier.ToPlainText();
             return modifierDisplayText + " " + before;
         }
-
         return before;
     }
     public enum Sources {
@@ -414,6 +416,13 @@ public class VTModifiersCoreV2 {
     public const string VtmElementElectricity = "ElementElectricity";
     public const string VtmElementGhost = "ElementGhost";
     public const string VtmPhysicFactor = "ElementPhysic"; //物理承伤倍率
+    
+    //秘法
+    public const string VtmMagicPower = "MagicPower";
+    public const string VtmMaxMana = "MaxMana";
+    public const string VtmManaCost = "ManaCost";
+    public const string VtmCastTime = "CastTime";
+    public const string VtmMagicCritRate = "MagicCritRate";
 
     //近战
     public const string VtmStaminaCost = "StaminaCost";
@@ -510,6 +519,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementElectricity, "VTMC_" + VtmElementElectricity) {
             applyOnGuns = true, 
+            applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Electricity",
             modifierTypeCustom = ModifierType.Add,
@@ -517,6 +527,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementGhost, "VTMC_" + VtmElementGhost) {
             applyOnGuns = true, 
+            applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Ghost",
             modifierTypeCustom = ModifierType.Add,
@@ -524,6 +535,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementFire, "VTMC_" + VtmElementFire) {
             applyOnGuns = true, 
+            applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Fire",
             modifierTypeCustom = ModifierType.Add,
@@ -531,6 +543,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementSpace, "VTMC_" + VtmElementSpace) {
             applyOnGuns = true, 
+            applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Space",
             modifierTypeCustom = ModifierType.Add,
@@ -538,6 +551,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementPoison, "VTMC_" + VtmElementPoison) {
             applyOnGuns = true, 
+            applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Poison",
             modifierTypeCustom = ModifierType.Add,
@@ -595,6 +609,29 @@ public class VTModifiersCoreV2 {
             applyOnMelee = true,
             modifierType = ModifierType.Add,
             isCustom = true,
+        });
+        
+        //秘法
+        AddKey(new VtMKey(VtmMagicPower, CharacterMagicStats.MagicPower) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
+        });
+        AddKey(new VtMKey(VtmMagicCritRate, CharacterMagicStats.MagicCritRate) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
+        });
+        AddKey(new VtMKey(VtmMaxMana, CharacterMagicStats.MaxMana) {
+            applyOnEquipments = true,
+            roundToInt = true,
+            modifierType = ModifierType.Add,
+        });
+        AddKey(new VtMKey(VtmCastTime, CharacterMagicStats.CastTime) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
+        });
+        AddKey(new VtMKey(VtmManaCost, CharacterMagicStats.ManaCost) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
         });
         
         void AddKey(VtMKey key) {

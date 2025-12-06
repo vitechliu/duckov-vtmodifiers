@@ -37,6 +37,15 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     private Harmony _harmony;
 
+    private void Update() {
+        if (!_isInitialized) return;
+        if (Input.GetKeyDown(VTSettingManager.Setting.ReforgeKey)) {
+            if (LevelManager.Instance) {
+                if (LevelManager.Instance.IsBaseLevel) OnReforge();
+            }
+        }
+    }
+
     protected virtual void Awake() {
         if (_instance == null) {
             _instance = this;
@@ -477,14 +486,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     }
 
     static void TryConnect() {
-        foreach (ModInfo mi in ModManager.modInfos) {
-            if (mi.name == MagicConnector.MOD_NAME) {
-                MagicConnector.TryConnect();
-            }
-            if (mi.name == DisplayConnector.MOD_NAME) {
-                DisplayConnector.TryConnect();
-            }
-        }
+        MagicConnector.TryConnect();
+        DisplayConnector.TryConnect();
     }
     private void ModManager_OnModActivated(ModInfo arg1, Duckov.Modding.ModBehaviour arg2) {
         if (arg1.name == MagicConnector.MOD_NAME) MagicConnector.TryConnect();
@@ -494,11 +497,12 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         ModSettingConnector.Init();
     }
     private void ModManager_OnModWillBeDeactivated(ModInfo arg1, Duckov.Modding.ModBehaviour arg2) {
+        LogStatic("ModWillBeDeactivated:" + arg1.name);
         if (arg1.name == MagicConnector.MOD_NAME) MagicConnector.OnDeactivated();
         if (arg1.name == DisplayConnector.MOD_NAME) DisplayConnector.OnDeactivated();
-        if (arg1.name != ModSettingAPI.MOD_NAME || !ModSettingAPI.Init(info)) return;
-        // //禁用ModSetting的时候移除监听
-        // Setting.OnSlider1ValueChanged -= Setting_OnSlider1ValueChanged;
+        // if (arg1.name != ModSettingAPI.MOD_NAME || !ModSettingAPI.Init(info)) return;
+        // // //禁用ModSetting的时候移除监听
+        // // Setting.OnSlider1ValueChanged -= Setting_OnSlider1ValueChanged;
     }
     void TryInitSetting() {
         if (!ModSettingAPI.IsInit) {

@@ -18,8 +18,8 @@
       "applyOnBackpack": false,
       "data": {
         "PriceMultiplier": 3,
-        "Moveability": 1.2,
-        "RunAcc": 0.6
+        "Moveability": 0.8,
+        "RunAcc": 0.4
       }
     },
     "WithGhost": {
@@ -37,6 +37,81 @@
       "data": {
         "PriceMultiplier": 0.5,
         "ElementGhost": 0.5
+      }
+    },
+    "Bloodthirsty": {
+      "key": "Bloodthirsty",
+      "author": null,
+      "weight": 100,
+      "quality": 5,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "LifeSteal": 0.1,
+        "PriceMultiplier": 1,
+        "CritDamageMultiplier": 0.2
+      }
+    },
+    "Unbreaking_3": {
+      "key": "Unbreaking_3",
+      "author": null,
+      "weight": 100,
+      "quality": 0,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": true,
+      "applyOnArmor": true,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.4,
+        "Endurance": 0.75
+      }
+    },
+    "Death": {
+      "key": "Death",
+      "author": null,
+      "weight": 20,
+      "quality": 5,
+      "forceFixed": true,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "DeathRate": 0.01,
+        "PriceMultiplier": 2,
+        "ScatterADSMultiplier": -0.5
+      }
+    },
+    "Invisible": {
+      "key": "Invisible",
+      "author": null,
+      "weight": 50,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": true,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 1,
+        "DodgeRate": 0.2,
+        "ElementGhost": 0.4
       }
     }
   }

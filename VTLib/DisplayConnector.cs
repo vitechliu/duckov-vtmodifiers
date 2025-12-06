@@ -9,8 +9,10 @@ public class DisplayConnector: Connector {
     public const string MOD_NAME = "CustomItemLevelValue";
     public static void TryConnect() {
         if (Connected) return;
-        Connected = true;
-        ModBehaviour.LogStatic("成功连接到[更丰富的信息显示]...");
+        if (AssemblyHelper.IsAssemblyLoaded("CustomItemLevelValue.Core")) {
+            Connected = true;
+            ModBehaviour.LogStatic("成功连接到[更丰富的信息显示]...");
+        }
     }
     public static void OnDeactivated() {
         ModBehaviour.LogStatic("[更丰富的信息显示]已卸载");
@@ -18,6 +20,6 @@ public class DisplayConnector: Connector {
     }
     public static void PatchItem(Item item, string modifier) {
         //能走到这里，说明modifier一定能找到
-        item.SetString("Top1_词缀", modifier.ToPlainText());
+        item.SetString(VTModifiersCoreV2.VariableVtModifierDisplayHashCode, modifier.ToPlainText());
     }
 }

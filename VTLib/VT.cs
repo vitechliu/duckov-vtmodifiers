@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Reflection;
 using Duckov;
 using Duckov.UI;
 using Duckov.UI.DialogueBubbles;
@@ -19,9 +20,15 @@ public static class VT {
     //         
     //     }
     // }
-
     public static bool Probability(float probability) {
         return UnityEngine.Random.value < probability;
+    }
+
+    public static bool RemoveItemVariable(CustomDataCollection variables, string variableKey) {
+        CustomData cd = variables.GetEntry(variableKey);
+        if (cd == null) return false;
+        variables.Remove(cd);
+        return true;
     }
     
     public static void Log(string message, bool isError = false) {

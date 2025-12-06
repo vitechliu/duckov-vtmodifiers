@@ -1,0 +1,82 @@
+{
+  "key": "vt_magic",
+  "author": "Official",
+  "version": "0.6.0",
+  "isCommunity": false,
+  "modifiers": {
+    "Magic": {
+      "key": "Magic",
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.9,
+        "MagicPower": 0.5
+      }
+    },
+    "Rich-Magic": {
+      "key": "Rich-Magic",
+      "weight": 150,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.6,
+        "ManaCost": -0.15,
+        "MaxMana": 15
+      }
+    },
+    "Wizard": {
+      "key": "Wizard",
+      "weight": 80,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.6,
+        "MagicCritRate": 0.15,
+        "CastTime": -0.15
+      }
+    },
+    "Fiend": {
+      "key": "Fiend",
+      "weight": 40,
+      "quality": 5,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 2,
+        "MagicPower": 0.5,
+        "MaxMana": 30,
+        "MagicCritRate": 0.2,
+        "CastTime": -0.5,
+        "Armor": -1
+      }
+    }
+  }
+}

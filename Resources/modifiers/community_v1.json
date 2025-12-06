@@ -1,9 +1,175 @@
 {
-  "author": "Community",
+  "key": "community_v1",
+  "author": "community",
   "version": "0.6.0",
   "isCommunity": true,
-  "key": "community_v1",
   "modifiers": {
-   
+    "Carnivore": {
+      "key": "Carnivore",
+      "author": "bbs",
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": true,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "ArmorPiercing": -2,
+        "DamageMultiplier": 0.7,
+        "BleedChance": 1,
+        "PriceMultiplier": 0.9
+      }
+    },
+    "Transfinite": {
+      "key": "Transfinite",
+      "author": "特蕾西娅天下第一！",
+      "weight": 100,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "ShootSpeedMultiplier": 1,
+        "DamageMultiplier": -0.25,
+        "ElementElectricity": 0.2,
+        "CritDamageMultiplier": -0.1,
+        "PriceMultiplier": 0.6
+      }
+    },
+    "halfgod": {
+      "key": "HalfGod",
+      "author": "朔曦",
+      "weight": 100,
+      "quality": 5,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "ShootSpeedMultiplier": 0.5,
+        "BulletSpeedMultiplier": 2,
+        "AmmoSave": 0.5,
+        "PriceMultiplier": 1.8
+      }
+    },
+    "BlackHole": {
+      "key": "BlackHole",
+      "author": "特蕾西娅天下第一！",
+      "weight": 50,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": true,
+      "data": {
+        "InventoryCapacity": 60,
+        "Weight": 1,
+        "Moveability": -0.2,
+        "ElementSpace": -0.5,
+        "PriceMultiplier": 1
+      }
+    },
+    "Bowel": {
+      "key": "Bowel",
+      "author": "bbs",
+      "weight": 150,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "ShootSpeedMultiplier": -0.5,
+        "DamageMultiplier": 0.8,
+        "ShootDistanceMultiplier": -0.3,
+        "PriceMultiplier": 0.7
+      }
+    },
+    "Auxiliary": {
+      "key": "Auxiliary",
+      "author": null,
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": true,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "MaxStamina": 0.3,
+        "Armor": -1.5,
+        "Moveability": 0.09,
+        "MaxWeight": 10,
+        "InventoryCapacity": 3,
+        "PriceMultiplier": 1
+      }
+    },
+    "All-In-All": {
+      "key": "All-In-All",
+      "author": null,
+      "weight": 40,
+      "quality": 6,
+      "forceFixed": true,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "ElementFire": 0.2,
+        "ElementSpace": 0.2,
+        "ElementPoison": 0.2,
+        "ElementElectricity": 0.2,
+        "ElementGhost": 0.2,
+        "DamageMultiplier": 0.2,
+        "ShootSpeedMultiplier": 0.2,
+        "PriceMultiplier": 5
+      }
+    },
+    "Tempering": {
+      "key": "Tempering",
+      "author": null,
+      "weight": 100,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "ElementPhysic": 0.2,
+        "Armor": 1
+      }
+    }
   }
 }

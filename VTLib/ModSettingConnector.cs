@@ -85,6 +85,12 @@ public static class ModSettingConnector {
                 VTSettingManager.Setting.EnableArcaneModifiers = b;
                 OnSettingChanged();
             });
+        
+        ModSettingAPI.AddKeybinding("ReforgeKey", "重铸快捷键", VTSettingManager.Setting.ReforgeKey, 
+            b => {
+                VTSettingManager.Setting.ReforgeKey = b;
+                OnSettingChanged();
+            });
     }
     public static void InitSCAV() {
         bool success = ModSettingAPI.Init(ModBehaviour.Instance.info);

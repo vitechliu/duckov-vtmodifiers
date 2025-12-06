@@ -56,7 +56,27 @@
     "40m": "40米的",
     "Broken": "破损",
     "Debug": "测试",
+    
     "Feathering": "羽化",
+    "Bloodthirsty": "嗜血",
+    "Unbreaking_3": "耐久III",
+    "Death": "死神",
+    "Invisible": "隐形",
+    
+    "Carnivore": "食肉",
+    "Transfinite": "超限",
+    "HalfGod": "伪神",
+    "BlackHole": "黑洞",
+    "Bowel": "开膛",
+    "Auxiliary": "辅助",
+    "All-In-All": "请输入文本",
+    "Tempering": "钢化",
+    
+    "Magic": "魔力",
+    "Rich-Magic": "蕴魔",
+    "Wizard": "巫术",
+    "Fiend": "魔神",
+    
     "VTMC_FIX": "修正",
     "VTMC_Dodged": "Miss!",
     "Tag_vttag": "词缀",

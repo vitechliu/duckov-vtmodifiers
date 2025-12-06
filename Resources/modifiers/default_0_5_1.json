@@ -222,7 +222,7 @@
     },
     "Legendary": {
       "key": "Legendary",
-      "weight": 20,
+      "weight": 40,
       "quality": 6,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -238,6 +238,7 @@
         "DamageMultiplier": 0.5,
         "ShootSpeedMultiplier": 0.2,
         "ShootDistanceMultiplier": 0.3,
+        "Moveability": 0.4,
         "Armor": 1.5,
         "InventoryCapacity": 5.0,
         "MaxWeight": 3.0,
@@ -420,7 +421,7 @@
     },
     "Apollyon": {
       "key": "Apollyon",
-      "weight": 10,
+      "weight": 20,
       "quality": 2,
       "forceFixed": true,
       "applyOnGuns": true,
