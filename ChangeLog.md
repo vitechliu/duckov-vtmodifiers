@@ -1,10 +1,11 @@
 ### 0.6.0
 - 重构词缀系统，优化体验，加入了吸血、即死、闪避、耐久等新机制
-- 加入了7个新的词缀和8个社区词缀
-- 支持自定义词缀/词缀组，配置文件在创意工坊mod目录/resource/modifiers 下
+- 加入了7个新的词缀和8个社区词缀(由群友提供)，可在设置中关闭社区词缀
+- 现在支持自定义词缀/词缀组，配置文件在创意工坊mod目录/resource/modifiers 下
 - 支持自定义多语言，语言文件在/resource/lang 下
 - 现在兼容[更丰富的信息显示](https://steamcommunity.com/sharedfiles/filedetails/?id=3612733981)，可以展示词缀具体信息
-- 现在兼容[秘法纪元](https://steamcommunity.com/sharedfiles/filedetails/?id=3610458453)，加入一批法术专用词缀
+- 现在兼容[秘法纪元](https://steamcommunity.com/sharedfiles/filedetails/?id=3610458453)，加入4个法术专用词缀，可在设置中关闭
+- 现在支持快捷键自动重铸，**注意会重铸你当前左键点击选中的道具!**，可在设置中更改快捷键
 - 修复了对于武器元素伤害、流血等属性，不管展示数值多少，实际效果均为最大值的bug
 - 重构了移动能力相关词条，现在能更好的加快玩家速度了
 

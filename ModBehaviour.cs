@@ -41,7 +41,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         if (!_isInitialized) return;
         if (Input.GetKeyDown(VTSettingManager.Setting.ReforgeKey)) {
             if (LevelManager.Instance) {
-                if (LevelManager.Instance.IsBaseLevel) OnReforge();
+                if (LevelManager.Instance.IsBaseLevel) KeyReforge();
             }
         }
     }
@@ -272,7 +272,23 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    
+
+    public static void KeyReforge() {
+        Item targetItem = ItemUIUtilities.SelectedItem;
+        ItemDisplay display = ItemUIUtilities.SelectedItemDisplay;
+
+        if (!targetItem || !display) {
+            VT.BubbleUserDebug("VTMC_NO_ITEM_SELECT".ToPlainText(), false);
+            return;
+        }
+        VTModifiersCoreV2.TryUnpatchItem(targetItem);
+        VTModifiersCoreV2.PatchItem(targetItem, VTModifiersCoreV2.Sources.Reforge);
+        VT.PostCustomSFX("Terraria_reforging.wav");
+        VT.BubbleUserDebug("Bubble_reforge_success".ToPlainText(), false);
+
+        //更新仓库里面的名称
+        VT.ForceUpdateItemDisplayName(display);
+    }
     
     public static void OnReforge() {
         ItemOperationMenu __instance = ItemOperationMenu.Instance;

@@ -79,6 +79,7 @@
     
     "VTMC_FIX": "修正",
     "VTMC_Dodged": "Miss!",
+    "VTMC_NO_ITEM_SELECT": "未选中道具，无法重铸!",
     "Tag_vttag": "词缀",
     "Btn_reforge": "重铸",
     "Btn_forge": "词缀附加",

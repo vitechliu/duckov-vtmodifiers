@@ -210,7 +210,7 @@ public class VTModifiersUI : MonoBehaviour {
                     VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Debug);
                 }
                 else {
-                    VT.BubbleUserDebug("未选中道具");
+                    VT.BubbleUserDebug("VTMC_NO_ITEM_SELECT".ToPlainText());
                 }
             }
             if (GUILayout.Button("-词缀", GUILayout.Width(80))) {
@@ -219,7 +219,7 @@ public class VTModifiersUI : MonoBehaviour {
                     VTModifiersCoreV2.TryUnpatchItem(item);
                 }
                 else {
-                    VT.BubbleUserDebug("未选中道具");
+                    VT.BubbleUserDebug("VTMC_NO_ITEM_SELECT".ToPlainText());
                 }
             }
             GUILayout.EndHorizontal();
