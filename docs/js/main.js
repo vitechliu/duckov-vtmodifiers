@@ -135,6 +135,8 @@ async function loadJsonFileList() {
         const exampleFiles = [
             "default_0_5_1.json",
             "default_0_6_0.json",
+            "community_v1.json",
+            "vt_magic.json",
         ];
         
         // 模拟网络延迟
