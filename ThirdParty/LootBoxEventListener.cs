@@ -65,7 +65,7 @@ namespace VTModifiers.ThirdParty {
 
                 ModBehaviour.LogStatic("检测到用户安装SCAV mod, 联动订阅");
                 VTSettingManager._scavLoaded = true;
-                VTModSettingConnector.InitSCAV();
+                ModSettingConnector.InitSCAV();
             }
             catch (Exception ex) {
                 ModBehaviour.LogStatic($"订阅战利品箱修改事件失败: {ex.Message}");

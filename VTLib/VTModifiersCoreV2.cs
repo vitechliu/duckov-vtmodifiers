@@ -38,6 +38,10 @@ public class VTModifiersCoreV2 {
     public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
     public static Dictionary<string, VtModifierV2> ModifierData = new();
 
+    public static void PatchItemDisplayInfo(Item item, string modifier) {
+        if (!DisplayConnector.Connected) return;
+        DisplayConnector.PatchItem(item, modifier);
+    }
     public static void CalcItemModifiers(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier == null) return;
@@ -64,8 +68,8 @@ public class VTModifiersCoreV2 {
             if (flag) {
                 item.Modifiers.ReapplyModifiers();
             }
-
             Random.state = originalState;
+            PatchItemDisplayInfo(item, modifier);
         }
         else {
             Log($"找不到modifier:{modifier}");
@@ -77,6 +81,8 @@ public class VTModifiersCoreV2 {
     public static void LoadFromConfig() {
         ModifierData.Clear();
         ModifierGroups.Clear();
+        VTModifiersUI.modifiers.Clear();
+        
         string directoryPath = Path.Combine(ModBehaviour.Instance._resourceDirectory, "modifiers");
         string[] jsonFiles = Directory.GetFiles(directoryPath, "*.json");
         int loadedCount = 0;
@@ -92,6 +98,7 @@ public class VTModifiersCoreV2 {
                         continue;
                     }
                     ModifierData[vtModifier.key] = vtModifier;
+                    VTModifiersUI.modifiers.Add(vtModifier.key);
                     loadedCount++;
                 }
             }
@@ -105,6 +112,7 @@ public class VTModifiersCoreV2 {
         Dictionary<string, VtModifierV2> filtered = new();
         foreach (VTModifierGroup group in ModifierGroups) {
             if (group.isCommunity && !VTSettingManager.Setting.EnableCommunityModifiers) continue;
+            if (group.key == "vt_magic" && !VTSettingManager.Setting.EnableArcaneModifiers) continue;
             foreach (VtModifierV2 vtm in group.modifiers.Values) {
                 if (
                     (item.Tags.Contains(ItemTagGun) && vtm.applyOnGuns)
@@ -266,10 +274,12 @@ public class VTModifiersCoreV2 {
             if (!vtMKey.applyOnEquipments) return false;
             //元素类出现在护甲，正负逆转
             string[] elements = {
-                "ElementFire",
-                "ElementFire",
-                "ElementPoison",
-                "ElementSpace"
+                VtmElementFire,
+                VtmElementSpace,
+                VtmElementPoison,
+                VtmElementElectricity,
+                VtmElementGhost,
+                VtmPhysicFactor,
             };
             if (elements.Contains(key)) {
                 polarity = -1;
@@ -317,7 +327,7 @@ public class VTModifiersCoreV2 {
         }
         return null;
     }
-    public static float Modify(Item item, string key, float original) {
+    public static float Modify(Item item, string key, float original = 0f) {
         if (!item) return original;
         if (!keys.ContainsKey(key)) return original;
         VtMKey vtMKey = keys[key];
@@ -365,7 +375,7 @@ public class VTModifiersCoreV2 {
     public const string VtmCritDamageMultiplier = "CritDamageMultiplier"; //爆伤因子,乘算
     public const string VtmArmorPiercing = "ArmorPiercing"; //穿甲等级 实际用整数
     public const string VtmPenetrate = "Penetrate"; //穿透 实际证书
-    public const string VtmSoundRange = "SoundRange"; //声音
+    public const string VtmSoundRange = "SoundRange"; //声音，仅枪械
     public const string VtmReloadTimeMultiplier = "ReloadTimeMultiplier"; //换弹速度
     public const string VtmScatterMultiplier = "ScatterMultiplier";
     public const string VtmScatterADSAMultiplier = "ScatterADSMultiplier";
@@ -382,23 +392,36 @@ public class VTModifiersCoreV2 {
     public const string VtmInventoryCapacity = "InventoryCapacity";
     public const string VtmMaxWeight = "MaxWeight";
     public const string VtmMoveability = "Moveability";
-
+    public const string VtmRunAcc = "RunAcc";
+    public const string VtmSenseRange = "SenseRange";
+    public const string VtmWalkSoundRange = "WalkSoundRange"; 
+    public const string VtmRunSoundRange = "RunSoundRange"; 
+    
+    //特殊
     public const string VtmBleedChance = "BleedChance"; //流血几率
     public const string VtmWeight = "Weight";
     public const string VtmAmmoSave = "AmmoSave";
     public const string VtmPriceMultiplier = "PriceMultiplier";
+    public const string VtmLifeSteal = "LifeSteal";  
+    public const string VtmDodgeRate = "DodgeRate"; //闪避概率(护甲)
+    public const string VtmDeathRate = "DeathRate"; //即死(99999)
+    public const string VtmEndurance = "Endurance"; //概率不消耗耐久
 
     //元素
     public const string VtmElementFire = "ElementFire";
     public const string VtmElementSpace = "ElementSpace";
     public const string VtmElementPoison = "ElementPoison";
     public const string VtmElementElectricity = "ElementElectricity";
+    public const string VtmElementGhost = "ElementGhost";
+    public const string VtmPhysicFactor = "ElementPhysic"; //物理承伤倍率
 
     //近战
     public const string VtmStaminaCost = "StaminaCost";
     public const string VtmMaxStamina = "MaxStamina";
     public const string VtmCritRate = "CritRate"; //暴击率,枪械暂未使用，因为官方写死了爆头才算暴击
 
+    
+    
     public static void InitVtmKeys() {
         keys.Clear();
         AddKey(new VtMKey(VtmDamageMultiplier, nameof(ItemAgent_Gun.Damage)) {
@@ -434,7 +457,32 @@ public class VTModifiersCoreV2 {
             modifierType = ModifierType.Add,
             isCustom = true,
         });
-
+        AddKey(new VtMKey(VtmLifeSteal, "VTMC_" + VtmLifeSteal) {
+            applyOnGuns = true,
+            applyOnMelee = true,
+            modifierType = ModifierType.Add,
+            modifierTypeCustom = ModifierType.Add,
+            isCustom = true,
+        });
+        AddKey(new VtMKey(VtmEndurance, "VTMC_" + VtmEndurance) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
+            modifierTypeCustom = ModifierType.Add,
+            isCustom = true,
+        });
+        AddKey(new VtMKey(VtmDeathRate, "VTMC_" + VtmDeathRate) {
+            applyOnGuns = true,
+            applyOnMelee = true,
+            modifierType = ModifierType.Add,
+            modifierTypeCustom = ModifierType.Add,
+            isCustom = true,
+        });
+        AddKey(new VtMKey(VtmDodgeRate, "VTMC_" + VtmDodgeRate) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
+            modifierTypeCustom = ModifierType.Add,
+            isCustom = true,
+        });
         AddKey(new VtMKey(VtmArmorPiercing, nameof(ItemAgent_Gun.ArmorPiercing)) {
             applyOnGuns = true, 
             modifierType = ModifierType.Add,
@@ -467,6 +515,13 @@ public class VTModifiersCoreV2 {
             modifierTypeCustom = ModifierType.Add,
             isCustom = true,
         });
+        AddKey(new VtMKey(VtmElementGhost, "VTMC_" + VtmElementGhost) {
+            applyOnGuns = true, 
+            modifierType = ModifierType.Add,
+            hashForEquipments = "ElementFactor_Ghost",
+            modifierTypeCustom = ModifierType.Add,
+            isCustom = true,
+        });
         AddKey(new VtMKey(VtmElementFire, "VTMC_" + VtmElementFire) {
             applyOnGuns = true, 
             modifierType = ModifierType.Add,
@@ -488,7 +543,10 @@ public class VTModifiersCoreV2 {
             modifierTypeCustom = ModifierType.Add,
             isCustom = true,
         });
-        
+        AddKey(new VtMKey(VtmPhysicFactor, "ElementFactor_Physics") {
+            applyOnEquipments = true, 
+            modifierType = ModifierType.Add,
+        });
         
         AddKey(new VtMKey(VtmArmor, "Armor"){applyOnEquipments = true, modifierType = ModifierType.Add});
         AddKey(new VtMKey(VtmInventoryCapacity, "InventoryCapacity") {
@@ -505,7 +563,17 @@ public class VTModifiersCoreV2 {
             hashForEquipments = "Moveability",
             modifierType = ModifierType.Add
         });
+        AddKey(new VtMKey(VtmRunAcc, "RunAcc") {
+            applyOnGuns = true,
+            applyOnEquipments = true, 
+            applyOnMelee = true,
+            modifierType = ModifierType.PercentageAdd,
+            forceTarget = ModifierTarget.Character,
+        });
+        
         AddKey(new VtMKey(VtmViewAngle, "ViewAngle"){applyOnEquipments = true});
+        AddKey(new VtMKey(VtmWalkSoundRange, nameof (CharacterMainControl.WalkSoundRange)){applyOnEquipments = true});
+        AddKey(new VtMKey(VtmRunSoundRange, nameof (CharacterMainControl.RunSoundRange)){applyOnEquipments = true});
         AddKey(new VtMKey(VtmMaxStamina, "Stamina"){applyOnEquipments = true, modifierType = ModifierType.Add});
         
         AddKey(new VtMKey(VtmCritRate, nameof(ItemAgent_MeleeWeapon.CritRate)){applyOnMelee = true, modifierType = ModifierType.Add});
@@ -713,7 +781,17 @@ public class VTModifiersCoreV2 {
     // }
     
     
-    
+    public struct VTModifierGroup {
+        public string key;
+        public string author = "Official";
+        public string version = "0.0.1"; 
+        public bool isCommunity = false; 
+        public Dictionary<string, VtModifierV2> modifiers = new();
+
+        public VTModifierGroup(string key) {
+            this.key = key;
+        }
+    }
     public struct VtModifierV2 {
         public string key;
         public string? author = null; //作者名
@@ -721,29 +799,20 @@ public class VTModifiersCoreV2 {
         public int quality = 1; //等级从-6到10 0代表不强不弱 负的代表负面的
         public bool forceFixed = false;
 
-        public bool applyOnGuns = false; //如果该项为true,则所有gun都会满足
-        public bool applyOnMelee = false; //近战
-        public bool applyOnEquipment = false; //如果该项为true,所有其他护甲（面罩背包图腾）都会满足
+        public bool applyOnGuns = false; 
+        public bool applyOnMelee = false; 
+        public bool applyOnEquipment = false; 
         public bool applyOnHelmet = false;
         public bool applyOnArmor = false;
         public bool applyOnFaceMask = false;
         public bool applyOnBackpack = false;
         
+        //核心数据，需要注意，这里面的键不能手动输入，而是一个固定的select
         public Dictionary<string, float> data = new();
 
         public VtModifierV2(string key) {
             this.key = key;
         }
     }
-    public struct VTModifierGroup {
-        public string author = "Official";
-        public string version = "0.0.1";
-        public bool isCommunity = false;
-        public string key;
-        public Dictionary<string, VtModifierV2> modifiers = new();
-
-        public VTModifierGroup(string key) {
-            this.key = key;
-        }
-    }
+    
 }

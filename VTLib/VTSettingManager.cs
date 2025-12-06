@@ -1,17 +1,4 @@
-using System.Globalization;
-using Duckov;
-using Duckov.UI;
-using Duckov.UI.DialogueBubbles;
-using Duckov.Utilities;
-using HarmonyLib;
-using ItemStatsSystem;
 using Newtonsoft.Json;
-using TMPro;
-using UnityEngine;
-using UnityEngine.UI;
-using UnityEngine.UI.ProceduralImage;
-using Object = System.Object;
-
 namespace VTModifiers.VTLib;
 
 public static class VTSettingManager {
@@ -92,6 +79,7 @@ public static class VTSettingManager {
         public float SCAVPercentage = 0.75f; //SCAV
 
         public bool EnableCommunityModifiers = true; //是否支持社区词缀
+        public bool EnableArcaneModifiers = true; //是否支持秘法纪元词缀
 
 
         public VtModifierSetting() { }

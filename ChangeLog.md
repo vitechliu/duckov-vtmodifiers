@@ -1,7 +1,10 @@
-### 0.6.0
+### 1.0.0
 
-- 支持自定义多语言，现在语言文件在mod目录resource/lang下
-- 支持自定义词缀/词缀组，配置文件在mod目录resource/modifiers下
+- 重构词缀系统，优化体验，加入了部分新的稀有词缀
+- 支持自定义词缀/词缀组，配置文件在创意工坊mod目录/resource/modifiers 下
+- 支持自定义多语言，语言文件在/resource/lang 下
+- 现在兼容[更丰富的信息显示](https://steamcommunity.com/sharedfiles/filedetails/?id=3612733981)，可以展示词缀具体信息
+- 现在兼容[秘法纪元](https://steamcommunity.com/sharedfiles/filedetails/?id=3610458453)，加入一批法术专用词缀
 - 修复了对于武器元素伤害、流血等属性，不管展示数值多少，实际效果均为最大值的bug
 - 重构了移动能力相关词条，现在能更好的加快玩家速度了
 

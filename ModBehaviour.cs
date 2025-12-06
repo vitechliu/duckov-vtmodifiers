@@ -2,9 +2,11 @@ using ItemStatsSystem;
 using UnityEngine;
 using System.Reflection;
 using Duckov.Economy;
+using Duckov.Modding;
 using HarmonyLib;
 using Duckov.UI;
 using Duckov.Utilities;
+using FX;
 using ItemStatsSystem.Data;
 using ItemStatsSystem.Items;
 using SodaCraft.Localizations;
@@ -53,6 +55,11 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         try {
             Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
             if (!temp) return;
+            float instantDeathRate = VTModifiersCoreV2.Modify(__instance.Item,
+                VTModifiersCoreV2.VtmDeathRate);
+            if (VT.Probability(instantDeathRate)) {
+                temp.context.damage = 999999f;
+            }
             temp.context.element_Electricity = VTModifiersCoreV2.Modify(__instance.Item,
                 VTModifiersCoreV2.VtmElementElectricity, temp.context.element_Electricity);
             temp.context.element_Fire =
@@ -61,7 +68,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
                 temp.context.element_Poison);
             temp.context.element_Space = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementSpace,
                 temp.context.element_Space);
-        
+            temp.context.element_Ghost = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementGhost,
+                temp.context.element_Ghost);
+            
             temp.context.bleedChance =
                 VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmBleedChance, temp.context.bleedChance);
         
@@ -74,19 +83,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             LogStatic($"PatchFailed: {ex.Message}\n{ex.StackTrace}");
         }
     }
-    //近战Patch
-    // [HarmonyPostfix]
-    // [HarmonyPatch(typeof(ItemAgent_MeleeWeapon), "CheckCollidersInRange")]
-    // public static void ItemAgentMeleeWeapon_CheckCollidersInRange_PostFix(ItemAgent_MeleeWeapon __instance) {
-    //     if (!__instance || !__instance.Holder) return;
-    //     if (!__instance.Holder.IsMainCharacter) return;
-    //     LogStatic("辉及");
-    //     CharacterMainControl main = __instance.Holder;
-    //     GameObject[] list = main.gameObject.GetComponentsInChildren<GameObject>();
-    //     foreach (var gameObj in list) {
-    //         LogStatic("找到obj:" + gameObj.name);   
-    //     }
-    // }
+    //扩大刀光
     [HarmonyPostfix]
     [HarmonyPatch(typeof(CA_Attack), "OnStart")]
     public static void CAAttack_OnStart_PostFix(CA_Attack __instance) {
@@ -109,6 +106,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         sfx.transform.localScale = new Vector3(1.92f, 1.92f, 1.92f);
     }
 
+    
     //重量Patch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Item), "get_SelfWeight")]
@@ -129,10 +127,76 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    //ItemOperationMenu 物品操作相关Button
+    //OnHurtPatch，解决吸血、耐久等问题
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(Health), "Hurt")]
+    public static void Health_Hurt_PrePatch(Health __instance, ref DamageInfo damageInfo) {
+        //闪避
+        CharacterMainControl character = __instance.TryGetCharacter();
+        if (!character) return;
+        Item armor = character.GetArmorItem();
+        if (armor && damageInfo.damageValue > 0f) {
+            float dodgeRate = VTModifiersCoreV2.Modify(armor, VTModifiersCoreV2.VtmDodgeRate);
+            if (VT.Probability(dodgeRate)) {
+                if (VTSettingManager.Setting.Debug) {
+                    LogStatic($"闪避触发！");
+                }
+                PopText.Pop("VTMC_Dodged".ToPlainText(), 
+                    character.transform.position + Vector3.up * 2f, Color.white, 1f, null);
+                damageInfo.damageValue = 0f;
+            }
+        }
+        
+        if (
+            damageInfo.damageType != DamageTypes.realDamage 
+            && damageInfo is { ignoreArmor: false, armorBreak: > 0 }) {
+            Item helmet = character.GetHelmatItem();
+            float helmetEnduranceProb = 0f;
+            float armorEnduranceProb = 0f;
+            if (helmet) {
+                helmetEnduranceProb = VTModifiersCoreV2.Modify(helmet, VTModifiersCoreV2.VtmEndurance, 0f);
+            }
+            if (armor) {
+                armorEnduranceProb = VTModifiersCoreV2.Modify(armor, VTModifiersCoreV2.VtmEndurance, 0f);
+            }
+
+            float fnEnduranceProb = (armorEnduranceProb + helmetEnduranceProb) / 2;
+            if (fnEnduranceProb > 0 && VT.Probability(fnEnduranceProb)) {
+                if (VTSettingManager.Setting.Debug) {
+                    LogStatic($"耐久触发！");
+                }
+                damageInfo.armorBreak = 0f;
+            }
+        }
+    }
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(Health), "Hurt")]
+    public static void Health_Hurt_PostPatch(Health __instance, DamageInfo damageInfo) {
+        if (
+            damageInfo.finalDamage > 0
+            && damageInfo.fromCharacter
+            && damageInfo.fromCharacter.CurrentHoldItemAgent
+            && damageInfo.fromCharacter.CurrentHoldItemAgent.Item
+        ) {
+            Item holdItem = damageInfo.fromCharacter.CurrentHoldItemAgent.Item;
+            float lifeSteal = VTModifiersCoreV2.Modify(holdItem, VTModifiersCoreV2.VtmLifeSteal, 0f);
+            if (lifeSteal > 0) {
+                float lifeStealAmount = lifeSteal * damageInfo.finalDamage;
+                if (VTSettingManager.Setting.Debug) {
+                    LogStatic($"LifeSteal:{lifeStealAmount}");
+                }
+                PopText.Pop(lifeStealAmount.ToString("F1"), 
+                    damageInfo.fromCharacter.transform.position + Vector3.up * 2f, Color.red, 1f, null);
+                damageInfo.fromCharacter.AddHealth(lifeStealAmount);
+            }
+        }
+    }
     
+    
+    //ItemOperationMenu 物品操作相关Button
     public static Button btn_Reforge = null!;
     
+    //重铸
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ItemOperationMenu), "Initialize")]
     public static void ItemOperationMenu_Initialize_PostFix(ItemOperationMenu __instance) {
@@ -336,18 +400,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    private void OnSetupMeta(ItemHoveringUI uI, ItemMetaData data) {
-        // Text.gameObject.SetActive(false);
-    }
-
-    //物品悬停UI改变物品名
-    private void OnSetupItemHoveringUI(ItemHoveringUI uiInstance, Item item) {
-        if (item == null) {
-            // Text.gameObject.SetActive(false);
-            return;
-        }
-    }
-
     static Color VTLabelColor = Color.magenta;
     static Color VTLabelColorLight = new Color(1f, 0.6f, 0.9f);
     static Color VTLabelColorDefault = Color.white;
@@ -418,11 +470,42 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             GameObject uiObject = new GameObject("VTModifier_ModUI_Instance");
             modUI = uiObject.AddComponent<VTModifiersUI>();
             DontDestroyOnLoad(uiObject);
-
+            TryConnect();
+            TryInitSetting();
             SCAV_Listener = LootBoxEventListener.Instance;
         }
     }
 
+    static void TryConnect() {
+        foreach (ModInfo mi in ModManager.modInfos) {
+            if (mi.name == MagicConnector.MOD_NAME) {
+                MagicConnector.TryConnect();
+            }
+            if (mi.name == DisplayConnector.MOD_NAME) {
+                DisplayConnector.TryConnect();
+            }
+        }
+    }
+    private void ModManager_OnModActivated(ModInfo arg1, Duckov.Modding.ModBehaviour arg2) {
+        if (arg1.name == MagicConnector.MOD_NAME) MagicConnector.TryConnect();
+        if (arg1.name == DisplayConnector.MOD_NAME) DisplayConnector.TryConnect();
+        if (ModSettingAPI.IsInit) return;
+        if (arg1.name != ModSettingAPI.MOD_NAME || !ModSettingAPI.Init(info)) return;
+        ModSettingConnector.Init();
+    }
+    private void ModManager_OnModWillBeDeactivated(ModInfo arg1, Duckov.Modding.ModBehaviour arg2) {
+        if (arg1.name == MagicConnector.MOD_NAME) MagicConnector.OnDeactivated();
+        if (arg1.name == DisplayConnector.MOD_NAME) DisplayConnector.OnDeactivated();
+        if (arg1.name != ModSettingAPI.MOD_NAME || !ModSettingAPI.Init(info)) return;
+        // //禁用ModSetting的时候移除监听
+        // Setting.OnSlider1ValueChanged -= Setting_OnSlider1ValueChanged;
+    }
+    void TryInitSetting() {
+        if (!ModSettingAPI.IsInit) {
+            if (!ModSettingAPI.Init(info)) return;
+            ModSettingConnector.Init();
+        }
+    }
     private void Start() {
         if (_isInitialized) {
             // VTModSettingConnector.Init();
@@ -451,24 +534,29 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     protected void RegisterEvents() {
         // LevelManager.OnLevelInitialized += OnLevelInitialized;
-        ItemHoveringUI.onSetupItem += OnSetupItemHoveringUI;
-        ItemHoveringUI.onSetupMeta += OnSetupMeta;
+        // ItemHoveringUI.onSetupItem += OnSetupItemHoveringUI;
+        // ItemHoveringUI.onSetupMeta += OnSetupMeta;
         CraftingManager.OnItemCrafted += OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
         ItemUIUtilities.OnSelectionChanged += OnSelectionChanged;
         ItemTreeData.OnItemLoaded += OnItemLoaded;
+        ModManager.OnModActivated += ModManager_OnModActivated;
+        ModManager.OnModWillBeDeactivated += ModManager_OnModWillBeDeactivated;
+
         
-        VTModSettingConnector.Init();
     }
 
     protected void UnregisterEvents() {
         // LevelManager.OnLevelInitialized -= OnLevelInitialized;
-        ItemHoveringUI.onSetupItem -= OnSetupItemHoveringUI;
-        ItemHoveringUI.onSetupMeta -= OnSetupMeta;
+        // ItemHoveringUI.onSetupItem -= OnSetupItemHoveringUI;
+        // ItemHoveringUI.onSetupMeta -= OnSetupMeta;
         CraftingManager.OnItemCrafted -= OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory -= OnItemSentToPlayerInventory;
         ItemUIUtilities.OnSelectionChanged -= OnSelectionChanged;
         ItemTreeData.OnItemLoaded -= OnItemLoaded;
+        ModManager.OnModActivated -= ModManager_OnModActivated;
+        ModManager.OnModWillBeDeactivated -= ModManager_OnModWillBeDeactivated;
+
     }
 
     private void OnItemSentToPlayerInventory(Item item) {
