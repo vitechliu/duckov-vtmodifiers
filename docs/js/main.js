@@ -65,7 +65,20 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 加载JSON文件列表
     loadJsonFileList();
+    
+    //为select注入options
+    //此时获取不到select 
+    
+    
 });
+
+function fillSelect(selectElement) {
+    selectElement.options.add(new Option("选择键...", ""));
+    for (const key in vtms) {
+        selectElement.options.add(new Option(vtms[key], key));
+    }
+    selectElement.options.add(new Option("自定义", "custom"));
+}
 
 // 绑定所有事件
 function bindEvents() {
@@ -534,6 +547,9 @@ function addModifierForm() {
     const modifierKeyInput = newModifier.querySelector('.modifier-key');
     newModifier.querySelector('.modifier-title').textContent = `Modifier #${modifierCounter}`;
     
+    const selectElement = newModifier.querySelector('#mainSelectVtms')
+    fillSelect(selectElement);
+    
     // 监听key输入变化
     modifierKeyInput.addEventListener('input', function() {
         const titleElement = document.querySelector(`#${modifierId} .modifier-title`);
@@ -799,13 +815,14 @@ function generateJsonFromForm() {
         const dataFields = form.querySelectorAll('.data-field-item');
         dataFields.forEach(field => {
             let keyInput = field.querySelector('.data-key');
+            if (!keyInput)
+                keyInput = field.querySelector('.data-key-custom');
             let keyValue;
             
             // 处理自定义key
             if (keyInput.tagName === 'SELECT') {
                 keyValue = keyInput.value;
             } else {
-                // 自定义输入
                 keyValue = keyInput.value;
             }
             
