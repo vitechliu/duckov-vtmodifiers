@@ -18,7 +18,25 @@
       "applyOnBackpack": false,
       "data": {
         "PriceMultiplier": 3,
-        "Moveability": 0.7
+        "Moveability": 1.2,
+        "RunAcc": 0.6
+      }
+    },
+    "WithGhost": {
+      "key": "WithGhost",
+      "weight": 80,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "ElementGhost": 0.5
       }
     }
   }

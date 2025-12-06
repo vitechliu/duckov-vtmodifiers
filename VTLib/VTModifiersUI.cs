@@ -5,6 +5,7 @@ using Duckov.UI;
 using Duckov.Utilities;
 using HarmonyLib;
 using ItemStatsSystem;
+using SodaCraft.Localizations;
 using TMPro;
 using UnityEngine;
 using VTModifiers.ThirdParty;
@@ -25,6 +26,8 @@ public class VTModifiersUI : MonoBehaviour {
             debouncer = new Debouncer(VTSettingManager.OnSettingChanged, 1000);
         }
     }
+
+    public static List<string> modifiers = new();
 
 
     void Update() {
@@ -58,7 +61,6 @@ public class VTModifiersUI : MonoBehaviour {
         return $"x{(float)(value * 100.0):0.##}%";
     }
 
-    private static string modifierName = "Debug";
     private static string itemId = "123";
     void WindowFunc(int id) {
         vt = GUILayout.BeginScrollView(vt);
@@ -197,10 +199,9 @@ public class VTModifiersUI : MonoBehaviour {
         if (toggleDebug) {
             GUILayout.Label("");
             GUILayout.Label("");
-            GUILayout.Label("秘法纪元已连接:" + MagicConnector.Connected);
+            GUILayout.Label("秘法纪元连接状态:" + MagicConnector.Connected);
             //词缀操作
             GUILayout.Label("测试功能(会极大影响游戏体验，慎重使用！）");
-
             GUILayout.BeginHorizontal();
             if (GUILayout.Button("+随机词缀", GUILayout.Width(80))) {
                 Item item = ItemUIUtilities.SelectedItem;
@@ -212,18 +213,6 @@ public class VTModifiersUI : MonoBehaviour {
                     VT.BubbleUserDebug("未选中道具");
                 }
             }
-
-            if (GUILayout.Button("+Debug词缀", GUILayout.Width(80))) {
-                Item item = ItemUIUtilities.SelectedItem;
-                if (item != null) {
-                    VTModifiersCoreV2.TryUnpatchItem(item);
-                    VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Debug, "Debug");
-                }
-                else {
-                    VT.BubbleUserDebug("未选中道具");
-                }
-            }
-
             if (GUILayout.Button("-词缀", GUILayout.Width(80))) {
                 Item item = ItemUIUtilities.SelectedItem;
                 if (item != null) {
@@ -233,29 +222,30 @@ public class VTModifiersUI : MonoBehaviour {
                     VT.BubbleUserDebug("未选中道具");
                 }
             }
-
             GUILayout.EndHorizontal();
             
-            
-            //自定义词缀
-            GUILayout.BeginHorizontal();
-            modifierName = GUILayout.TextField(modifierName);
-            if (GUILayout.Button("+词缀", GUILayout.Width(80))) {
-                if (VTModifiersCoreV2.ModifierData.ContainsKey(modifierName)) {
-                    Item item = ItemUIUtilities.SelectedItem;
-                    if (item) {
-                        VTModifiersCoreV2.TryUnpatchItem(item);
-                        VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Debug, modifierName);
+            //将modifiers按一行四个去chunk
+            int chunkSize = 4;
+            var chunks = modifiers.Select((x, i) => new { x, i })
+                .GroupBy(x => x.i / chunkSize)
+                .Select(g => g.Select(x => x.x).ToList())
+                .ToList();
+            foreach (var chunk in chunks) {
+                GUILayout.BeginHorizontal();
+                foreach (var modifier in chunk) {
+                    if (GUILayout.Button(modifier.ToPlainText(), GUILayout.Width(80))) {
+                        Item item = ItemUIUtilities.SelectedItem;
+                        if (item != null) {
+                            VTModifiersCoreV2.TryUnpatchItem(item);
+                            VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Debug, modifier);
+                        }
+                        else {
+                            VT.BubbleUserDebug("未选中道具");
+                        }
                     }
-                    else {
-                        VT.BubbleUserDebug("未选中道具");
-                    }
-                } 
-                else {
-                    VT.BubbleUserDebug("未找到词缀:" + modifierName);
                 }
+                GUILayout.EndHorizontal();
             }
-            GUILayout.EndHorizontal();
             
             //自定义添加道具
             GUILayout.BeginHorizontal();
