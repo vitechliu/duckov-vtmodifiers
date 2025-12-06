@@ -11,6 +11,8 @@ let modifierCounter = 0;
 let dataFieldCounter = 0;
 
 const vtms = {
+    PriceMultiplier: "价格倍率(必选)",
+    
     DamageMultiplier: "伤害倍率",
     BulletSpeedMultiplier: "弹速倍率",
     ShootDistanceMultiplier: "射程/攻击距离倍率",
@@ -24,28 +26,35 @@ const vtms = {
     ScatterADSMultiplier: "腰射精度",
     RecoilVMultiplier: "垂直后坐力",
     RecoilHMultiplier: "水平后坐力",
+    WalkSoundRange: "行走声音范围",
+    RunSoundRange: "奔跑声音范围",
     Armor: "护甲加成",
     ViewAngle: "视野范围",
     GasMask: "毒气防护",
     InventoryCapacity: "背包容量",
     MaxWeight: "负重",
     Moveability: "移动能力(移动速度系数)",
+    RunAcc: "奔跑加速度",
 
     BleedChance: "流血概率",
     Weight: "重量修正",
     AmmoSave: "弹药节省率",
-    PriceMultiplier: "价格倍率",
+    
 
     ElementFire: "火元素加成",
     ElementSpace: "空间元素加成",
     ElementPoison: "毒元素加成",
     ElementElectricity: "电元素加成",
     ElementGhost: "灵元素加成",
-
+    ElementPhysic: "物理抗性",
 
     StaminaCost: "耐力消耗",
     MaxStamina: "耐力上限",
     CritRate: "暴击率",
+    Endurance: "不消耗耐久概率",
+    LifeSteal: "吸血",
+    DeathRate: "即死",
+    DodgeRate: "闪避率",
 }
 // 预定义的data字段键（根据你的C# struct中的可能值）
 // const predefinedDataKeys = [
