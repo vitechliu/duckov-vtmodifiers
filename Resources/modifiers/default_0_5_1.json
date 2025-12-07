@@ -238,7 +238,7 @@
         "DamageMultiplier": 0.5,
         "ShootSpeedMultiplier": 0.2,
         "ShootDistanceMultiplier": 0.3,
-        "Moveability": 0.4,
+        "Moveability": 0.15,
         "Armor": 1.5,
         "InventoryCapacity": 5.0,
         "MaxWeight": 3.0,

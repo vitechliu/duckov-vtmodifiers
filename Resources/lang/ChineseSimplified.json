@@ -20,6 +20,7 @@
     "Heavy": "重量级",
     "Deadly": "致命",
     "Eagle-Eye": "鹰眼",
+    
     "Legendary": "传说",
     "Silver": "银质",
     "Chaos": "混沌",
@@ -79,11 +80,11 @@
     
     "VTMC_FIX": "修正",
     "VTMC_Dodged": "Miss!",
-    "VTMC_NO_ITEM_SELECT": "未选中道具，无法重铸!",
     "Tag_vttag": "词缀",
     "Btn_reforge": "重铸",
     "Btn_forge": "词缀附加",
     "Bubble_lack_of_coin": "重铸需求的金额不足",
+    "Bubble_no_item_select": "未选中道具，无法重铸!",
     "Bubble_reforge_success": "重铸成功!"
   }
 }

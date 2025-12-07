@@ -278,7 +278,13 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         ItemDisplay display = ItemUIUtilities.SelectedItemDisplay;
 
         if (!targetItem || !display) {
-            VT.BubbleUserDebug("VTMC_NO_ITEM_SELECT".ToPlainText(), false);
+            VT.BubbleUserDebug("Bubble_no_item_select".ToPlainText(), false);
+            return;
+        }
+        if (!VTModifiersCoreV2.ItemCanBePatched(targetItem)) return;
+        int price = VTModifiersCoreV2.ReforgePrice(targetItem);
+        if (!EconomyManager.Pay(new Cost(price))) {
+            VT.BubbleUserDebug("Bubble_lack_of_coin".ToPlainText(), false);
             return;
         }
         VTModifiersCoreV2.TryUnpatchItem(targetItem);

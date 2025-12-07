@@ -37,12 +37,17 @@ public class VTModifiersCoreV2 {
 
     public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
     public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
-    public static readonly string VariableVtModifierDisplayHashCode = "Top1_词缀";
+    public static readonly string VariableVtModifierDisplayHashCodeOld = "Top1_词缀";
+    public static readonly string VariableVtModifierDisplayHashCode = "VTModifiers_Top1_词缀";
+    public static readonly string VariableVtAuthorDisplayHashCode = "VTModifiers_Top2_词缀作者";
+    public static readonly string VariableVtLevelDisplayHashCode = "VTModifiers_Top3_词缀等级";
     public static Dictionary<string, VtModifierV2> ModifierData = new();
+    public static Dictionary<string, string> AuthorData = new();
 
-    public static void PatchItemDisplayInfo(Item item, string modifier) {
+    public static void PatchItemDisplayInfo(Item item, VtModifierV2 modifier) {
         if (!DisplayConnector.Connected) return;
         DisplayConnector.PatchItem(item, modifier);
+        DisplayConnector.TryRefresh(item);
     }
     public static void CalcItemModifiers(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
@@ -71,7 +76,7 @@ public class VTModifiersCoreV2 {
                 item.Modifiers.ReapplyModifiers();
             }
             Random.state = originalState;
-            PatchItemDisplayInfo(item, modifier);
+            PatchItemDisplayInfo(item, vtModifier);
         }
         else {
             Log($"找不到modifier:{modifier}");
@@ -82,6 +87,7 @@ public class VTModifiersCoreV2 {
 
     public static void LoadFromConfig() {
         ModifierData.Clear();
+        AuthorData.Clear();
         ModifierGroups.Clear();
         VTModifiersUI.modifiers.Clear();
         
@@ -99,6 +105,12 @@ public class VTModifiersCoreV2 {
                         VT.Log($"词缀键重复:{vtModifier.key}");
                         continue;
                     }
+
+                    string author = group.author;
+                    if (vtModifier.author != null) {
+                        author = vtModifier.author;
+                    }
+                    AuthorData[vtModifier.key] = author;
                     ModifierData[vtModifier.key] = vtModifier;
                     VTModifiersUI.modifiers.Add(vtModifier.key);
                     loadedCount++;
@@ -174,6 +186,7 @@ public class VTModifiersCoreV2 {
         if (variables != null) {
             VT.RemoveItemVariable(variables, VariableVtModifierHashCode);
             VT.RemoveItemVariable(variables, VariableVtModifierSeedHashCode);
+            VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCodeOld);
             VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCode);
         }
 
@@ -287,7 +300,14 @@ public class VTModifiersCoreV2 {
                 polarity = -1;
             }
         }
-
+        
+        //特殊
+        if (key == VtmDamageMultiplier) {
+            value *= VTSettingManager.Setting.DamageThreshold;
+        }
+        if (key == VtmArmor) {
+            value *= VTSettingManager.Setting.ArmorThreshold;
+        }
         value *= polarity;
         if (item.Modifiers == null) {
             item.CreateModifiersComponent();

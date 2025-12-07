@@ -62,7 +62,7 @@
       "key": "Unbreaking_3",
       "author": null,
       "weight": 100,
-      "quality": 0,
+      "quality": 2,
       "forceFixed": false,
       "applyOnGuns": false,
       "applyOnMelee": false,
