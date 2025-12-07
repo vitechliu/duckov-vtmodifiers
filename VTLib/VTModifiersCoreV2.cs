@@ -452,6 +452,7 @@ public class VTModifiersCoreV2 {
         
         AddKey(new VtMKey(VtmShootDistanceMultiplier, nameof(ItemAgent_Gun.BulletDistance)) {
             applyOnGuns = true,
+            applyOnMelee = true,
             hashForMelee = nameof(ItemAgent_MeleeWeapon.AttackRange),
         });
         AddKey(new VtMKey(VtmShootSpeedMultiplier, nameof(ItemAgent_Gun.ShootSpeed)) {
@@ -494,6 +495,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmArmorPiercing, nameof(ItemAgent_Gun.ArmorPiercing)) {
             applyOnGuns = true, 
+            applyOnMelee = true,
             modifierType = ModifierType.Add,
             roundToInt = true,
         });
@@ -649,7 +651,7 @@ public class VTModifiersCoreV2 {
                     return hashForMelee;
                 }
             }
-            if (item.Tags.Contains(ItemTagGun)) {
+            else if (item.Tags.Contains(ItemTagGun)) {
             }
             else {
                 if (hashForEquipments != null) {

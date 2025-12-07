@@ -8,8 +8,9 @@ public class DisplayConnector: Connector {
     public static bool Connected = false;
     public const string MOD_NAME = "CustomItemLevelValue";
     public static void TryConnect() {
+        // VT.Log("tryConnect1");
         if (Connected) return;
-        if (AssemblyHelper.IsAssemblyLoaded("CustomItemLevelValue.Core")) {
+        if (AssemblyHelper.IsAssemblyLoaded("CustomItemLevelValue")) {
             Connected = true;
             ModBehaviour.LogStatic("成功连接到[更丰富的信息显示]...");
         }
