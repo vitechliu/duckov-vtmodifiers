@@ -39,8 +39,8 @@ public class VTModifiersCoreV2 {
     public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
     public static readonly string VariableVtModifierDisplayHashCodeOld = "Top1_词缀";
     public static readonly string VariableVtModifierDisplayHashCode = "VTModifiers_Top1_词缀";
-    public static readonly string VariableVtAuthorDisplayHashCode = "VTModifiers_Top2_词缀作者";
-    public static readonly string VariableVtLevelDisplayHashCode = "VTModifiers_Top3_词缀等级";
+    public static readonly string VariableVtAuthorDisplayHashCode = "VTModifiers_Top1_词缀作者";
+    public static readonly string VariableVtLevelDisplayHashCode = "VTModifiers_Top1_词缀等级";
     public static Dictionary<string, VtModifierV2> ModifierData = new();
     public static Dictionary<string, string> AuthorData = new();
 
@@ -188,6 +188,8 @@ public class VTModifiersCoreV2 {
             VT.RemoveItemVariable(variables, VariableVtModifierSeedHashCode);
             VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCodeOld);
             VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCode);
+            VT.RemoveItemVariable(variables, VariableVtAuthorDisplayHashCode);
+            VT.RemoveItemVariable(variables, VariableVtLevelDisplayHashCode);
         }
 
         int removedModifiersCount = 0;

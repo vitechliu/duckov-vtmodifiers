@@ -191,9 +191,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             float lifeSteal = VTModifiersCoreV2.Modify(holdItem, VTModifiersCoreV2.VtmLifeSteal, 0f);
             if (lifeSteal > 0) {
                 float lifeStealAmount = lifeSteal * damageInfo.finalDamage;
-                if (VTSettingManager.Setting.Debug) {
-                    LogStatic($"LifeSteal:{lifeStealAmount}");
-                }
+                // if (VTSettingManager.Setting.Debug) {
+                //     LogStatic($"LifeSteal:{lifeStealAmount}");
+                // }
                 PopText.Pop(lifeStealAmount.ToString("F1"), 
                     damageInfo.fromCharacter.transform.position + Vector3.up * 2f, Color.red, 1f, null);
                 damageInfo.fromCharacter.AddHealth(lifeStealAmount);
