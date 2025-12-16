@@ -20,13 +20,16 @@ namespace VTModifiers;
 
 [HarmonyPatch]
 public class ModBehaviour : Duckov.Modding.ModBehaviour {
-    public string _logFilePath;
+    // public string _logFilePath;
+    public string _logFilePathNew;
     public string _dllDirectory;
-    public string _cfgDirectory;
+    public string _cfgDirectoryNew;
     public string _resourceDirectory;
+    public string _modifiersDirectoryPersistant;
+    public string _modifiersDirectoryCustom;
 
     public static string _modName = "VTModifiers";
-    public static string _version = "0.6.1";
+    public static string _version = "0.7.0";
     
     protected bool _isInitialized = false;
 
@@ -488,9 +491,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     private LootBoxEventListener SCAV_Listener = null!;
     protected override void OnAfterSetup() {
         if (!_isInitialized) {
-            _dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            InitializeLogFile();
-            InitializeDirectories();
+            LoadPath();
+            VTSettingManager.LoadSetting();
             LocalizationUtil.ReadLang();
             VTModifiersCoreV2.InitData();
 
@@ -564,7 +566,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // ItemHoveringUI.onSetupMeta += OnSetupMeta;
         CraftingManager.OnItemCrafted += OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
-        ItemUIUtilities.OnSelectionChanged += OnSelectionChanged;
+        // ItemUIUtilities.OnSelectionChanged += OnSelectionChanged;
         ItemTreeData.OnItemLoaded += OnItemLoaded;
         ModManager.OnModActivated += ModManager_OnModActivated;
         ModManager.OnModWillBeDeactivated += ModManager_OnModWillBeDeactivated;
@@ -578,7 +580,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // ItemHoveringUI.onSetupMeta -= OnSetupMeta;
         CraftingManager.OnItemCrafted -= OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory -= OnItemSentToPlayerInventory;
-        ItemUIUtilities.OnSelectionChanged -= OnSelectionChanged;
+        // ItemUIUtilities.OnSelectionChanged -= OnSelectionChanged;
         ItemTreeData.OnItemLoaded -= OnItemLoaded;
         ModManager.OnModActivated -= ModManager_OnModActivated;
         ModManager.OnModWillBeDeactivated -= ModManager_OnModWillBeDeactivated;
@@ -590,15 +592,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         VTModifiersCoreV2.CalcItemModifiers(item);
     }
 
-    private async void OnSelectionChanged() {
-        // Item selectingItem = ItemUIUtilities.SelectedItem;
-        // if (selectingItem && VTModifiersCoreV2.IsPatchedItem(selectingItem)) {
-        //     string[] dialog = {
-        //         "a1", "a2"
-        //     };
-        //     await VTDialog.DialogFlow(dialog);
-        // }
-    }
 
     //修复
     
@@ -607,25 +600,22 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // LogStatic($"OnItemLoaded: {item.DisplayName}");
         VTModifiersCoreV2.CalcItemModifiers(item);
     }
-
-    //初始化地图后，扫描该地图的敌人和物资箱，为其中的武器等道具异步加入词缀
-    private void OnLevelInitialized() {
-        Log("地图已初始化");
-    }
-
-    protected void InitializeLogFile() {
-        string str = Path.Combine(this._dllDirectory, "logs");
-        Directory.CreateDirectory(str);
-        _logFilePath = Path.Combine(str,
-            string.Format("{0}_log_{1:yyyyMMdd}.txt", _modName, (object)DateTime.Now));
-        Log("模组启动，开始初始化，版本:" + _version);
-        Log("日志路径: " + _logFilePath);
-    }
-    protected void InitializeDirectories() {
-        _cfgDirectory = Path.Combine(this._dllDirectory, "cfg");
+    void LoadPath() {
+        _dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         _resourceDirectory = Path.Combine(this._dllDirectory, "resources");
-        Directory.CreateDirectory(_cfgDirectory);
-        VTSettingManager.LoadSetting();
+        string mainDirectory = Path.Combine(Application.persistentDataPath, _modName);
+        Directory.CreateDirectory(mainDirectory);
+        string str = Path.Combine(mainDirectory, "logs");
+        _logFilePathNew = Path.Combine(str,
+            string.Format("{0}_log_{1:yyyyMMdd}.txt", _modName, (object)DateTime.Now));
+        Directory.CreateDirectory(_logFilePathNew);
+        _cfgDirectoryNew = Path.Combine(mainDirectory, "cfg");
+        Directory.CreateDirectory(_cfgDirectoryNew);
+        _modifiersDirectoryPersistant = Path.Combine(_resourceDirectory, "modifiers");
+        _modifiersDirectoryCustom = Path.Combine(mainDirectory, "modifiers");
+        Directory.CreateDirectory(_modifiersDirectoryCustom);
+        Log("模组启动，开始初始化，版本:" + _version);
+        Log("日志路径: " + _logFilePathNew);
     }
     public static void LogStatic(string message, bool isError = false) {
         if (ModBehaviour.Instance) {
@@ -635,7 +625,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     protected void Log(string message, bool isError = false) {
         try {
-            File.AppendAllText(this._logFilePath,
+            File.AppendAllText(this._logFilePathNew,
                 string.Format("[{0:HH:mm:ss}] {1}\n", (object)DateTime.Now, message));
             if (isError) Debug.LogError(("[" + _modName + "]" + message));
             else Debug.Log(("[" + _modName + "]" + message));

@@ -5,7 +5,6 @@ qq交流群群号1042906424
 
 ### 联动模组
 - [ModSetting](https://steamcommunity.com/sharedfiles/filedetails/?id=3595729494)可以配置参数
-- Scav模式 敌人可以掉落词缀物品
 - [秘法纪元](https://steamcommunity.com/sharedfiles/filedetails/?id=3610458453) 会出现法系特色词缀
 - [更丰富的信息显示](https://steamcommunity.com/sharedfiles/filedetails/?id=3612733981)可以展示词缀额外信息
 
@@ -23,7 +22,6 @@ qq交流群群号1042906424
 - 重构了移动能力相关词条，现在能更好的加快玩家速度了
 
 ### 0.5
-- 现在部分兼容mod:Scav模式，在Scav模式中敌人掉落的装备也会有词缀。**请确保Scav模式的加载位置在本mod之前！**
 - 更新ModSetting API
 - 现在近战武器也支持了词缀！
 - 加入了"词缀属性是否固定"开关，开启后词缀属性将固定为最大值

@@ -90,8 +90,8 @@ public class VTModifiersCoreV2 {
         AuthorData.Clear();
         ModifierGroups.Clear();
         VTModifiersUI.modifiers.Clear();
-        
-        string directoryPath = Path.Combine(ModBehaviour.Instance._resourceDirectory, "modifiers");
+
+        string directoryPath = ModBehaviour.Instance._modifiersDirectoryPersistant;
         string[] jsonFiles = Directory.GetFiles(directoryPath, "*.json");
         int loadedCount = 0;
         foreach (string path in jsonFiles) { 

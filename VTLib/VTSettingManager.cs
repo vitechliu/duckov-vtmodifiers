@@ -4,7 +4,7 @@ using UnityEngine;
 namespace VTModifiers.VTLib;
 
 public static class VTSettingManager {
-    public static string SettingFilePath => Path.Combine(ModBehaviour.Instance._cfgDirectory, "config.json");
+    public static string SettingFilePath => Path.Combine(ModBehaviour.Instance._cfgDirectoryNew, "config.json");
 
     public static void LoadSetting() {
         try {
