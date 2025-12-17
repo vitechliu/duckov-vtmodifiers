@@ -305,10 +305,12 @@ public class VTModifiersCoreV2 {
         
         //特殊
         if (key == VtmDamageMultiplier) {
-            value *= VTSettingManager.Setting.DamageThreshold;
+            if (value > 0) value *= VTSettingManager.Setting.DamageThreshold;
+            else if (value < 0) value /= VTSettingManager.Setting.DamageThreshold;
         }
         if (key == VtmArmor) {
-            value *= VTSettingManager.Setting.ArmorThreshold;
+            if (value > 0) value *= VTSettingManager.Setting.ArmorThreshold;
+            else if (value < 0) value /= VTSettingManager.Setting.ArmorThreshold;
         }
         value *= polarity;
         if (item.Modifiers == null) {
