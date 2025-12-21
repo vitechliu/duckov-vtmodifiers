@@ -51,7 +51,7 @@ public class DisplayConnector : Connector {
                 if (method != null) {
                     // 调用方法，refreshUI设置为true
                     method.Invoke(instance, new object[] { item, true });
-                    VT.Log("invoke success");
+                    // VT.Log("invoke success");
                 }
 
                 

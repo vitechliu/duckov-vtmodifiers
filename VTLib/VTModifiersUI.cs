@@ -9,6 +9,7 @@ using SodaCraft.Localizations;
 using TMPro;
 using UnityEngine;
 using VTModifiers.ThirdParty;
+using VTModifiers.VTLib.Items;
 
 namespace VTModifiers.VTLib;
 
@@ -319,6 +320,19 @@ public class VTModifiersUI : MonoBehaviour {
             //     if (itemDisplay) VT.ForceUpdateItemDisplayName(itemDisplay);
             // }
             GUILayout.EndHorizontal();
+            
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("词卡1", GUILayout.Width(80))) {
+                ItemUtilities.SendToPlayer(ItemAssetsCollection.InstantiateSync(ItemUtil.MC_CARD_v1));
+            }
+            if (GUILayout.Button("词卡2", GUILayout.Width(80))) {
+                ItemUtilities.SendToPlayer(ItemAssetsCollection.InstantiateSync(ItemUtil.MC_CARD_v2));
+            }
+            if (GUILayout.Button("词卡3", GUILayout.Width(80))) {
+                ItemUtilities.SendToPlayer(ItemAssetsCollection.InstantiateSync(ItemUtil.MC_CARD_v3));
+            }
+            GUILayout.EndHorizontal();
+
         }
 
         GUILayout.EndScrollView();

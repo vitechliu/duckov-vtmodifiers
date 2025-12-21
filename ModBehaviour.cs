@@ -11,9 +11,12 @@ using ItemStatsSystem.Data;
 using ItemStatsSystem.Items;
 using SodaCraft.Localizations;
 using TMPro;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VTModifiers.ThirdParty;
 using VTModifiers.VTLib;
+using VTModifiers.VTLib.Items;
+
 // ReSharper disable Unity.PerformanceCriticalCodeInvocation
 
 namespace VTModifiers;
@@ -74,6 +77,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             }
             temp.context.element_Electricity = VTModifiersCoreV2.Modify(__instance.Item,
                 VTModifiersCoreV2.VtmElementElectricity, temp.context.element_Electricity);
+            temp.context.element_Ice = VTModifiersCoreV2.Modify(__instance.Item,
+                VTModifiersCoreV2.VtmElementIce, temp.context.element_Ice);
             temp.context.element_Fire =
                 VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementFire, temp.context.element_Fire);
             temp.context.element_Poison = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementPoison,
@@ -484,6 +489,30 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             labelGUI.color = VTLabelColorDefault;
         }
     }
+    
+    //拖拽物品色卡
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ItemDisplay), "HandleDirectDrop")]
+    public static bool ItemDisplay_HandleDirectDrop_PrePatch(ItemDisplay __instance, PointerEventData eventData) {
+        if ( __instance.Target == null || eventData.button != PointerEventData.InputButton.Left || __instance.IsStockshopSample)
+            return true;
+        IItemDragSource component = eventData.pointerDrag.gameObject.GetComponent<IItemDragSource>();
+        if (component == null || !component.IsEditable())
+            return true;
+        Item part = component.GetItem();
+        Item main = __instance.Target;
+        if (
+            part && main
+                 && VTModifiersCoreV2.IsModifiersCard(part)
+                 && VTModifiersCoreV2.ItemCanBePatched(main)
+        ) {
+            VTModifiersCoreV2.PatchByCard(part, main, __instance);
+            ItemUIUtilities.NotifyPutItem(part);
+            eventData.Use();
+            return false;
+        }
+        return true;
+    }
 
     public static bool loggedIMEColor = false;
 
@@ -495,6 +524,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             VTSettingManager.LoadSetting();
             LocalizationUtil.ReadLang();
             VTModifiersCoreV2.InitData();
+            
+            ItemUtil.InitItem();
 
             RegisterEvents();
             _isInitialized = true;
@@ -509,6 +540,26 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
+    protected override void OnBeforeDeactivate() {
+        if (_isInitialized) {
+            _isInitialized = false;
+            _harmony.UnpatchAll(_harmony.Id);
+            ItemUtil.UnloadItems();
+            UnregisterEvents();
+
+            if (_text != null) Destroy(_text);
+            if (btn_Reforge != null) Destroy(btn_Reforge);
+            
+            if (modUI != null && modUI.gameObject != null) {
+                Destroy(modUI.gameObject);
+            }
+
+            if (SCAV_Listener) {
+                Destroy(SCAV_Listener);
+            }
+            Log("模组已卸载");
+        }
+    }
     static void TryConnect() {
         MagicConnector.TryConnect();
         DisplayConnector.TryConnect();
@@ -540,25 +591,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    protected override void OnBeforeDeactivate() {
-        if (_isInitialized) {
-            _isInitialized = false;
-            _harmony.UnpatchAll();
-            UnregisterEvents();
-
-            if (_text != null) Destroy(_text);
-            if (btn_Reforge != null) Destroy(btn_Reforge);
-            
-            if (modUI != null && modUI.gameObject != null) {
-                Destroy(modUI.gameObject);
-            }
-
-            if (SCAV_Listener) {
-                Destroy(SCAV_Listener);
-            }
-            Log("模组已卸载");
-        }
-    }
 
     protected void RegisterEvents() {
         // LevelManager.OnLevelInitialized += OnLevelInitialized;
@@ -573,6 +605,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
         
     }
+    
+    
 
     protected void UnregisterEvents() {
         // LevelManager.OnLevelInitialized -= OnLevelInitialized;
@@ -606,9 +640,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         string mainDirectory = Path.Combine(Application.persistentDataPath, _modName);
         Directory.CreateDirectory(mainDirectory);
         string str = Path.Combine(mainDirectory, "logs");
+        Directory.CreateDirectory(str);
         _logFilePathNew = Path.Combine(str,
             string.Format("{0}_log_{1:yyyyMMdd}.txt", _modName, (object)DateTime.Now));
-        Directory.CreateDirectory(_logFilePathNew);
         _cfgDirectoryNew = Path.Combine(mainDirectory, "cfg");
         Directory.CreateDirectory(_cfgDirectoryNew);
         _modifiersDirectoryPersistant = Path.Combine(_resourceDirectory, "modifiers");

@@ -487,9 +487,9 @@
       "applyOnFaceMask": false,
       "applyOnBackpack": false,
       "data": {
-        "PriceMultiplier": 0.2,
-        "RecoilHMultiplier": -0.2,
-        "ScatterADSMultiplier": -0.2
+        "PriceMultiplier": 0.3,
+        "RecoilHMultiplier": -0.3,
+        "ScatterADSMultiplier": -0.3
       }
     },
     "Deadly": {
@@ -642,7 +642,7 @@
     "Gauss": {
       "key": "Gauss",
       "weight": 50,
-      "quality": 4,
+      "quality": 5,
       "forceFixed": false,
       "applyOnGuns": true,
       "applyOnMelee": false,
@@ -652,10 +652,10 @@
       "applyOnFaceMask": false,
       "applyOnBackpack": false,
       "data": {
-        "PriceMultiplier": 0.7,
+        "PriceMultiplier": 0.9,
         "Penetrate": 3.0,
         "ShootSpeedMultiplier": 0.1,
-        "ElementElectricity": 0.4
+        "ElementElectricity": 0.3
       }
     },
     "Concentrated": {
@@ -730,7 +730,7 @@
         "Weight": -0.5,
         "PriceMultiplier": -0.2,
         "DamageMultiplier": -0.1,
-        "AmmoSave": 0.7
+        "AmmoSave": 0.8
       }
     },
     "Silent": {

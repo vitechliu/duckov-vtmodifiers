@@ -66,6 +66,7 @@ public static class VTSettingManager {
 
         public bool AllowReforge = true; //实装+UI
         public bool AllowForge = true; //实装+UI
+        public bool EnableModifiersCard = true; //启用词缀卡功能
 
         public bool FixMode = false; //词缀属性是否固定为最大值
 
