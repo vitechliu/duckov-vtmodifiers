@@ -142,14 +142,14 @@
       "applyOnFaceMask": false,
       "applyOnBackpack": false,
       "data": {
-        "ElementFire": 0.2,
-        "ElementSpace": 0.2,
-        "ElementPoison": 0.2,
-        "ElementElectricity": 0.2,
-        "ElementGhost": 0.2,
-        "DamageMultiplier": 0.2,
-        "ShootSpeedMultiplier": 0.2,
-        "PriceMultiplier": 5
+        "ElementFire": 0.1,
+        "ElementSpace": 0.1,
+        "ElementPoison": 0.1,
+        "ElementElectricity": 0.1,
+        "ElementGhost": 0.1,
+        "DamageMultiplier": 0.1,
+        "ShootSpeedMultiplier": 0.1,
+        "PriceMultiplier": 4
       }
     },
     "Tempering": {

@@ -11,22 +11,28 @@ using ItemStatsSystem.Data;
 using ItemStatsSystem.Items;
 using SodaCraft.Localizations;
 using TMPro;
+using UnityEngine.EventSystems;
 using UnityEngine.UI;
 using VTModifiers.ThirdParty;
 using VTModifiers.VTLib;
+using VTModifiers.VTLib.Items;
+
 // ReSharper disable Unity.PerformanceCriticalCodeInvocation
 
 namespace VTModifiers;
 
 [HarmonyPatch]
 public class ModBehaviour : Duckov.Modding.ModBehaviour {
-    public string _logFilePath;
+    // public string _logFilePath;
+    public string _logFilePathNew;
     public string _dllDirectory;
-    public string _cfgDirectory;
+    public string _cfgDirectoryNew;
     public string _resourceDirectory;
+    public string _modifiersDirectoryPersistant;
+    public string _modifiersDirectoryCustom;
 
     public static string _modName = "VTModifiers";
-    public static string _version = "0.6.0";
+    public static string _version = "0.7.0";
     
     protected bool _isInitialized = false;
 
@@ -71,6 +77,8 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             }
             temp.context.element_Electricity = VTModifiersCoreV2.Modify(__instance.Item,
                 VTModifiersCoreV2.VtmElementElectricity, temp.context.element_Electricity);
+            temp.context.element_Ice = VTModifiersCoreV2.Modify(__instance.Item,
+                VTModifiersCoreV2.VtmElementIce, temp.context.element_Ice);
             temp.context.element_Fire =
                 VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementFire, temp.context.element_Fire);
             temp.context.element_Poison = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementPoison,
@@ -191,9 +199,9 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             float lifeSteal = VTModifiersCoreV2.Modify(holdItem, VTModifiersCoreV2.VtmLifeSteal, 0f);
             if (lifeSteal > 0) {
                 float lifeStealAmount = lifeSteal * damageInfo.finalDamage;
-                if (VTSettingManager.Setting.Debug) {
-                    LogStatic($"LifeSteal:{lifeStealAmount}");
-                }
+                // if (VTSettingManager.Setting.Debug) {
+                //     LogStatic($"LifeSteal:{lifeStealAmount}");
+                // }
                 PopText.Pop(lifeStealAmount.ToString("F1"), 
                     damageInfo.fromCharacter.transform.position + Vector3.up * 2f, Color.red, 1f, null);
                 damageInfo.fromCharacter.AddHealth(lifeStealAmount);
@@ -278,7 +286,13 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         ItemDisplay display = ItemUIUtilities.SelectedItemDisplay;
 
         if (!targetItem || !display) {
-            VT.BubbleUserDebug("VTMC_NO_ITEM_SELECT".ToPlainText(), false);
+            VT.BubbleUserDebug("Bubble_no_item_select".ToPlainText(), false);
+            return;
+        }
+        if (!VTModifiersCoreV2.ItemCanBePatched(targetItem)) return;
+        int price = VTModifiersCoreV2.ReforgePrice(targetItem);
+        if (!EconomyManager.Pay(new Cost(price))) {
+            VT.BubbleUserDebug("Bubble_lack_of_coin".ToPlainText(), false);
             return;
         }
         VTModifiersCoreV2.TryUnpatchItem(targetItem);
@@ -475,6 +489,30 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             labelGUI.color = VTLabelColorDefault;
         }
     }
+    
+    //拖拽物品色卡
+    [HarmonyPrefix]
+    [HarmonyPatch(typeof(ItemDisplay), "HandleDirectDrop")]
+    public static bool ItemDisplay_HandleDirectDrop_PrePatch(ItemDisplay __instance, PointerEventData eventData) {
+        if ( __instance.Target == null || eventData.button != PointerEventData.InputButton.Left || __instance.IsStockshopSample)
+            return true;
+        IItemDragSource component = eventData.pointerDrag.gameObject.GetComponent<IItemDragSource>();
+        if (component == null || !component.IsEditable())
+            return true;
+        Item part = component.GetItem();
+        Item main = __instance.Target;
+        if (
+            part && main
+                 && VTModifiersCoreV2.IsModifiersCard(part)
+                 && VTModifiersCoreV2.ItemCanBePatched(main)
+        ) {
+            VTModifiersCoreV2.PatchByCard(part, main, __instance);
+            ItemUIUtilities.NotifyPutItem(part);
+            eventData.Use();
+            return false;
+        }
+        return true;
+    }
 
     public static bool loggedIMEColor = false;
 
@@ -482,11 +520,12 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     private LootBoxEventListener SCAV_Listener = null!;
     protected override void OnAfterSetup() {
         if (!_isInitialized) {
-            _dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            InitializeLogFile();
-            InitializeDirectories();
+            LoadPath();
+            VTSettingManager.LoadSetting();
             LocalizationUtil.ReadLang();
             VTModifiersCoreV2.InitData();
+            
+            ItemUtil.InitItem();
 
             RegisterEvents();
             _isInitialized = true;
@@ -501,6 +540,26 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
+    protected override void OnBeforeDeactivate() {
+        if (_isInitialized) {
+            _isInitialized = false;
+            _harmony.UnpatchAll(_harmony.Id);
+            ItemUtil.UnloadItems();
+            UnregisterEvents();
+
+            if (_text != null) Destroy(_text);
+            if (btn_Reforge != null) Destroy(btn_Reforge);
+            
+            if (modUI != null && modUI.gameObject != null) {
+                Destroy(modUI.gameObject);
+            }
+
+            if (SCAV_Listener) {
+                Destroy(SCAV_Listener);
+            }
+            Log("模组已卸载");
+        }
+    }
     static void TryConnect() {
         MagicConnector.TryConnect();
         DisplayConnector.TryConnect();
@@ -532,25 +591,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         }
     }
 
-    protected override void OnBeforeDeactivate() {
-        if (_isInitialized) {
-            _isInitialized = false;
-            _harmony.UnpatchAll();
-            UnregisterEvents();
-
-            if (_text != null) Destroy(_text);
-            if (btn_Reforge != null) Destroy(btn_Reforge);
-            
-            if (modUI != null && modUI.gameObject != null) {
-                Destroy(modUI.gameObject);
-            }
-
-            if (SCAV_Listener) {
-                Destroy(SCAV_Listener);
-            }
-            Log("模组已卸载");
-        }
-    }
 
     protected void RegisterEvents() {
         // LevelManager.OnLevelInitialized += OnLevelInitialized;
@@ -558,13 +598,15 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // ItemHoveringUI.onSetupMeta += OnSetupMeta;
         CraftingManager.OnItemCrafted += OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
-        ItemUIUtilities.OnSelectionChanged += OnSelectionChanged;
+        // ItemUIUtilities.OnSelectionChanged += OnSelectionChanged;
         ItemTreeData.OnItemLoaded += OnItemLoaded;
         ModManager.OnModActivated += ModManager_OnModActivated;
         ModManager.OnModWillBeDeactivated += ModManager_OnModWillBeDeactivated;
 
         
     }
+    
+    
 
     protected void UnregisterEvents() {
         // LevelManager.OnLevelInitialized -= OnLevelInitialized;
@@ -572,7 +614,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // ItemHoveringUI.onSetupMeta -= OnSetupMeta;
         CraftingManager.OnItemCrafted -= OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory -= OnItemSentToPlayerInventory;
-        ItemUIUtilities.OnSelectionChanged -= OnSelectionChanged;
+        // ItemUIUtilities.OnSelectionChanged -= OnSelectionChanged;
         ItemTreeData.OnItemLoaded -= OnItemLoaded;
         ModManager.OnModActivated -= ModManager_OnModActivated;
         ModManager.OnModWillBeDeactivated -= ModManager_OnModWillBeDeactivated;
@@ -584,15 +626,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         VTModifiersCoreV2.CalcItemModifiers(item);
     }
 
-    private async void OnSelectionChanged() {
-        // Item selectingItem = ItemUIUtilities.SelectedItem;
-        // if (selectingItem && VTModifiersCoreV2.IsPatchedItem(selectingItem)) {
-        //     string[] dialog = {
-        //         "a1", "a2"
-        //     };
-        //     await VTDialog.DialogFlow(dialog);
-        // }
-    }
 
     //修复
     
@@ -601,25 +634,22 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         // LogStatic($"OnItemLoaded: {item.DisplayName}");
         VTModifiersCoreV2.CalcItemModifiers(item);
     }
-
-    //初始化地图后，扫描该地图的敌人和物资箱，为其中的武器等道具异步加入词缀
-    private void OnLevelInitialized() {
-        Log("地图已初始化");
-    }
-
-    protected void InitializeLogFile() {
-        string str = Path.Combine(this._dllDirectory, "logs");
-        Directory.CreateDirectory(str);
-        _logFilePath = Path.Combine(str,
-            string.Format("{0}_log_{1:yyyyMMdd}.txt", _modName, (object)DateTime.Now));
-        Log("模组启动，开始初始化，版本:" + _version);
-        Log("日志路径: " + _logFilePath);
-    }
-    protected void InitializeDirectories() {
-        _cfgDirectory = Path.Combine(this._dllDirectory, "cfg");
+    void LoadPath() {
+        _dllDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location);
         _resourceDirectory = Path.Combine(this._dllDirectory, "resources");
-        Directory.CreateDirectory(_cfgDirectory);
-        VTSettingManager.LoadSetting();
+        string mainDirectory = Path.Combine(Application.persistentDataPath, _modName);
+        Directory.CreateDirectory(mainDirectory);
+        string str = Path.Combine(mainDirectory, "logs");
+        Directory.CreateDirectory(str);
+        _logFilePathNew = Path.Combine(str,
+            string.Format("{0}_log_{1:yyyyMMdd}.txt", _modName, (object)DateTime.Now));
+        _cfgDirectoryNew = Path.Combine(mainDirectory, "cfg");
+        Directory.CreateDirectory(_cfgDirectoryNew);
+        _modifiersDirectoryPersistant = Path.Combine(_resourceDirectory, "modifiers");
+        _modifiersDirectoryCustom = Path.Combine(mainDirectory, "modifiers");
+        Directory.CreateDirectory(_modifiersDirectoryCustom);
+        Log("模组启动，开始初始化，版本:" + _version);
+        Log("日志路径: " + _logFilePathNew);
     }
     public static void LogStatic(string message, bool isError = false) {
         if (ModBehaviour.Instance) {
@@ -629,7 +659,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
 
     protected void Log(string message, bool isError = false) {
         try {
-            File.AppendAllText(this._logFilePath,
+            File.AppendAllText(this._logFilePathNew,
                 string.Format("[{0:HH:mm:ss}] {1}\n", (object)DateTime.Now, message));
             if (isError) Debug.LogError(("[" + _modName + "]" + message));
             else Debug.Log(("[" + _modName + "]" + message));

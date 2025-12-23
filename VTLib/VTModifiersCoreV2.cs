@@ -1,3 +1,4 @@
+using Duckov.UI;
 using Duckov.Utilities;
 using HarmonyLib;
 using ItemStatsSystem;
@@ -6,6 +7,7 @@ using Newtonsoft.Json;
 using SodaCraft.Localizations;
 using UnityEngine;
 using VTModifiers.ThirdParty;
+using VTModifiers.VTLib.Items;
 using Random = UnityEngine.Random;
 
 // ReSharper disable All
@@ -29,6 +31,7 @@ public class VTModifiersCoreV2 {
     }
 
     public const string ItemTagMask = "FaceMask";
+    public const string ItemTagHeadset = "Headset";
     public const string ItemTagArmor = "Armor";
     public const string ItemTagHelmet = "Helmat";
     public const string ItemTagBackpack = "Backpack";
@@ -37,12 +40,17 @@ public class VTModifiersCoreV2 {
 
     public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
     public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
-    public static readonly string VariableVtModifierDisplayHashCode = "Top1_词缀";
+    public static readonly string VariableVtModifierDisplayHashCodeOld = "Top1_词缀";
+    public static readonly string VariableVtModifierDisplayHashCode = "VTModifiers_Top1_词缀";
+    public static readonly string VariableVtAuthorDisplayHashCode = "VTModifiers_Top1_词缀作者";
+    public static readonly string VariableVtLevelDisplayHashCode = "VTModifiers_Top1_词缀等级";
     public static Dictionary<string, VtModifierV2> ModifierData = new();
+    public static Dictionary<string, string> AuthorData = new();
 
-    public static void PatchItemDisplayInfo(Item item, string modifier) {
+    public static void PatchItemDisplayInfo(Item item, VtModifierV2 modifier) {
         if (!DisplayConnector.Connected) return;
         DisplayConnector.PatchItem(item, modifier);
+        DisplayConnector.TryRefresh(item);
     }
     public static void CalcItemModifiers(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
@@ -71,7 +79,7 @@ public class VTModifiersCoreV2 {
                 item.Modifiers.ReapplyModifiers();
             }
             Random.state = originalState;
-            PatchItemDisplayInfo(item, modifier);
+            PatchItemDisplayInfo(item, vtModifier);
         }
         else {
             Log($"找不到modifier:{modifier}");
@@ -82,11 +90,19 @@ public class VTModifiersCoreV2 {
 
     public static void LoadFromConfig() {
         ModifierData.Clear();
+        AuthorData.Clear();
         ModifierGroups.Clear();
         VTModifiersUI.modifiers.Clear();
-        
-        string directoryPath = Path.Combine(ModBehaviour.Instance._resourceDirectory, "modifiers");
-        string[] jsonFiles = Directory.GetFiles(directoryPath, "*.json");
+
+        string directoryPath1 = ModBehaviour.Instance._modifiersDirectoryPersistant;
+        string directoryPath2 = ModBehaviour.Instance._modifiersDirectoryCustom;
+        List<string> jsonFiles = new();
+        if (Directory.Exists(directoryPath1)) {
+            jsonFiles.AddRange(Directory.GetFiles(directoryPath1, "*.json"));
+        }
+        if (Directory.Exists(directoryPath2)) {
+            jsonFiles.AddRange(Directory.GetFiles(directoryPath2, "*.json"));
+        }
         int loadedCount = 0;
         foreach (string path in jsonFiles) { 
             try {
@@ -99,6 +115,12 @@ public class VTModifiersCoreV2 {
                         VT.Log($"词缀键重复:{vtModifier.key}");
                         continue;
                     }
+
+                    string author = group.author;
+                    if (vtModifier.author != null) {
+                        author = vtModifier.author;
+                    }
+                    AuthorData[vtModifier.key] = author;
                     ModifierData[vtModifier.key] = vtModifier;
                     VTModifiersUI.modifiers.Add(vtModifier.key);
                     loadedCount++;
@@ -117,15 +139,28 @@ public class VTModifiersCoreV2 {
             if (group.key == "vt_magic" && (
                 !VTSettingManager.Setting.EnableArcaneModifiers || !MagicConnector.Connected
             )) continue;
+
+            bool isCard = IsModifiersCard(item);
             foreach (VtModifierV2 vtm in group.modifiers.Values) {
-                if (
-                    (item.Tags.Contains(ItemTagGun) && vtm.applyOnGuns)
-                    || (item.Tags.Contains(ItemTagMelee) && vtm.applyOnMelee)
-                    || (item.Tags.Contains(ItemTagArmor) && (vtm.applyOnArmor || vtm.applyOnEquipment))
-                    || (item.Tags.Contains(ItemTagHelmet) && (vtm.applyOnHelmet || vtm.applyOnEquipment))
-                    || (item.Tags.Contains(ItemTagMask) && (vtm.applyOnFaceMask || vtm.applyOnEquipment))
-                    || (item.Tags.Contains(ItemTagBackpack) && (vtm.applyOnBackpack || vtm.applyOnEquipment))
-                ) {
+                if (isCard) {
+                    switch (item.TypeID) {
+                        case ItemUtil.MC_CARD_v1:
+                            if (vtm.quality == 1 || vtm.quality == 2) {
+                                filtered.Add(vtm.key, vtm);
+                            }
+                            break;
+                        case ItemUtil.MC_CARD_v2:
+                            if (vtm.quality == 3 || vtm.quality == 4) {
+                                filtered.Add(vtm.key, vtm);
+                            }
+                            break;
+                        case ItemUtil.MC_CARD_v3:
+                            if (vtm.quality == 5 || vtm.quality == 6) {
+                                filtered.Add(vtm.key, vtm);
+                            }
+                            break;
+                    }
+                } else if (vtm.CanPatchTo(item)) {
                     filtered.Add(vtm.key, vtm);
                 }
             }
@@ -165,7 +200,9 @@ public class VTModifiersCoreV2 {
                || item.Tags.Contains(ItemTagHelmet)
                || item.Tags.Contains(ItemTagArmor)
                || item.Tags.Contains(ItemTagMask)
-               || item.Tags.Contains(ItemTagBackpack);
+               || item.Tags.Contains(ItemTagHeadset)
+               || item.Tags.Contains(ItemTagBackpack)
+               || IsModifiersCard(item);
     }
     public static void TryUnpatchItem(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
@@ -174,7 +211,10 @@ public class VTModifiersCoreV2 {
         if (variables != null) {
             VT.RemoveItemVariable(variables, VariableVtModifierHashCode);
             VT.RemoveItemVariable(variables, VariableVtModifierSeedHashCode);
+            VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCodeOld);
             VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCode);
+            VT.RemoveItemVariable(variables, VariableVtAuthorDisplayHashCode);
+            VT.RemoveItemVariable(variables, VariableVtLevelDisplayHashCode);
         }
 
         int removedModifiersCount = 0;
@@ -193,24 +233,30 @@ public class VTModifiersCoreV2 {
         }
         Log($"移除词缀:{item.DisplayName}成功，同时移除了{removedModifiersCount}个原生Modifier");
     }
-    
+
+    public static bool IsModifiersCard(Item item) {
+        return ItemUtil.MC_CARD_IDS.Contains(item.TypeID);
+    }
     public static string PatchItem(Item item, Sources source) {
         if (ItemCanBePatched(item)) {
-            switch (source) {
-                case Sources.LootBox:
-                    if (!VT.Probability(VTSettingManager.Setting.LootBoxPatchedPercentage)) return null;
-                    break;
-                case Sources.Enemy:
-                    if (!VT.Probability(VTSettingManager.Setting.EnemyPatchedPercentage)) return null;
-                    break;
-                case Sources.Craft:
-                    if (!VT.Probability(VTSettingManager.Setting.CraftPatchedPercentage)) return null;
-                    break;
-                case Sources.SCAV:
-                    if (!VT.Probability(VTSettingManager.Setting.SCAVPercentage)) return null;
-                    break;
+            if (!IsModifiersCard(item)) {
+                switch (source) {
+                    case Sources.LootBox:
+                        if (!VT.Probability(VTSettingManager.Setting.LootBoxPatchedPercentage)) return null;
+                        break;
+                    case Sources.Enemy:
+                        if (!VT.Probability(VTSettingManager.Setting.EnemyPatchedPercentage)) return null;
+                        break;
+                    case Sources.Craft:
+                        if (!VT.Probability(VTSettingManager.Setting.CraftPatchedPercentage)) return null;
+                        break;
+                    case Sources.SCAV:
+                        if (!VT.Probability(VTSettingManager.Setting.SCAVPercentage)) return null;
+                        break;
+                    case Sources.Card:
+                        break;
+                }
             }
-
             string? modifier = GetAModifierByWeight(item);
             if (modifier != null) {
                 return PatchItem(item, source, modifier);
@@ -248,6 +294,7 @@ public class VTModifiersCoreV2 {
         Debug, //测试用
         Craft, //制作的
         SCAV, //SCAV
+        Card, //Card
         Reforge, //重铸的
     }
 
@@ -262,7 +309,10 @@ public class VTModifiersCoreV2 {
         
         //特殊hash
         int polarity = 1;
-        if (item.Tags.Contains(ItemTagGun)) {
+        if (IsModifiersCard(item)) {
+            mt = ModifierTarget.Self;
+        }
+        else if (item.Tags.Contains(ItemTagGun)) {
             if (!vtMKey.applyOnGuns) return false;
             //武器
             mt = ModifierTarget.Self;
@@ -280,6 +330,7 @@ public class VTModifiersCoreV2 {
                 VtmElementSpace,
                 VtmElementPoison,
                 VtmElementElectricity,
+                VtmElementIce,
                 VtmElementGhost,
                 VtmPhysicFactor,
             };
@@ -287,7 +338,16 @@ public class VTModifiersCoreV2 {
                 polarity = -1;
             }
         }
-
+        
+        //特殊
+        if (key == VtmDamageMultiplier) {
+            if (value > 0) value *= VTSettingManager.Setting.DamageThreshold;
+            else if (value < 0) value /= VTSettingManager.Setting.DamageThreshold;
+        }
+        if (key == VtmArmor) {
+            if (value > 0) value *= VTSettingManager.Setting.ArmorThreshold;
+            else if (value < 0) value /= VTSettingManager.Setting.ArmorThreshold;
+        }
         value *= polarity;
         if (item.Modifiers == null) {
             item.CreateModifiersComponent();
@@ -383,6 +443,11 @@ public class VTModifiersCoreV2 {
     public const string VtmScatterADSAMultiplier = "ScatterADSMultiplier";
     public const string VtmRecoilVMultiplier = "RecoilVMultiplier";
     public const string VtmRecoilHMultiplier = "RecoilHMultiplier";
+    public const string VtmTraceAbility = "TraceAbility"; //追踪
+    public const string VtmBurstCount = "BurstCount"; //连发数
+    public const string VtmShotCount = "ShotCount"; //多重射击
+    public const string VtmShootSpeedGainEachShoot = "ShootSpeedGainEachShoot"; //射速叠加
+    public const string VtmShootSpeedGainByShootMax = "ShootSpeedGainByShootMax"; //射速叠加上限
 
 
     //护甲
@@ -398,6 +463,8 @@ public class VTModifiersCoreV2 {
     public const string VtmSenseRange = "SenseRange";
     public const string VtmWalkSoundRange = "WalkSoundRange"; 
     public const string VtmRunSoundRange = "RunSoundRange"; 
+    public const string VtmColdProtection = "ColdProtection"; 
+    public const string VtmStormProtection = "StormProtection"; 
     
     //特殊
     public const string VtmBleedChance = "BleedChance"; //流血几率
@@ -415,6 +482,7 @@ public class VTModifiersCoreV2 {
     public const string VtmElementPoison = "ElementPoison";
     public const string VtmElementElectricity = "ElementElectricity";
     public const string VtmElementGhost = "ElementGhost";
+    public const string VtmElementIce = "ElementIce";
     public const string VtmPhysicFactor = "ElementPhysic"; //物理承伤倍率
     
     //秘法
@@ -452,6 +520,7 @@ public class VTModifiersCoreV2 {
         
         AddKey(new VtMKey(VtmShootDistanceMultiplier, nameof(ItemAgent_Gun.BulletDistance)) {
             applyOnGuns = true,
+            applyOnMelee = true,
             hashForMelee = nameof(ItemAgent_MeleeWeapon.AttackRange),
         });
         AddKey(new VtMKey(VtmShootSpeedMultiplier, nameof(ItemAgent_Gun.ShootSpeed)) {
@@ -494,6 +563,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmArmorPiercing, nameof(ItemAgent_Gun.ArmorPiercing)) {
             applyOnGuns = true, 
+            applyOnMelee = true,
             modifierType = ModifierType.Add,
             roundToInt = true,
         });
@@ -507,7 +577,31 @@ public class VTModifiersCoreV2 {
         AddKey(new VtMKey(VtmRecoilVMultiplier, nameof(ItemAgent_Gun.RecoilScaleV)){applyOnGuns = true});
         AddKey(new VtMKey(VtmScatterMultiplier, "ScatterFactor"){applyOnGuns = true});
         AddKey(new VtMKey(VtmScatterADSAMultiplier, "ScatterFactorADS"){applyOnGuns = true});
-        AddKey(new VtMKey(VtmViewAngle, "ViewAngle"){applyOnGuns = true});
+        AddKey(new VtMKey(VtmTraceAbility, nameof(ItemAgent_Gun.TraceAbility)) {
+            applyOnGuns = true,
+            modifierType = ModifierType.Add,
+        });
+        AddKey(new VtMKey(VtmBurstCount, nameof(ItemAgent_Gun.BurstCount)) {
+            applyOnGuns = true,
+            modifierType = ModifierType.Add,
+            forceFixed = true,
+            roundToInt = true,
+        });
+        AddKey(new VtMKey(VtmShotCount, nameof(ItemAgent_Gun.ShotCount)) {
+            applyOnGuns = true,
+            modifierType = ModifierType.Add,
+            forceFixed = true,
+            roundToInt = true,
+        });
+        AddKey(new VtMKey(VtmShootSpeedGainEachShoot, nameof(ItemAgent_Gun.ShootSpeedGainEachShoot)) {
+            applyOnGuns = true,
+            modifierType = ModifierType.Add,
+        });
+        AddKey(new VtMKey(VtmShootSpeedGainByShootMax, nameof(ItemAgent_Gun.ShootSpeedGainByShootMax)) {
+            applyOnGuns = true,
+            modifierType = ModifierType.Add,
+        });
+        
         
 
         AddKey(new VtMKey(VtmBleedChance, "VTMC_" + VtmBleedChance) {
@@ -522,6 +616,14 @@ public class VTModifiersCoreV2 {
             applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Electricity",
+            modifierTypeCustom = ModifierType.Add,
+            isCustom = true,
+        });
+        AddKey(new VtMKey(VtmElementIce, "VTMC_" + VtmElementIce) {
+            applyOnGuns = true, 
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
+            hashForEquipments = "ElementFactor_Ice",
             modifierTypeCustom = ModifierType.Add,
             isCustom = true,
         });
@@ -568,7 +670,10 @@ public class VTModifiersCoreV2 {
             modifierType = ModifierType.Add,
             roundToInt = true,
         });
-        AddKey(new VtMKey(VtmGasMask, "InventoryCapacity"){applyOnEquipments = true, modifierType = ModifierType.Add});
+        AddKey(new VtMKey(VtmGasMask, "GasMask") {
+            applyOnEquipments = true, 
+            modifierType = ModifierType.Add,
+        });
         AddKey(new VtMKey(VtmMaxWeight, "MaxWeight"){applyOnEquipments = true, modifierType = ModifierType.Add});
         AddKey(new VtMKey(VtmMoveability, nameof (ItemAgent_Gun.MoveSpeedMultiplier)) {
             applyOnGuns = true,
@@ -585,10 +690,26 @@ public class VTModifiersCoreV2 {
             forceTarget = ModifierTarget.Character,
         });
         
-        AddKey(new VtMKey(VtmViewAngle, "ViewAngle"){applyOnEquipments = true});
+        AddKey(new VtMKey(VtmViewAngle, "ViewAngle") {
+            applyOnEquipments = true
+        });
         AddKey(new VtMKey(VtmWalkSoundRange, nameof (CharacterMainControl.WalkSoundRange)){applyOnEquipments = true});
         AddKey(new VtMKey(VtmRunSoundRange, nameof (CharacterMainControl.RunSoundRange)){applyOnEquipments = true});
+        AddKey(new VtMKey(VtmColdProtection, nameof (CharacterMainControl.ColdProtection)) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add
+        });
+        AddKey(new VtMKey(VtmStormProtection, nameof (CharacterMainControl.StormProtection)) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add
+        });
         AddKey(new VtMKey(VtmMaxStamina, "Stamina"){applyOnEquipments = true, modifierType = ModifierType.Add});
+        AddKey(new VtMKey(VtmSenseRange, nameof(CharacterMainControl.SenseRange)) {
+            applyOnGuns = true,
+            applyOnEquipments = true,
+            forceTarget = ModifierTarget.Character,
+            modifierType = ModifierType.Add,
+        });
         
         AddKey(new VtMKey(VtmCritRate, nameof(ItemAgent_MeleeWeapon.CritRate)){applyOnMelee = true, modifierType = ModifierType.Add});
         AddKey(new VtMKey(VtmStaminaCost, nameof(ItemAgent_MeleeWeapon.StaminaCost)){applyOnMelee = true});
@@ -644,19 +765,20 @@ public class VTModifiersCoreV2 {
         public string hash; //哈希
 
         public string GetHashForItem(Item item) {
+            if (IsModifiersCard(item)) return hash;
             if (item.Tags.Contains(ItemTagMelee)) {
                 if (hashForMelee != null) {
                     return hashForMelee;
                 }
             }
-            if (item.Tags.Contains(ItemTagGun)) {
+            else if (item.Tags.Contains(ItemTagGun)) {
             }
             else {
                 if (hashForEquipments != null) {
                     return hashForEquipments;
                 }
                 if (hash == "Armor") {
-                    if (item.Tags.Contains(ItemTagHelmet) || item.Tags.Contains(ItemTagMask)) {
+                    if (item.Tags.Contains(ItemTagHelmet) || item.Tags.Contains(ItemTagMask) || item.Tags.Contains(ItemTagHeadset)) {
                         return nameof(Health.HeadArmor);
                     }
                     if (item.Tags.Contains(ItemTagArmor) || item.Tags.Contains(ItemTagBackpack)) {
@@ -678,7 +800,6 @@ public class VTModifiersCoreV2 {
 
         public bool applyOnGuns = false;
         public bool applyOnMelee = false;
-
         public string? hashForMelee = null;
         public bool applyOnEquipments = false;
         public string? hashForEquipments = null;
@@ -697,126 +818,41 @@ public class VTModifiersCoreV2 {
             this.hash = hash;
         }
     }
-    
-    //V1到V2已经迁移完成
-    // public static void MigrateToV2Data() {
-    //     VTModifiersCoreV2.VTModifierGroup v2group = new("default");
-    //     
-    //     foreach (VTModifiersCore.VtModifier v1Modifier in VTModifiersCore.ModifierData.Values) {
-    //         Dictionary<string, float> v2Data = new();
-    //         if (v1Modifier.Weight.HasValue) {
-    //             v2Data[VtmWeight] = v1Modifier.Weight.Value;
-    //         }
-    //         if (v1Modifier.PriceMultiplier.HasValue) {
-    //             v2Data[VtmPriceMultiplier] = v1Modifier.PriceMultiplier.Value;
-    //         }
-    //         if (v1Modifier.DamageMultiplier.HasValue) {
-    //             v2Data[VtmDamageMultiplier] = v1Modifier.DamageMultiplier.Value;
-    //         }
-    //         if (v1Modifier.AmmoSave.HasValue) {
-    //             v2Data[VtmAmmoSave] = v1Modifier.AmmoSave.Value;
-    //         }
-    //         if (v1Modifier.ArmorPiercing.HasValue) {
-    //             v2Data[VtmArmorPiercing] = v1Modifier.ArmorPiercing.Value;
-    //         }
-    //         if (v1Modifier.Penetrate.HasValue) {
-    //             v2Data[VtmPenetrate] = v1Modifier.Penetrate.Value;
-    //         }
-    //         if (v1Modifier.ShootSpeedMultiplier.HasValue) {
-    //             v2Data[VtmShootSpeedMultiplier] = v1Modifier.ShootSpeedMultiplier.Value;
-    //         }
-    //         if (v1Modifier.BulletSpeedMultiplier.HasValue) {
-    //             v2Data[VtmBulletSpeedMultiplier] = v1Modifier.BulletSpeedMultiplier.Value;
-    //         }
-    //         if (v1Modifier.ShootDistanceMultiplier.HasValue) {
-    //             v2Data[VtmShootDistanceMultiplier] = v1Modifier.ShootDistanceMultiplier.Value;
-    //         }
-    //         if (v1Modifier.ReloadTimeMultiplier.HasValue) {
-    //             v2Data[VtmReloadTimeMultiplier] = v1Modifier.ReloadTimeMultiplier.Value;
-    //         }
-    //         if (v1Modifier.RecoilScaleVMultiplier.HasValue) {
-    //             v2Data[VtmRecoilVMultiplier] = v1Modifier.RecoilScaleVMultiplier.Value;
-    //         }
-    //         if (v1Modifier.RecoilScaleHMultiplier.HasValue) {
-    //             v2Data[VtmRecoilHMultiplier] = v1Modifier.RecoilScaleHMultiplier.Value;
-    //         }
-    //         if (v1Modifier.ScatterFactorMultiplier.HasValue) {
-    //             v2Data[VtmScatterMultiplier] = v1Modifier.ScatterFactorMultiplier.Value;
-    //         }
-    //         if (v1Modifier.ScatterFactorADSMultiplier.HasValue) {
-    //             v2Data[VtmScatterADSAMultiplier] = v1Modifier.ScatterFactorADSMultiplier.Value;
-    //         }
-    //         if (v1Modifier.CritRate.HasValue) {
-    //             v2Data[VtmCritRate] = v1Modifier.CritRate.Value;
-    //         }
-    //         if (v1Modifier.CritDamageMultiplier.HasValue) {
-    //             v2Data[VtmCritDamageMultiplier] = v1Modifier.CritDamageMultiplier.Value;
-    //         }
-    //         if (v1Modifier.BleedChance.HasValue) {
-    //             v2Data[VtmBleedChance] = v1Modifier.BleedChance.Value;
-    //         }
-    //         if (v1Modifier.SoundRange.HasValue) {
-    //             v2Data[VtmSoundRange] = v1Modifier.SoundRange.Value;
-    //         }
-    //         if (v1Modifier.ElementFire.HasValue) {
-    //             v2Data[VtmElementFire] = v1Modifier.ElementFire.Value;
-    //         }
-    //         if (v1Modifier.ElementSpace.HasValue) {
-    //             v2Data[VtmElementSpace] = v1Modifier.ElementSpace.Value;
-    //         }
-    //         if (v1Modifier.ElementPoison.HasValue) {
-    //             v2Data[VtmElementPoison] = v1Modifier.ElementPoison.Value;
-    //         }
-    //         if (v1Modifier.ElementElectricity.HasValue) {
-    //             v2Data[VtmElementElectricity] = v1Modifier.ElementElectricity.Value;
-    //         }
-    //         if (v1Modifier.Armor.HasValue) {
-    //             v2Data[VtmArmor] = v1Modifier.Armor.Value;
-    //         }
-    //         if (v1Modifier.InventoryCapacity.HasValue) {
-    //             v2Data[VtmInventoryCapacity] = v1Modifier.InventoryCapacity.Value;
-    //         }
-    //         if (v1Modifier.MaxWeight.HasValue) {
-    //             v2Data[VtmMaxWeight] = v1Modifier.MaxWeight.Value;
-    //         }
-    //         if (v1Modifier.ViewAngle.HasValue) {
-    //             v2Data[VtmViewAngle] = v1Modifier.ViewAngle.Value;
-    //         }
-    //         if (v1Modifier.GasMask.HasValue) {
-    //             v2Data[VtmGasMask] = v1Modifier.GasMask.Value;
-    //         }
-    //         if (v1Modifier.Moveability.HasValue) {
-    //             v2Data[VtmMoveability] = v1Modifier.Moveability.Value;
-    //         }
-    //         if (v1Modifier.StaminaCost.HasValue) {
-    //             v2Data[VtmStaminaCost] = v1Modifier.StaminaCost.Value;
-    //         }
-    //         if (v1Modifier.MaxStamina.HasValue) {
-    //             v2Data[VtmMaxStamina] = v1Modifier.MaxStamina.Value;
-    //         }
-    //         v2group.modifiers[v1Modifier.key] = new VTModifiersCoreV2.VtModifierV2(v1Modifier.key) {
-    //             key = v1Modifier.key,
-    //             weight = v1Modifier.ModifierWeight,
-    //             quality = v1Modifier.ModifierLevel,
-    //             forceFixed = v1Modifier.ForceFixed,
-    //             applyOnGuns = v1Modifier.ApplyOnGuns,
-    //             applyOnMelee = v1Modifier.ApplyOnMelee,
-    //             applyOnEquipment = v1Modifier.ApplyOnEquipment,
-    //             applyOnHelmet = v1Modifier.ApplyOnHelmet,
-    //             applyOnArmor = v1Modifier.ApplyOnArmor,
-    //             applyOnBackpack = v1Modifier.ApplyOnBackpack,
-    //             data = v2Data,
-    //         };
-    //     }
-    //     JsonSerializerSettings settings = new JsonSerializerSettings
-    //     {
-    //         NullValueHandling = NullValueHandling.Ignore,
-    //         Formatting = Formatting.Indented // Optional: for readable output
-    //     };
-    //     File.WriteAllText(Path.Combine(ModBehaviour.Instance._resourceDirectory, "v2group.json"),
-    //         JsonConvert.SerializeObject(v2group, settings));
-    // }
-    
+
+    public static void PatchByCard(Item card, Item item, ItemDisplay itemDisplay) {
+        // VT.Log("尝试打词缀卡");
+        if (IsModifiersCard(item)) {
+            //不能给卡上卡
+            VT.BubbleUserDebug("Bubble_cannot_patch_to_card".ToPlainText());
+            VT.PostCustomSFX("Terraria_no.wav");
+            return;
+        }
+        string cardModifier = card.GetString(VariableVtModifierHashCode);
+        if (cardModifier == null) {
+            VT.BubbleUserDebug("Bubble_cannot_patch_empty_card".ToPlainText());
+            VT.PostCustomSFX("Terraria_no.wav");
+            return;
+        }
+        if (!ModifierData.TryGetValue(cardModifier, out VtModifierV2 vtModifierV2)) {
+            VT.PostCustomSFX("Terraria_no.wav");
+            return;
+        }
+
+        if (!vtModifierV2.CanPatchTo(item)) {
+            VT.BubbleUserDebug("Bubble_cannot_patch_to_item".ToPlainText());
+            VT.PostCustomSFX("Terraria_no.wav");
+            return;
+        }
+        int cardModifierSeed = card.GetInt(VariableVtModifierSeedHashCode, -1);
+        if (cardModifierSeed != -1) {
+            item.SetInt(VariableVtModifierSeedHashCode, cardModifierSeed);
+        }
+        TryUnpatchItem(item);
+        PatchItem(item, Sources.Card, cardModifier);
+        card.Detach();
+        VT.PostCustomSFX("Terraria_card_patch.wav");
+        VT.ForceUpdateItemDisplayName(itemDisplay);
+    }
     
     public struct VTModifierGroup {
         public string key;
@@ -842,8 +878,18 @@ public class VTModifiersCoreV2 {
         public bool applyOnHelmet = false;
         public bool applyOnArmor = false;
         public bool applyOnFaceMask = false;
+        public bool applyOnHeadset = false;
         public bool applyOnBackpack = false;
-        
+
+        public bool CanPatchTo(Item item) {
+            return (item.Tags.Contains(ItemTagGun) && applyOnGuns)
+                   || (item.Tags.Contains(ItemTagMelee) && applyOnMelee)
+                   || (item.Tags.Contains(ItemTagArmor) && (applyOnArmor || applyOnEquipment))
+                   || (item.Tags.Contains(ItemTagHelmet) && (applyOnHelmet || applyOnEquipment))
+                   || (item.Tags.Contains(ItemTagHeadset) && (applyOnHeadset || applyOnEquipment))
+                   || (item.Tags.Contains(ItemTagMask) && (applyOnFaceMask || applyOnEquipment))
+                   || (item.Tags.Contains(ItemTagBackpack) && (applyOnBackpack || applyOnEquipment));
+        }
         //核心数据，需要注意，这里面的键不能手动输入，而是一个固定的select
         public Dictionary<string, float> data = new();
 

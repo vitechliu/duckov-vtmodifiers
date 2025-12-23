@@ -1,6 +1,6 @@
 {
   "author": "Official",
-  "version": "0.6.0",
+  "version": "0.7.0",
   "lang": {
     "Stat_VTMC_Weight": "重量",
     "Stat_VTMC_AmmoSave": "弹药节省率",
@@ -9,17 +9,48 @@
     "Stat_VTMC_ElementSpace": "空间元素附加",
     "Stat_VTMC_ElementPoison": "毒元素附加",
     "Stat_VTMC_ElementGhost": "灵元素附加",
+    "Stat_VTMC_ElementIce": "冰元素附加",
     "Stat_VTMC_BleedChance": "流血概率",
     "Stat_VTMC_Endurance": "概率不消耗耐久",
     "Stat_VTMC_LifeSteal": "吸血",
     "Stat_VTMC_DeathRate": "即死",
     "Stat_VTMC_DodgeRate": "闪避率",
+    
+    "Stat_ShootSpeedGainEachShoot": "射速叠加",
+    "Stat_ShootSpeedGainByShootMax": "射速叠加上限",
+
+    "vt_modifiers_card_v1": "词缀卡v1",
+    "vt_modifiers_card_v2": "词缀卡v2",
+    "vt_modifiers_card_v3": "词缀卡v3",
+    "vt_modifiers_card_v1_Desc": "含有词缀的卡片，可以承载1-2级的词缀，拖拽到需要施加词缀的物品上即可使用",
+    "vt_modifiers_card_v2_Desc": "含有词缀的卡片，可以承载3-4级的词缀，拖拽到需要施加词缀的物品上即可使用",
+    "vt_modifiers_card_v3_Desc": "含有词缀的卡片，可以承载5-6级的词缀，拖拽到需要施加词缀的物品上即可使用",
+
+    "MSText_FixMode": "词缀属性是否固定",
+    "MSText_EnableModifiersCard": "启用词缀卡(重启游戏生效)",
+    "MSText_ArmorThreshold": "护甲属性倍率",
+    "MSText_DamageThreshold": "伤害属性倍率",
+    "MSText_Reforge": "允许重铸",
+    "MSText_ReforgePriceFactor": "重铸价格倍率",
+    "MSText_Forge": "允许词缀附加",
+    "MSText_ForgePriceFactor": "词缀附加价格倍率",
+    "MSText_EnemyPatchedPercentage": "敌人生成词缀概率",
+    "MSText_LootBoxPatchedPercentage": "物资箱生成词缀概率",
+    "MSText_CraftPatchedPercentage": "合成道具附带词缀概率",
+    "MSText_EnableCommunityModifiers": "支持社区词缀",
+    "MSText_EnableArcaneModifiers": "支持[秘法纪元]词缀",
+    "MSText_CustomModifiersDirectory": "自定义词缀目录",
+    "MSText_OfficialModifiersDirectory": "官方词缀目录",
+    "MSText_ReforgeKey": "重铸快捷键",
+    "MSText_Open": "打开",
+    
     "Unreal": "虚幻",
     "Sighted": "精准",
     "Light": "轻便",
     "Heavy": "重量级",
     "Deadly": "致命",
     "Eagle-Eye": "鹰眼",
+    
     "Legendary": "传说",
     "Silver": "银质",
     "Chaos": "混沌",
@@ -71,6 +102,19 @@
     "Auxiliary": "辅助",
     "All-In-All": "请输入文本",
     "Tempering": "钢化",
+
+    "WithIce": "冰峰",
+    "Storm": "风暴",
+    "Perception": "感知",
+    "Specter": "幽魂",
+    "Frozen": "霜冻",
+    "Three-Proof": "三防",
+    "Tracking": "追踪",
+    "Suppression": "压制",
+    "Scattering": "散射",
+    "Burst": "连发",
+    "Eldritch": "异骇",
+    
     
     "Magic": "魔力",
     "Rich-Magic": "蕴魔",
@@ -79,11 +123,14 @@
     
     "VTMC_FIX": "修正",
     "VTMC_Dodged": "Miss!",
-    "VTMC_NO_ITEM_SELECT": "未选中道具，无法重铸!",
     "Tag_vttag": "词缀",
     "Btn_reforge": "重铸",
     "Btn_forge": "词缀附加",
     "Bubble_lack_of_coin": "重铸需求的金额不足",
-    "Bubble_reforge_success": "重铸成功!"
+    "Bubble_no_item_select": "未选中道具，无法重铸!",
+    "Bubble_reforge_success": "重铸成功!",
+    "Bubble_cannot_patch_empty_card": "词缀卡缺少词缀!",
+    "Bubble_cannot_patch_to_card": "不能给词缀卡添加词缀卡！",
+    "Bubble_cannot_patch_to_item": "当前词缀不适合此道具！"
   }
 }

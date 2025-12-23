@@ -1,0 +1,234 @@
+{
+  "key": "default070",
+  "author": "Official",
+  "version": "0.7.0",
+  "isCommunity": false,
+  "modifiers": {
+    "WithIce": {
+      "key": "WithIce",
+      "author": null,
+      "weight": 80,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.5,
+        "ElementIce": 0.5
+      }
+    },
+    "Storm": {
+      "key": "Storm",
+      "author": null,
+      "weight": 60,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "StormProtection": 0.5,
+        "PriceMultiplier": 0.4
+      }
+    },
+    "Perception": {
+      "key": "Perception",
+      "author": null,
+      "weight": 120,
+      "quality": 1,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": true,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": true,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.3,
+        "SenseRange": 2
+      }
+    },
+    "Specter": {
+      "key": "Specter",
+      "author": null,
+      "weight": 40,
+      "quality": 5,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 3,
+        "ElementGhost": 0.6,
+        "WalkSoundRange": -0.7,
+        "Moveability": 0.1,
+        "SoundRange": -0.7,
+        "SenseRange": 3,
+        "DamageMultiplier": -0.1
+      }
+    },
+    "Frozen": {
+      "key": "Frozen",
+      "author": null,
+      "weight": 40,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": true,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 2.4,
+        "ElementIce": 0.6,
+        "ShootSpeedMultiplier": -0.2,
+        "DamageMultiplier": 0.2,
+        "ColdProtection": 1,
+        "Moveability": -0.05
+      }
+    },
+    "Three-Proof": {
+      "key": "Three-Proof",
+      "author": null,
+      "weight": 50,
+      "quality": 4,
+      "forceFixed": false,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": true,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 2,
+        "StormProtection": 1,
+        "GasMask": 1,
+        "ColdProtection": 1
+      }
+    },
+    "Tracking": {
+      "key": "Tracking",
+      "author": null,
+      "weight": 100,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "TraceAbility": 1,
+        "PriceMultiplier": 0.8
+      }
+    },
+    "Suppression": {
+      "key": "Suppression",
+      "author": null,
+      "weight": 80,
+      "quality": 2,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "ShootSpeedGainEachShoot": 2,
+        "ShootSpeedGainByShootMax": 20,
+        "PriceMultiplier": 0.3
+      }
+    },
+    "Scattering": {
+      "key": "Scattering",
+      "author": null,
+      "weight": 50,
+      "quality": 3,
+      "forceFixed": true,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.6,
+        "ShotCount": 1
+      }
+    },
+    "Burst": {
+      "key": "Burst",
+      "author": null,
+      "weight": 100,
+      "quality": 2,
+      "forceFixed": true,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 0.4,
+        "BurstCount": 2
+      }
+    },
+    "Eldritch": {
+      "key": "Eldritch",
+      "author": null,
+      "weight": 40,
+      "quality": 6,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "PriceMultiplier": 5,
+        "TraceAbility": 2,
+        "ShotCount": 3,
+        "DamageMultiplier": -0.3,
+        "BulletSpeedMultiplier": -0.8,
+        "ShootDistanceMultiplier": 2,
+        "AmmoSave": 0.9
+      }
+    }
+  }
+}

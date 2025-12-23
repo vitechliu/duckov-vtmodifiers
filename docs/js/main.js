@@ -26,6 +26,12 @@ const vtms = {
     ScatterADSMultiplier: "瞄准精度",
     RecoilVMultiplier: "垂直后坐力",
     RecoilHMultiplier: "水平后坐力",
+    TraceAbility: "子弹追踪",
+    BurstCount: "连发数",
+    ShootSpeedGainEachShoot: "每发射速叠加",
+    ShootSpeedGainByShootMax: "射速叠加上限",
+    
+    
     WalkSoundRange: "行走声音范围",
     RunSoundRange: "奔跑声音范围",
     Armor: "护甲加成",
@@ -35,16 +41,19 @@ const vtms = {
     MaxWeight: "负重",
     Moveability: "移动能力(移动速度系数)",
     RunAcc: "奔跑加速度",
-
+    SenseRange: "感知距离",
+    ColdProtection: "寒冷防护",
+    StormProtection: "风暴防护",
+    
     BleedChance: "流血概率",
     Weight: "重量修正",
     AmmoSave: "弹药节省率",
-    
 
     ElementFire: "火元素加成",
     ElementSpace: "空间元素加成",
     ElementPoison: "毒元素加成",
     ElementElectricity: "电元素加成",
+    ElementIce: "冰元素加成",
     ElementGhost: "灵元素加成",
     ElementPhysic: "物理抗性",
 
@@ -55,6 +64,13 @@ const vtms = {
     LifeSteal: "吸血",
     DeathRate: "即死",
     DodgeRate: "闪避率",
+
+    MaxMana: "最大魔量",
+    MagicPower: "法术强度",
+    MagicDistanceMultiplier: "法术距离",
+    ManaCost: "魔量消耗",
+    MagicCritRate: "法术暴击",
+    CastTime: "咏唱时间",
 }
 // 预定义的data字段键（根据你的C# struct中的可能值）
 // const predefinedDataKeys = [
@@ -135,6 +151,7 @@ async function loadJsonFileList() {
         const exampleFiles = [
             "default_0_5_1.json",
             "default_0_6_0.json",
+            "default_0_7_0.json",
             "community_v1.json",
             "vt_magic.json",
         ];
@@ -441,19 +458,20 @@ function createModifierViewHtml(modifierKey, modifier) {
 }
 
 // 创建应用目标HTML
+
+const applyTargetsDict = [
+    { key: 'applyOnGuns', label: '枪械' },
+    { key: 'applyOnMelee', label: '近战武器' },
+    { key: 'applyOnEquipment', label: '装备' },
+    { key: 'applyOnHelmet', label: '头盔' },
+    { key: 'applyOnArmor', label: '护甲' },
+    { key: 'applyOnFaceMask', label: '面罩' },
+    { key: 'applyOnHeadset', label: '耳机' },
+    { key: 'applyOnBackpack', label: '背包' }
+];
 function createApplyTargetsHtml(modifier) {
-    const targets = [
-        { key: 'applyOnGuns', label: '枪械' },
-        { key: 'applyOnMelee', label: '近战武器' },
-        { key: 'applyOnEquipment', label: '装备' },
-        { key: 'applyOnHelmet', label: '头盔' },
-        { key: 'applyOnArmor', label: '护甲' },
-        { key: 'applyOnFaceMask', label: '面罩' },
-        { key: 'applyOnBackpack', label: '背包' }
-    ];
-    
     let html = '';
-    targets.forEach(target => {
+    applyTargetsDict.forEach(target => {
         if (modifier[target.key]) {
             html += `
                 <div class="col-6 col-md-4">
@@ -733,10 +751,7 @@ function populateFormWithData(jsonData) {
             lastModifier.querySelector('[name="forceFixed"]').checked = modifier.forceFixed || false;
             
             // 填充应用目标
-            const applyTargets = [
-                'applyOnGuns', 'applyOnMelee', 'applyOnEquipment', 
-                'applyOnHelmet', 'applyOnArmor', 'applyOnFaceMask', 'applyOnBackpack'
-            ];
+            const applyTargets = Object.keys(applyTargetsDict)
             
             applyTargets.forEach(target => {
                 lastModifier.querySelector(`[name="${target}"]`).checked = modifier[target] || false;
@@ -818,6 +833,7 @@ function generateJsonFromForm() {
             applyOnHelmet: form.querySelector('[name="applyOnHelmet"]').checked,
             applyOnArmor: form.querySelector('[name="applyOnArmor"]').checked,
             applyOnFaceMask: form.querySelector('[name="applyOnFaceMask"]').checked,
+            applyOnHeadset: form.querySelector('[name="applyOnHeadset"]').checked,
             applyOnBackpack: form.querySelector('[name="applyOnBackpack"]').checked,
             data: {}
         };
@@ -989,6 +1005,7 @@ async function downloadJsonFile2(filename) {
                     "applyOnHelmet": false,
                     "applyOnArmor": false,
                     "applyOnFaceMask": false,
+                    "applyOnHeadset": false,
                     "applyOnBackpack": false,
                     "data": {
                         "PriceMultiplier": 1.5,

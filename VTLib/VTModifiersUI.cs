@@ -9,6 +9,7 @@ using SodaCraft.Localizations;
 using TMPro;
 using UnityEngine;
 using VTModifiers.ThirdParty;
+using VTModifiers.VTLib.Items;
 
 namespace VTModifiers.VTLib;
 
@@ -210,7 +211,7 @@ public class VTModifiersUI : MonoBehaviour {
                     VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Debug);
                 }
                 else {
-                    VT.BubbleUserDebug("VTMC_NO_ITEM_SELECT".ToPlainText());
+                    VT.BubbleUserDebug("Bubble_no_item_select".ToPlainText());
                 }
             }
             if (GUILayout.Button("-词缀", GUILayout.Width(80))) {
@@ -219,7 +220,7 @@ public class VTModifiersUI : MonoBehaviour {
                     VTModifiersCoreV2.TryUnpatchItem(item);
                 }
                 else {
-                    VT.BubbleUserDebug("VTMC_NO_ITEM_SELECT".ToPlainText());
+                    VT.BubbleUserDebug("Bubble_no_item_select".ToPlainText());
                 }
             }
             GUILayout.EndHorizontal();
@@ -319,6 +320,19 @@ public class VTModifiersUI : MonoBehaviour {
             //     if (itemDisplay) VT.ForceUpdateItemDisplayName(itemDisplay);
             // }
             GUILayout.EndHorizontal();
+            
+            GUILayout.BeginHorizontal();
+            if (GUILayout.Button("词卡1", GUILayout.Width(80))) {
+                ItemUtilities.SendToPlayer(ItemAssetsCollection.InstantiateSync(ItemUtil.MC_CARD_v1));
+            }
+            if (GUILayout.Button("词卡2", GUILayout.Width(80))) {
+                ItemUtilities.SendToPlayer(ItemAssetsCollection.InstantiateSync(ItemUtil.MC_CARD_v2));
+            }
+            if (GUILayout.Button("词卡3", GUILayout.Width(80))) {
+                ItemUtilities.SendToPlayer(ItemAssetsCollection.InstantiateSync(ItemUtil.MC_CARD_v3));
+            }
+            GUILayout.EndHorizontal();
+
         }
 
         GUILayout.EndScrollView();
