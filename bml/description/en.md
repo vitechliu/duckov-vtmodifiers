@@ -4,6 +4,8 @@ Loot boxes, enemy equipment, crafted equipment, etc. will now be randomly attach
 Supports "Reforging" and "Forging", which can be operated by right clicking on the equipment in the base.
 press Ctrl+F3 to open the mod configuration menu
 
+### 0.7.1
+- fix some bugs
 ### 0.7.0
 - Add new item: Modifiers Cards (v1, v2, v3), card comes with its own modifiers, which can be found in the chassis/JLab box, etc. Dragging the card onto the equipment will assign the modifiers
 - Added new map related modifiers such as cold and ice elements, as well as 11 new modifiers including bullet tracking, storm protection, and increased firing rate

@@ -32,7 +32,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
     public string _modifiersDirectoryCustom;
 
     public static string _modName = "VTModifiers";
-    public static string _version = "0.7.0";
+    public static string _version = "0.7.1";
     
     protected bool _isInitialized = false;
 
@@ -73,7 +73,10 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
             float instantDeathRate = VTModifiersCoreV2.Modify(__instance.Item,
                 VTModifiersCoreV2.VtmDeathRate);
             if (VT.Probability(instantDeathRate)) {
-                temp.context.damage = 999999f;
+                CharacterMainControl c = __instance.Holder;
+                //只有玩家才能应用即死
+                if (c && c.IsMainCharacter)
+                    temp.context.damage = 999999f;
             }
             temp.context.element_Electricity = VTModifiersCoreV2.Modify(__instance.Item,
                 VTModifiersCoreV2.VtmElementElectricity, temp.context.element_Electricity);
@@ -426,7 +429,27 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Craft);
     }
 
-
+    //词缀化来源：地面词缀卡
+    [HarmonyPostfix]
+    [HarmonyPatch(typeof(CharacterItemControl), "PickupItem")]
+    public static void CharacterItemControl_PickupItem_PostPatch(
+        CharacterItemControl __instance,
+        Item item,
+        bool __result
+        ) {
+        if (__result) {
+            if (item 
+                && VTModifiersCoreV2.IsModifiersCard(item) 
+                && item.FromInfoKey == "Ground"
+                && !VTModifiersCoreV2.IsPatchedItem(item)) {
+                VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Card);
+            }
+        }
+        VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Craft);
+    }
+    
+    
+    
     TextMeshProUGUI _text;
 
     TextMeshProUGUI Text {
@@ -503,6 +526,7 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
         Item main = __instance.Target;
         if (
             part && main
+                 && part != main
                  && VTModifiersCoreV2.IsModifiersCard(part)
                  && VTModifiersCoreV2.ItemCanBePatched(main)
         ) {

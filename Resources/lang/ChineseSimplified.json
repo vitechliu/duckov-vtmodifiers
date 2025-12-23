@@ -1,6 +1,6 @@
 {
   "author": "Official",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "lang": {
     "Stat_VTMC_Weight": "重量",
     "Stat_VTMC_AmmoSave": "弹药节省率",
@@ -15,6 +15,7 @@
     "Stat_VTMC_LifeSteal": "吸血",
     "Stat_VTMC_DeathRate": "即死",
     "Stat_VTMC_DodgeRate": "闪避率",
+    "Stat_Armor": "护甲",
     
     "Stat_ShootSpeedGainEachShoot": "射速叠加",
     "Stat_ShootSpeedGainByShootMax": "射速叠加上限",
@@ -129,7 +130,7 @@
     "Bubble_lack_of_coin": "重铸需求的金额不足",
     "Bubble_no_item_select": "未选中道具，无法重铸!",
     "Bubble_reforge_success": "重铸成功!",
-    "Bubble_cannot_patch_empty_card": "词缀卡缺少词缀!",
+    "Bubble_cannot_patch_empty_card": "空的词缀卡，请先于基地右键为其附加词缀!",
     "Bubble_cannot_patch_to_card": "不能给词缀卡添加词缀卡！",
     "Bubble_cannot_patch_to_item": "当前词缀不适合此道具！"
   }

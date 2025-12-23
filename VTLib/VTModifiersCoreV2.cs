@@ -417,9 +417,11 @@ public class VTModifiersCoreV2 {
         return original;
     }
     public static int ReforgePrice(Item item) {
-        float plus = IsPatchedItem(item)
+        bool isPatched = IsPatchedItem(item);
+        float plus = isPatched
             ? VTSettingManager.Setting.ReforgePriceFactor
             : VTSettingManager.Setting.ForgePriceFactor; //词缀化需要5倍
+        if (!isPatched && IsModifiersCard(item)) return 0;
         return Mathf.RoundToInt(Modify(item, VtmPriceMultiplier, item.Value) * plus);
     }
     

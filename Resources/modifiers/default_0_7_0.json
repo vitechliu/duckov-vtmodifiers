@@ -145,7 +145,8 @@
       "applyOnBackpack": false,
       "data": {
         "TraceAbility": 1,
-        "PriceMultiplier": 0.8
+        "BulletSpeedMultiplier": -0.4,
+        "PriceMultiplier": 1.3
       }
     },
     "Suppression": {
