@@ -445,7 +445,6 @@ public class ModBehaviour : Duckov.Modding.ModBehaviour {
                 VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Card);
             }
         }
-        VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.Craft);
     }
     
     
