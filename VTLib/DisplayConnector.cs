@@ -1,28 +1,13 @@
 using System.Reflection;
 using ItemStatsSystem;
 using SodaCraft.Localizations;
+using VTLib;
 
 namespace VTModifiers.VTLib;
 
 //更好的
-public class DisplayConnector : Connector {
-    public static bool Connected = false;
-    public const string MOD_NAME = "CustomItemLevelValue";
-
-    public static void TryConnect() {
-        // VT.Log("tryConnect1");
-        if (Connected) return;
-        if (AssemblyHelper.IsAssemblyLoaded("CustomItemLevelValue")) {
-            Connected = true;
-            ModBehaviour.LogStatic("成功连接到[更丰富的信息显示]...");
-        }
-    }
-
-    public static void OnDeactivated() {
-        ModBehaviour.LogStatic("[更丰富的信息显示]已卸载");
-        Connected = false;
-    }
-
+public class DisplayConnector {
+    public static bool Connected => VT.IsModConnected(ModifiersModBehaviour.MOD_CILV);
     public static void PatchItem(Item item, VTModifiersCoreV2.VtModifierV2 modifier) {
         //能走到这里，说明modifier一定能找到
         string modifierName = modifier.key.ToPlainText();
@@ -58,7 +43,7 @@ public class DisplayConnector : Connector {
             }
         }
         catch (Exception e) {
-            ModBehaviour.LogStatic("[更丰富的信息显示]刷新失败:" + e.Message);
+            VT.Log("[更丰富的信息显示]刷新失败:" + e.Message);
         }
     }
 }

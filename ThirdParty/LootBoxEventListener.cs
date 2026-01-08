@@ -3,30 +3,39 @@ using UnityEngine;
 using Cysharp.Threading.Tasks;
 using ItemStatsSystem;
 using VTModifiers.VTLib;
+using VTLib;
 
 namespace VTModifiers.ThirdParty {
     public class LootBoxEventListener : MonoBehaviour {
         private static LootBoxEventListener _instance;
+        private static readonly object _lock = new object();
         private static EventInfo? _lootBoxEvent;
         private static MethodInfo? _eventSubscribeMethod;
         private static MethodInfo? _eventUnsubscribeMethod;
+        private static bool _isSubscribed = false;
+        private static bool _initializationAttempted = false;
 
         public static LootBoxEventListener Instance {
             get {
-                if (_instance == null) {
-                    GameObject go = new GameObject("LootBoxEventListener");
-                    _instance = go.AddComponent<LootBoxEventListener>();
-                    DontDestroyOnLoad(go);
+                lock (_lock) {
+                    if (_instance == null) {
+                        GameObject go = new GameObject("LootBoxEventListener");
+                        _instance = go.AddComponent<LootBoxEventListener>();
+                        DontDestroyOnLoad(go);
+                    }
+                    return _instance;
                 }
-                return _instance;
             }
         }
 
         void Start() {
-            Invoke(nameof(InitializeListener), 1.0f);
+            InitializeListener();
         }
 
         private void InitializeListener() {
+            if (_isSubscribed) {
+                return; // 防止重复订阅
+            }
             try {
                 Assembly randomNpcAssembly = null;
                 foreach (Assembly assembly in AppDomain.CurrentDomain.GetAssemblies()) {
@@ -37,112 +46,114 @@ namespace VTModifiers.ThirdParty {
                 }
 
                 if (randomNpcAssembly == null) {
-                    // ModBehaviour.LogStatic("用户未安装SCAV mod");
-                    VTSettingManager._scavLoaded = false;
+                    VT.Log("未找到RandomNpc程序集");
                     return;
                 }
 
                 Type broadcasterType = randomNpcAssembly.GetType("RandomNpc.LootBoxEventBroadcaster");
                 if (broadcasterType == null) {
-                    ModBehaviour.LogStatic("未找到LootBoxEventBroadcaster类型");
+                    VT.Log("未找到LootBoxEventBroadcaster类型");
                     return;
                 }
 
                 _lootBoxEvent = broadcasterType.GetEvent("OnLootBoxModified");
                 if (_lootBoxEvent == null) {
-                    ModBehaviour.LogStatic("未找到OnLootBoxModified事件");
+                    VT.Log("未找到OnLootBoxModified事件");
+                    return;
+                }
+
+                _eventSubscribeMethod = broadcasterType.GetMethod("add_OnLootBoxModified");
+                if (_eventSubscribeMethod == null) {
+                    VT.Log("未找到add_OnLootBoxModified方法");
+                    return;
+                }
+
+                _eventUnsubscribeMethod = broadcasterType.GetMethod("remove_OnLootBoxModified");
+                if (_eventUnsubscribeMethod == null) {
+                    VT.Log("未找到remove_OnLootBoxModified方法");
                     return;
                 }
 
                 MethodInfo handlerMethod = typeof(LootBoxEventListener).GetMethod("OnLootBoxModified",
                     BindingFlags.NonPublic | BindingFlags.Instance);
+                
+                if (handlerMethod == null) {
+                    VT.Log("未找到OnLootBoxModified处理方法");
+                    return;
+                }
 
                 // 创建委托
                 Delegate handler = Delegate.CreateDelegate(_lootBoxEvent.EventHandlerType, this, handlerMethod);
 
-                _eventSubscribeMethod = broadcasterType.GetMethod("add_OnLootBoxModified");
+                // 订阅事件
                 _eventSubscribeMethod.Invoke(null, new object[] { handler });
+                _isSubscribed = true;
 
-                ModBehaviour.LogStatic("检测到用户安装SCAV mod, 联动订阅");
-                VTSettingManager._scavLoaded = true;
-                ModSettingConnector.InitSCAV();
+                VT.Log("检测到用户安装SCAV mod, 联动订阅");
+                ModSettingConnector.TryInitSCAV();
+            }
+            catch (System.Reflection.ReflectionTypeLoadException ex) {
+                VT.Log($"订阅战利品箱修改事件失败: {ex.Message}");
+                foreach (var loaderEx in ex.LoaderExceptions) {
+                    VT.Log($"加载异常: {loaderEx.Message}");
+                }
             }
             catch (Exception ex) {
-                ModBehaviour.LogStatic($"订阅战利品箱修改事件失败: {ex.Message}");
-                // 如果失败，尝试重新初始化
-                Invoke(nameof(InitializeListener), 2.0f);
+                VT.Log($"订阅战利品箱修改事件失败: {ex.Message}");
+                // 如果失败，尝试重新初始化（限制重试次数）
+                if (!_initializationAttempted) {
+                    _initializationAttempted = true;
+                    Invoke(nameof(InitializeListener), 2.0f);
+                }
             }
         }
 
         void OnDestroy() {
             try {
-                if (_eventSubscribeMethod != null && _lootBoxEvent != null) {
+                if (_isSubscribed && _eventSubscribeMethod != null && _lootBoxEvent != null && _eventUnsubscribeMethod != null) {
                     // 获取当前类的方法信息
                     MethodInfo handlerMethod = typeof(LootBoxEventListener).GetMethod("OnLootBoxModified",
                         BindingFlags.NonPublic | BindingFlags.Instance);
 
-                    // 创建委托
-                    Delegate handler = Delegate.CreateDelegate(_lootBoxEvent.EventHandlerType, this, handlerMethod);
+                    if (handlerMethod != null) {
+                        // 创建委托
+                        Delegate handler = Delegate.CreateDelegate(_lootBoxEvent.EventHandlerType, this, handlerMethod);
 
-                    // 获取取消订阅方法
-                    _eventUnsubscribeMethod = _eventSubscribeMethod.DeclaringType.GetMethod("remove_OnLootBoxModified");
+                        // 取消订阅事件
+                        _eventUnsubscribeMethod.Invoke(null, new object[] { handler });
+                        _isSubscribed = false;
 
-                    // 取消订阅事件
-                    _eventUnsubscribeMethod?.Invoke(null, new object[] { handler });
-
-                    ModBehaviour.LogStatic("已通过反射取消订阅战利品箱修改事件");
+                        VT.Log("已通过反射取消订阅战利品箱修改事件");
+                    }
                 }
             }
             catch (Exception ex) {
-                ModBehaviour.LogStatic($"取消订阅战利品箱修改事件失败: {ex.Message}");
+                VT.Log($"取消订阅战利品箱修改事件失败: {ex.Message}");
             }
         }
 
         private void OnLootBoxModified(InteractableLootbox lootBox) {
             if (lootBox == null) {
-                ModBehaviour.LogStatic("[LootBoxEventListener] 接收到空的战利品箱对象");
+                VT.Log("[LootBoxEventListener] 接收到空的战利品箱对象");
                 return;
             }
-
             try {
-                if (lootBox.Inventory) {
+                if (lootBox.Inventory != null) {
                     foreach (Item item in lootBox.Inventory) {
                         VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.SCAV);
                     }
                 }
-                // ModBehaviour.LogStatic($"[LootBoxEventListener] 已获取lootbox");
+                // ModBehaviour.VT.Log($"[LootBoxEventListener] 已获取lootbox");
+            }
+            catch (System.ArgumentNullException ex) {
+                VT.Log($"[LootBoxEventListener] 处理战利品箱修改事件时遇到空引用: {ex.Message}");
+            }
+            catch (System.InvalidOperationException ex) {
+                VT.Log($"[LootBoxEventListener] 处理战利品箱修改事件时遇到操作异常: {ex.Message}");
             }
             catch (Exception ex) {
-                ModBehaviour.LogStatic($"[LootBoxEventListener] 处理战利品箱修改事件时出错: {ex.Message}");
+                VT.Log($"[LootBoxEventListener] 处理战利品箱修改事件时出错: {ex.Message}");
             }
         }
-        //
-        // private async UniTask AddItemToLootBox(InteractableLootbox lootBox, int itemID) {
-        //     try {
-        //         Item newItem = await ItemAssetsCollection.InstantiateAsync(itemID);
-        //         if (newItem == null) {
-        //             ModBehaviour.LogStatic($"[LootBoxEventListener] 无法创建ID为{itemID}的物品");
-        //             return;
-        //         }
-        //
-        //         var inventory = lootBox.Inventory;
-        //         if (inventory == null) {
-        //             ModBehaviour.LogStatic("[LootBoxEventListener] 战利品箱库存为空");
-        //             return;
-        //         }
-        //
-        //         MethodInfo addMethod = inventory.GetType().GetMethod("AddItem");
-        //         if (addMethod != null) {
-        //             addMethod.Invoke(inventory, new object[] { newItem });
-        //             ModBehaviour.LogStatic($"[LootBoxEventListener] 已向战利品箱添加ID为{itemID}的物品: {newItem.DisplayName}");
-        //         }
-        //         else {
-        //             ModBehaviour.LogStatic("[LootBoxEventListener] 无法找到AddItem方法");
-        //         }
-        //     }
-        //     catch (Exception ex) {
-        //         ModBehaviour.LogStatic($"[LootBoxEventListener] 向战利品箱添加物品时出错: {ex.Message}");
-        //     }
-        // }
     }
 }

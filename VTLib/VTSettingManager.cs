@@ -1,12 +1,15 @@
 using Newtonsoft.Json;
 using UnityEngine;
+using VTLib;
 
 namespace VTModifiers.VTLib;
 
 public static class VTSettingManager {
-    public static string SettingFilePath => Path.Combine(ModBehaviour.Instance._cfgDirectoryNew, "config.json");
 
     public static void LoadSetting() {
+        if (!VT.Mod) return;
+        if (VT.Mod.SettingFilePath == null) return;
+        string SettingFilePath = Path.Combine(VT.Mod.SettingFilePath, "config.json");
         try {
             if (File.Exists(SettingFilePath)) {
                 // 读取文件内容
@@ -26,41 +29,41 @@ public static class VTSettingManager {
 
                 // 3. 转换回设置对象
                 Setting = defaultJson.ToObject<VtModifierSetting>();
-                ModBehaviour.LogStatic("设置加载成功");
+                VT.Log("设置加载成功");
             }
             else {
                 // 文件不存在，使用默认设置
                 Setting = new VtModifierSetting();
-                ModBehaviour.LogStatic("未找到设置文件，使用默认设置");
+                VT.Log("未找到设置文件，使用默认设置");
                 OnSettingChanged();
             }
         }
         catch (System.Exception ex) {
-            ModBehaviour.LogStatic($"加载设置失败: {ex.Message}\n{ex.StackTrace}");
+            VT.Log($"加载设置失败: {ex.Message}\n{ex.StackTrace}");
             // 加载失败时强制使用默认设置
             Setting = new VtModifierSetting();
         }
     }
 
     public static void OnSettingChanged() {
+        if (!VT.Mod) return;
+        if (VT.Mod.SettingFilePath == null) return;
+        string SettingFilePath = Path.Combine(VT.Mod.SettingFilePath, "config.json");
         try {
             // 序列化当前设置（格式化便于查看）
             string json = JsonConvert.SerializeObject(Setting, Formatting.Indented);
-
             // 写入文件
             File.WriteAllText(SettingFilePath, json);
-            if (Setting.Debug) ModBehaviour.LogStatic($"设置已保存到: {SettingFilePath}");
+            if (Setting.Debug) VT.Log($"设置已保存到: {SettingFilePath}");
         }
         catch (System.Exception ex) {
-            if (Setting.Debug) ModBehaviour.LogStatic($"保存设置失败: {ex.Message}\n{ex.StackTrace}");
+            if (Setting.Debug) VT.Log($"保存设置失败: {ex.Message}\n{ex.StackTrace}");
         }
     }
 
     public static VtModifierSetting Setting = new VtModifierSetting();
 
-    public static bool _scavLoaded = false;
 
-    public static bool SCAVLoaded => _scavLoaded;
     public struct VtModifierSetting {
         public bool Debug = false;
 
@@ -85,6 +88,7 @@ public static class VTSettingManager {
         public bool EnableArcaneModifiers = true; //是否支持秘法纪元词缀
 
         public KeyCode ReforgeKey = KeyCode.Keypad9;
+        
         public VtModifierSetting() { }
     }
 }

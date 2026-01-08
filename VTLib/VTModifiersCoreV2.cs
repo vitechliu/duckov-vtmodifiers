@@ -9,7 +9,7 @@ using UnityEngine;
 using VTModifiers.ThirdParty;
 using VTModifiers.VTLib.Items;
 using Random = UnityEngine.Random;
-
+using VTLib;
 // ReSharper disable All
 
 namespace VTModifiers.VTLib;
@@ -48,7 +48,7 @@ public class VTModifiersCoreV2 {
     public static Dictionary<string, string> AuthorData = new();
 
     public static void PatchItemDisplayInfo(Item item, VtModifierV2 modifier) {
-        if (!DisplayConnector.Connected) return;
+        if (!VT.IsModConnected(ModifiersModBehaviour.MOD_CILV)) return;
         DisplayConnector.PatchItem(item, modifier);
         DisplayConnector.TryRefresh(item);
     }
@@ -94,8 +94,8 @@ public class VTModifiersCoreV2 {
         ModifierGroups.Clear();
         VTModifiersUI.modifiers.Clear();
 
-        string directoryPath1 = ModBehaviour.Instance._modifiersDirectoryPersistant;
-        string directoryPath2 = ModBehaviour.Instance._modifiersDirectoryCustom;
+        string directoryPath1 = ModifiersModBehaviour.Instance._modifiersDirectoryPersistant;
+        string directoryPath2 = ModifiersModBehaviour.Instance._modifiersDirectoryCustom;
         List<string> jsonFiles = new();
         if (Directory.Exists(directoryPath1)) {
             jsonFiles.AddRange(Directory.GetFiles(directoryPath1, "*.json"));
@@ -137,7 +137,7 @@ public class VTModifiersCoreV2 {
         foreach (VTModifierGroup group in ModifierGroups) {
             if (group.isCommunity && !VTSettingManager.Setting.EnableCommunityModifiers) continue;
             if (group.key == "vt_magic" && (
-                !VTSettingManager.Setting.EnableArcaneModifiers || !MagicConnector.Connected
+                !VTSettingManager.Setting.EnableArcaneModifiers || !VT.IsModConnected(ModifiersModBehaviour.MOD_VTMAGIC)
             )) continue;
 
             bool isCard = IsModifiersCard(item);
@@ -207,7 +207,7 @@ public class VTModifiersCoreV2 {
     public static void TryUnpatchItem(Item item) {
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier == null) return;
-        CustomDataCollection variables = Traverse.Create(item).Field("variables").GetValue<CustomDataCollection>();
+        CustomDataCollection variables = item.variables;
         if (variables != null) {
             VT.RemoveItemVariable(variables, VariableVtModifierHashCode);
             VT.RemoveItemVariable(variables, VariableVtModifierSeedHashCode);
@@ -351,8 +351,7 @@ public class VTModifiersCoreV2 {
         value *= polarity;
         if (item.Modifiers == null) {
             item.CreateModifiersComponent();
-            ModifierDescriptionCollection mdc = item.Modifiers;
-            Traverse.Create(mdc).Field("list").SetValue(new List<ModifierDescription>());
+            item.Modifiers!.list = new List<ModifierDescription>();
         }
         if (item.Modifiers == null) return false;
         if (item.Modifiers.Find(tmd => (tmd.Key == hash && IsModMD(tmd))) != null) {
@@ -376,8 +375,7 @@ public class VTModifiersCoreV2 {
             false,
             MAGIC_ORDER
         );
-        Traverse tmp = Traverse.Create(md);
-        tmp.Field("display").SetValue(true);
+        md.display = true;
         item.Modifiers.Add(md);
         return true;
     }
@@ -426,7 +424,7 @@ public class VTModifiersCoreV2 {
     }
     
     public static void Log(string message, bool isError = false) {
-        ModBehaviour.LogStatic(message, isError);
+        VT.Log(message, isError);
     }
     
     
@@ -853,7 +851,7 @@ public class VTModifiersCoreV2 {
         PatchItem(item, Sources.Card, cardModifier);
         card.Detach();
         VT.PostCustomSFX("Terraria_card_patch.wav");
-        VT.ForceUpdateItemDisplayName(itemDisplay);
+        itemDisplay.nameText.text = itemDisplay.Target.DisplayName;
     }
     
     public struct VTModifierGroup {

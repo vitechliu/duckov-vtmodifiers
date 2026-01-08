@@ -1,22 +1,16 @@
-using System.Globalization;
-using System.Text;
-using Duckov.Economy;
-using Duckov.UI;
-using Duckov.Utilities;
-using HarmonyLib;
-using ItemStatsSystem;
+using VTLib;
 using SodaCraft.Localizations;
-using TMPro;
 using UnityEngine;
-using VTModifiers.ThirdParty;
+using VTLib.ThirdParty;
 
 namespace VTModifiers.VTLib;
 
 public static class ModSettingConnector {
     public static void Init() {
-        bool success = ModSettingAPI.Init(ModBehaviour.Instance.info);
+        scavSettingLoaded = false;
+        bool success = ModSettingAPI.Init(ModifiersModBehaviour.Instance.info);
         if (!success) {
-            ModBehaviour.LogStatic("接入ModSetting失败");
+            VT.Log("接入ModSetting失败");
             return;
         }
         
@@ -93,39 +87,38 @@ public static class ModSettingConnector {
             });
         ModSettingAPI.AddButton("CustomModifiersDirectory", "MSText_CustomModifiersDirectory".ToPlainText(), "MSText_Open".ToPlainText(), 
             () => {
-                if (Directory.Exists(ModBehaviour.Instance._modifiersDirectoryCustom)) {
+                if (Directory.Exists(ModifiersModBehaviour.Instance._modifiersDirectoryCustom)) {
                     //打开对应目录
-                    VT.OpenFolderInExplorer(ModBehaviour.Instance._modifiersDirectoryCustom);
+                    VT.OpenFolderInExplorer(ModifiersModBehaviour.Instance._modifiersDirectoryCustom);
                 }
             });
         ModSettingAPI.AddButton("OfficialModifiersDirectory", "MSText_OfficialModifiersDirectory".ToPlainText(), "MSText_Open".ToPlainText(), 
             () => {
-                if (Directory.Exists(ModBehaviour.Instance._modifiersDirectoryPersistant)) {
+                if (Directory.Exists(ModifiersModBehaviour.Instance._modifiersDirectoryPersistant)) {
                     //打开对应目录
-                    VT.OpenFolderInExplorer(ModBehaviour.Instance._modifiersDirectoryPersistant);
+                    VT.OpenFolderInExplorer(ModifiersModBehaviour.Instance._modifiersDirectoryPersistant);
                 }
             });
         ModSettingAPI.AddKeybinding("ReforgeKey", "MSText_ReforgeKey".ToPlainText(), VTSettingManager.Setting.ReforgeKey, 
+            KeyCode.Keypad9,
             b => {
                 VTSettingManager.Setting.ReforgeKey = b;
                 OnSettingChanged();
             });
     }
-    public static void InitSCAV() {
-        bool success = ModSettingAPI.Init(ModBehaviour.Instance.info);
-        if (!success) {
-            return;
-        }
-        
+
+    public static bool scavSettingLoaded = false;
+    public static void TryInitSCAV() {
+        if (scavSettingLoaded || !ModSettingAPI.IsInit) return;
+        if (!VT.IsModConnected(ModifiersModBehaviour.MOD_SCAV)) return;
         ModSettingAPI.AddSlider("SCAVPercentage", "SCAV模式生成词缀概率", VTSettingManager.Setting.SCAVPercentage, 
             new Vector2(0f, 1f), f => {
                 VTSettingManager.Setting.SCAVPercentage = f;
                 OnSettingChanged();
             });
+        scavSettingLoaded = true;
     }
     static void OnSettingChanged() {
-        if (VTModifiersUI.debouncer != null) {
-            VTModifiersUI.debouncer.Invoke();
-        }
+        SettingUtil.OnSettingChangedDebounce();
     }
 }

@@ -3,6 +3,7 @@ using Duckov.Utilities;
 using ItemStatsSystem;
 using UnityEngine;
 using Object = UnityEngine.Object;
+using VTLib;
 
 namespace VTModifiers.VTLib.Items; 
 

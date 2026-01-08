@@ -10,26 +10,15 @@ using TMPro;
 using UnityEngine;
 using VTModifiers.ThirdParty;
 using VTModifiers.VTLib.Items;
+using VTLib;
 
 namespace VTModifiers.VTLib;
 
 public class VTModifiersUI : MonoBehaviour {
-    private ModBehaviour mod;
 
     private bool show = false;
 
-    public static Debouncer? debouncer;
-    private void Start() {
-        if (mod == null) {
-            mod = ModBehaviour.Instance;
-        }
-        if (debouncer == null) {
-            debouncer = new Debouncer(VTSettingManager.OnSettingChanged, 1000);
-        }
-    }
-
     public static List<string> modifiers = new();
-
 
     void Update() {
         if (
@@ -178,7 +167,7 @@ public class VTModifiersUI : MonoBehaviour {
             1.01f
         );
 
-        if (VTSettingManager.SCAVLoaded) {
+        if (VT.IsModConnected(ModifiersModBehaviour.MOD_SCAV)) {
             GUILayout.BeginHorizontal();
             GUILayout.Label("SCAV附带词缀概率");
             GUILayout.FlexibleSpace();
@@ -192,15 +181,14 @@ public class VTModifiersUI : MonoBehaviour {
             );
         }
 
-        if (GUI.changed && debouncer != null) {
-            debouncer.Invoke();
+        if (GUI.changed) {
+            SettingUtil.OnSettingChangedDebounce();
         }
 
         
         if (toggleDebug) {
             GUILayout.Label("");
             GUILayout.Label("");
-            GUILayout.Label("秘法纪元连接状态:" + MagicConnector.Connected);
             //词缀操作
             GUILayout.Label("测试功能(会极大影响游戏体验，慎重使用！）");
             GUILayout.BeginHorizontal();
@@ -288,7 +276,7 @@ public class VTModifiersUI : MonoBehaviour {
 
                     if ((UnityEngine.Object)item.Modifiers != (UnityEngine.Object)null) {
                         foreach (ModifierDescription modifier in item.Modifiers) {
-                            ModifierTarget mt = Traverse.Create(modifier).Field("target").GetValue<ModifierTarget>();
+                            ModifierTarget mt = modifier.target;
                             string mts = mt.ToString();
                             stringBuilder.AppendLine("Modifier:" + modifier.Key + "\t" + modifier.DisplayName + "\t" +
                                                      "MT:" + mts + "\t" + modifier.GetDisplayValueString());
@@ -341,7 +329,7 @@ public class VTModifiersUI : MonoBehaviour {
 
 
     public static void Log(string message, bool isError = false) {
-        ModBehaviour.LogStatic(message, isError);
+        VT.Log(message, isError);
     }
 
     public class Debouncer {
