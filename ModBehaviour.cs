@@ -1,4 +1,4 @@
-using HarmonyLib;
 namespace VTModifiers;
-public class ModBehaviour : ModifiersModBehaviour {
+
+public class ModBehaviour : VTMO {
 }

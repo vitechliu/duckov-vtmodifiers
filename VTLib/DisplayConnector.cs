@@ -7,7 +7,7 @@ namespace VTModifiers.VTLib;
 
 //更好的
 public class DisplayConnector {
-    public static bool Connected => VT.IsModConnected(ModifiersModBehaviour.MOD_CILV);
+    public static bool Connected => VTMO.IsModConnected(VTMO.MOD_CILV);
     public static void PatchItem(Item item, VTModifiersCoreV2.VtModifierV2 modifier) {
         //能走到这里，说明modifier一定能找到
         string modifierName = modifier.key.ToPlainText();
@@ -36,14 +36,14 @@ public class DisplayConnector {
                 if (method != null) {
                     // 调用方法，refreshUI设置为true
                     method.Invoke(instance, new object[] { item, true });
-                    // VT.Log("invoke success");
+                    // VTMO.Log("invoke success");
                 }
 
                 
             }
         }
         catch (Exception e) {
-            VT.Log("[更丰富的信息显示]刷新失败:" + e.Message);
+            VTMO.Log("[更丰富的信息显示]刷新失败:" + e.Message);
         }
     }
 }

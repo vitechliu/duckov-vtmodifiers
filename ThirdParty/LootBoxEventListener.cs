@@ -46,31 +46,31 @@ namespace VTModifiers.ThirdParty {
                 }
 
                 if (randomNpcAssembly == null) {
-                    VT.Log("未找到RandomNpc程序集");
+                    VTMO.Log("未找到RandomNpc程序集");
                     return;
                 }
 
                 Type broadcasterType = randomNpcAssembly.GetType("RandomNpc.LootBoxEventBroadcaster");
                 if (broadcasterType == null) {
-                    VT.Log("未找到LootBoxEventBroadcaster类型");
+                    VTMO.Log("未找到LootBoxEventBroadcaster类型");
                     return;
                 }
 
                 _lootBoxEvent = broadcasterType.GetEvent("OnLootBoxModified");
                 if (_lootBoxEvent == null) {
-                    VT.Log("未找到OnLootBoxModified事件");
+                    VTMO.Log("未找到OnLootBoxModified事件");
                     return;
                 }
 
                 _eventSubscribeMethod = broadcasterType.GetMethod("add_OnLootBoxModified");
                 if (_eventSubscribeMethod == null) {
-                    VT.Log("未找到add_OnLootBoxModified方法");
+                    VTMO.Log("未找到add_OnLootBoxModified方法");
                     return;
                 }
 
                 _eventUnsubscribeMethod = broadcasterType.GetMethod("remove_OnLootBoxModified");
                 if (_eventUnsubscribeMethod == null) {
-                    VT.Log("未找到remove_OnLootBoxModified方法");
+                    VTMO.Log("未找到remove_OnLootBoxModified方法");
                     return;
                 }
 
@@ -78,7 +78,7 @@ namespace VTModifiers.ThirdParty {
                     BindingFlags.NonPublic | BindingFlags.Instance);
                 
                 if (handlerMethod == null) {
-                    VT.Log("未找到OnLootBoxModified处理方法");
+                    VTMO.Log("未找到OnLootBoxModified处理方法");
                     return;
                 }
 
@@ -89,17 +89,17 @@ namespace VTModifiers.ThirdParty {
                 _eventSubscribeMethod.Invoke(null, new object[] { handler });
                 _isSubscribed = true;
 
-                VT.Log("检测到用户安装SCAV mod, 联动订阅");
+                VTMO.Log("SCAV事件已订阅");
                 ModSettingConnector.TryInitSCAV();
             }
             catch (System.Reflection.ReflectionTypeLoadException ex) {
-                VT.Log($"订阅战利品箱修改事件失败: {ex.Message}");
+                VTMO.Log($"订阅战利品箱修改事件失败: {ex.Message}");
                 foreach (var loaderEx in ex.LoaderExceptions) {
-                    VT.Log($"加载异常: {loaderEx.Message}");
+                    VTMO.Log($"加载异常: {loaderEx.Message}");
                 }
             }
             catch (Exception ex) {
-                VT.Log($"订阅战利品箱修改事件失败: {ex.Message}");
+                VTMO.Log($"订阅战利品箱修改事件失败: {ex.Message}");
                 // 如果失败，尝试重新初始化（限制重试次数）
                 if (!_initializationAttempted) {
                     _initializationAttempted = true;
@@ -123,18 +123,18 @@ namespace VTModifiers.ThirdParty {
                         _eventUnsubscribeMethod.Invoke(null, new object[] { handler });
                         _isSubscribed = false;
 
-                        VT.Log("已通过反射取消订阅战利品箱修改事件");
+                        VTMO.Log("已通过反射取消订阅战利品箱修改事件");
                     }
                 }
             }
             catch (Exception ex) {
-                VT.Log($"取消订阅战利品箱修改事件失败: {ex.Message}");
+                VTMO.Log($"取消订阅战利品箱修改事件失败: {ex.Message}");
             }
         }
 
         private void OnLootBoxModified(InteractableLootbox lootBox) {
             if (lootBox == null) {
-                VT.Log("[LootBoxEventListener] 接收到空的战利品箱对象");
+                VTMO.Log("[LootBoxEventListener] 接收到空的战利品箱对象");
                 return;
             }
             try {
@@ -143,16 +143,16 @@ namespace VTModifiers.ThirdParty {
                         VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.SCAV);
                     }
                 }
-                // ModBehaviour.VT.Log($"[LootBoxEventListener] 已获取lootbox");
+                // ModBehaviour.VTMO.Log($"[LootBoxEventListener] 已获取lootbox");
             }
             catch (System.ArgumentNullException ex) {
-                VT.Log($"[LootBoxEventListener] 处理战利品箱修改事件时遇到空引用: {ex.Message}");
+                VTMO.Log($"[LootBoxEventListener] 处理战利品箱修改事件时遇到空引用: {ex.Message}");
             }
             catch (System.InvalidOperationException ex) {
-                VT.Log($"[LootBoxEventListener] 处理战利品箱修改事件时遇到操作异常: {ex.Message}");
+                VTMO.Log($"[LootBoxEventListener] 处理战利品箱修改事件时遇到操作异常: {ex.Message}");
             }
             catch (Exception ex) {
-                VT.Log($"[LootBoxEventListener] 处理战利品箱修改事件时出错: {ex.Message}");
+                VTMO.Log($"[LootBoxEventListener] 处理战利品箱修改事件时出错: {ex.Message}");
             }
         }
     }

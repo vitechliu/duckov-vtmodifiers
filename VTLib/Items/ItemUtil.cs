@@ -18,7 +18,7 @@ public class ItemUtil {
         Item item = ItemBuilder.New()
             .TypeID(id)
             .DisableStacking()
-            .Icon(VT.LoadSprite($"modifier_card_v{lvl}.png"))
+            .Icon(VTMO.LoadSprite($"modifier_card_v{lvl}.png"))
             .Instantiate();
         // modifiersCard.Tags.Add(new Tag());
 
@@ -31,7 +31,7 @@ public class ItemUtil {
         item.Quality = 2 * lvl;
         ItemAssetsCollection.AddDynamicEntry(item);
         Object.DontDestroyOnLoad(item.gameObject);
-        // VT.Log($"成功加载道具:{item.DisplayName}");
+        // VTMO.Log($"成功加载道具:{item.DisplayName}");
     }
     public static void InitItem() {
         if (!VTSettingManager.Setting.EnableModifiersCard) return;

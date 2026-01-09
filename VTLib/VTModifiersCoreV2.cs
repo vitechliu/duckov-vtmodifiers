@@ -48,7 +48,7 @@ public class VTModifiersCoreV2 {
     public static Dictionary<string, string> AuthorData = new();
 
     public static void PatchItemDisplayInfo(Item item, VtModifierV2 modifier) {
-        if (!VT.IsModConnected(ModifiersModBehaviour.MOD_CILV)) return;
+        if (!VTMO.IsModConnected(VTMO.MOD_CILV)) return;
         DisplayConnector.PatchItem(item, modifier);
         DisplayConnector.TryRefresh(item);
     }
@@ -94,8 +94,8 @@ public class VTModifiersCoreV2 {
         ModifierGroups.Clear();
         VTModifiersUI.modifiers.Clear();
 
-        string directoryPath1 = ModifiersModBehaviour.Instance._modifiersDirectoryPersistant;
-        string directoryPath2 = ModifiersModBehaviour.Instance._modifiersDirectoryCustom;
+        string directoryPath1 = VTMO.Instance._modifiersDirectoryPersistant;
+        string directoryPath2 = VTMO.Instance._modifiersDirectoryCustom;
         List<string> jsonFiles = new();
         if (Directory.Exists(directoryPath1)) {
             jsonFiles.AddRange(Directory.GetFiles(directoryPath1, "*.json"));
@@ -109,10 +109,10 @@ public class VTModifiersCoreV2 {
                 string jsonContent = File.ReadAllText(path);
                 VTModifierGroup group = JsonConvert.DeserializeObject<VTModifierGroup>(jsonContent);
                 ModifierGroups.Add(group);
-                VT.Log($"加载来自{group.author}的{group.key}词缀组...");
+                VTMO.Log($"加载来自{group.author}的{group.key}词缀组...");
                 foreach (VtModifierV2 vtModifier in group.modifiers.Values) {
                     if (ModifierData.ContainsKey(vtModifier.key)) {
-                        VT.Log($"词缀键重复:{vtModifier.key}");
+                        VTMO.Log($"词缀键重复:{vtModifier.key}");
                         continue;
                     }
 
@@ -127,7 +127,7 @@ public class VTModifiersCoreV2 {
                 }
             }
             catch (Exception ex) {
-                VT.Log($"ModifierJSON解析错误， {path}: {ex.Message}");
+                VTMO.Log($"ModifierJSON解析错误， {path}: {ex.Message}");
             }
         }
         
@@ -137,7 +137,7 @@ public class VTModifiersCoreV2 {
         foreach (VTModifierGroup group in ModifierGroups) {
             if (group.isCommunity && !VTSettingManager.Setting.EnableCommunityModifiers) continue;
             if (group.key == "vt_magic" && (
-                !VTSettingManager.Setting.EnableArcaneModifiers || !VT.IsModConnected(ModifiersModBehaviour.MOD_VTMAGIC)
+                !VTSettingManager.Setting.EnableArcaneModifiers || !VTMO.IsModConnected(VTMO.MOD_VTMAGIC)
             )) continue;
 
             bool isCard = IsModifiersCard(item);
@@ -424,7 +424,7 @@ public class VTModifiersCoreV2 {
     }
     
     public static void Log(string message, bool isError = false) {
-        VT.Log(message, isError);
+        VTMO.Log(message, isError);
     }
     
     
@@ -820,27 +820,27 @@ public class VTModifiersCoreV2 {
     }
 
     public static void PatchByCard(Item card, Item item, ItemDisplay itemDisplay) {
-        // VT.Log("尝试打词缀卡");
+        // VTMO.Log("尝试打词缀卡");
         if (IsModifiersCard(item)) {
             //不能给卡上卡
             VT.BubbleUserDebug("Bubble_cannot_patch_to_card".ToPlainText());
-            VT.PostCustomSFX("Terraria_no.wav");
+            VTMO.PostCustomSFX("Terraria_no.wav");
             return;
         }
         string cardModifier = card.GetString(VariableVtModifierHashCode);
         if (cardModifier == null) {
             VT.BubbleUserDebug("Bubble_cannot_patch_empty_card".ToPlainText());
-            VT.PostCustomSFX("Terraria_no.wav");
+            VTMO.PostCustomSFX("Terraria_no.wav");
             return;
         }
         if (!ModifierData.TryGetValue(cardModifier, out VtModifierV2 vtModifierV2)) {
-            VT.PostCustomSFX("Terraria_no.wav");
+            VTMO.PostCustomSFX("Terraria_no.wav");
             return;
         }
 
         if (!vtModifierV2.CanPatchTo(item)) {
             VT.BubbleUserDebug("Bubble_cannot_patch_to_item".ToPlainText());
-            VT.PostCustomSFX("Terraria_no.wav");
+            VTMO.PostCustomSFX("Terraria_no.wav");
             return;
         }
         int cardModifierSeed = card.GetInt(VariableVtModifierSeedHashCode, -1);
@@ -850,7 +850,7 @@ public class VTModifiersCoreV2 {
         TryUnpatchItem(item);
         PatchItem(item, Sources.Card, cardModifier);
         card.Detach();
-        VT.PostCustomSFX("Terraria_card_patch.wav");
+        VTMO.PostCustomSFX("Terraria_card_patch.wav");
         itemDisplay.nameText.text = itemDisplay.Target.DisplayName;
     }
     

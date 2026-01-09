@@ -22,7 +22,7 @@ using VTModifiers.ThirdParty;
 namespace VTModifiers;
 
 [HarmonyPatch]
-public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
+public class VTMO : VTModBehaviour<VTMO> {
     public override string ModName => "VTModifiers";
     public override string Version => "0.8.0";
 
@@ -78,13 +78,13 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
                 VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmBleedChance, temp.context.bleedChance);
 
             // if (VTSettingManager.Setting.Debug) {
-            //     VT.Log($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
+            //     VTMO.Log($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
             //               $"ArmorPiercing:{temp.context.armorPiercing}, " +
             //               $"ArmorBreak:{temp.context.armorBreak}");
             // }
         }
         catch (Exception ex) {
-            VT.Log($"PatchFailed: {ex.Message}\n{ex.StackTrace}");
+            VTMO.Log($"PatchFailed: {ex.Message}\n{ex.StackTrace}");
         }
     }
 
@@ -147,7 +147,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
             float dodgeRate = VTModifiersCoreV2.Modify(armor, VTModifiersCoreV2.VtmDodgeRate);
             if (VT.Probability(dodgeRate)) {
                 if (VTSettingManager.Setting.Debug) {
-                    VT.Log($"闪避触发！");
+                    VTMO.Log($"闪避触发！");
                 }
 
                 PopText.Pop("VTMC_Dodged".ToPlainText(),
@@ -173,7 +173,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
             float fnEnduranceProb = (armorEnduranceProb + helmetEnduranceProb) / 2;
             if (fnEnduranceProb > 0 && VT.Probability(fnEnduranceProb)) {
                 if (VTSettingManager.Setting.Debug) {
-                    VT.Log($"耐久触发！");
+                    VTMO.Log($"耐久触发！");
                 }
 
                 damageInfo.armorBreak = 0f;
@@ -195,7 +195,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
             if (lifeSteal > 0) {
                 float lifeStealAmount = lifeSteal * damageInfo.finalDamage;
                 // if (VTSettingManager.Setting.Debug) {
-                //     VT.Log($"LifeSteal:{lifeStealAmount}");
+                //     VTMO.Log($"LifeSteal:{lifeStealAmount}");
                 // }
                 PopText.Pop(lifeStealAmount.ToString("F1"),
                     damageInfo.fromCharacter.transform.position + Vector3.up * 2f, Color.red, 1f, null);
@@ -298,7 +298,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
 
         VTModifiersCoreV2.TryUnpatchItem(targetItem);
         VTModifiersCoreV2.PatchItem(targetItem, VTModifiersCoreV2.Sources.Reforge);
-        VT.PostCustomSFX("Terraria_reforging.wav");
+        PostCustomSFX("Terraria_reforging.wav");
         VT.BubbleUserDebug("Bubble_reforge_success".ToPlainText());
 
         //更新仓库里面的名称
@@ -321,7 +321,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
 
         VTModifiersCoreV2.TryUnpatchItem(targetItem);
         VTModifiersCoreV2.PatchItem(targetItem, VTModifiersCoreV2.Sources.Reforge);
-        VT.PostCustomSFX("Terraria_reforging.wav");
+        PostCustomSFX("Terraria_reforging.wav");
         VT.BubbleUserDebug("Bubble_reforge_success".ToPlainText());
         __instance.Close();
 
@@ -350,7 +350,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
         float? ammoSaveChance = VTModifiersCoreV2.GetItemVtmKey(__instance.Item, VTModifiersCoreV2.VtmAmmoSave);
         if (ammoSaveChance.HasValue) {
             bool prob = !VT.Probability(ammoSaveChance.Value);
-            // if (VTSettingManager.Setting.Debug) VT.Log("UseABullet:" + prob);
+            // if (VTSettingManager.Setting.Debug) VTMO.Log("UseABullet:" + prob);
             return prob;
         }
 
@@ -361,7 +361,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Item), "GetTotalRawValue")]
     public static void Item_GetTotalRawValue_PostFix(Item __instance, ref int __result) {
-        // VT.Log($"ItemPriceModify: {__instance.DisplayName}");
+        // VTMO.Log($"ItemPriceModify: {__instance.DisplayName}");
         __result = Mathf.RoundToInt(
             VTModifiersCoreV2.Modify(__instance, VTModifiersCoreV2.VtmPriceMultiplier, (float)__result)
         );
@@ -388,10 +388,10 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
                 if (slot.Content == null) continue;
                 VTModifiersCoreV2.PatchItem(slot.Content, VTModifiersCoreV2.Sources.Enemy);
             }
-            // VT.Log($"CSRSetup:{csrInstanceId}, itemCount:{itemCount}");
+            // VTMO.Log($"CSRSetup:{csrInstanceId}, itemCount:{itemCount}");
         }
         else {
-            // VT.Log($"CSRSetupFailed:{csrInstanceId}, cannot find inventory");
+            // VTMO.Log($"CSRSetupFailed:{csrInstanceId}, cannot find inventory");
         }
     }
 
@@ -408,7 +408,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
             Inventory inventory = lootbox.Inventory;
             if (inventory != null) {
                 int inventoryCount = inventory.Count();
-                // VT.Log($"LBLSetup:{lootBoxLoaderId}, name:{lootBoxName}, count:{inventoryCount}");
+                // VTMO.Log($"LBLSetup:{lootBoxLoaderId}, name:{lootBoxName}, count:{inventoryCount}");
                 foreach (Item item in inventory) {
                     VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.LootBox);
                 }
@@ -416,11 +416,11 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
                 // Traverse.Create(__instance).Field("_lootBox").SetValue(lootbox);
             }
             else {
-                // VT.Log($"LBLSetupFailed:{lootBoxLoaderId}, name:{lootBoxName},, nullInventory");
+                // VTMO.Log($"LBLSetupFailed:{lootBoxLoaderId}, name:{lootBoxName},, nullInventory");
             }
         }
         else {
-            // VT.Log($"LBLSetupFailed:{lootBoxLoaderId}, nullLootBox");
+            // VTMO.Log($"LBLSetupFailed:{lootBoxLoaderId}, nullLootBox");
         }
     }
 
@@ -529,14 +529,14 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
 
 
     public const string MOD_VTMAGIC = "VTMagic";
-    public const string MOD_ELEMENT = "VTElement";
+    public const string MOD_ELEMENT = "VTElements";
     public const string MOD_SETTING = "ModSetting";
     public const string MOD_CILV = "CustomItemLevelValue";
     public const string MOD_SCAV = "RandomNpc";
     protected override void OnAfterSetup() {
         base.OnAfterSetup();
         LoadPathCustom();
-        LocalizationUtil.ReadLang(Path.Combine(_resourceDirectory, "lang"));
+        ReadLang();
         VTSettingManager.LoadSetting();
         RegisterDebouncer(VTSettingManager.OnSettingChanged, 1000);
         VTModifiersCoreV2.InitData();
@@ -583,7 +583,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
         UnregisterEvents();
         if (btn_Reforge != null) Destroy(btn_Reforge);
         if (coreObj != null) Destroy(coreObj);
-        VT.Log("模组已卸载");
+        VTMO.Log("模组已卸载");
         base.OnBeforeDeactivate();
     }
 
@@ -593,9 +593,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
             if (!ModSettingAPI.Init(info)) return;
             ModSettingConnector.Init();
         }
-        else {
-            ModSettingConnector.TryInitSCAV();
-        }
+        ModSettingConnector.TryInitSCAV();
     }
 
     protected void RegisterEvents() {
@@ -612,7 +610,7 @@ public class ModifiersModBehaviour : VTModBehaviour<ModifiersModBehaviour> {
     }
 
     private void OnItemSentToPlayerInventory(Item item) {
-        // VT.Log($"OnItemSentToPlayerInventory: {item.DisplayName}");
+        // VTMO.Log($"OnItemSentToPlayerInventory: {item.DisplayName}");
         VTModifiersCoreV2.CalcItemModifiers(item);
     }
 

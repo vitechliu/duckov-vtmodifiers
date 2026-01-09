@@ -167,7 +167,7 @@ public class VTModifiersUI : MonoBehaviour {
             1.01f
         );
 
-        if (VT.IsModConnected(ModifiersModBehaviour.MOD_SCAV)) {
+        if (VTMO.IsModConnected(VTMO.MOD_SCAV)) {
             GUILayout.BeginHorizontal();
             GUILayout.Label("SCAV附带词缀概率");
             GUILayout.FlexibleSpace();
@@ -182,7 +182,7 @@ public class VTModifiersUI : MonoBehaviour {
         }
 
         if (GUI.changed) {
-            SettingUtil.OnSettingChangedDebounce();
+            VTMO.OnSettingChangedDebounce();
         }
 
         
@@ -329,7 +329,7 @@ public class VTModifiersUI : MonoBehaviour {
 
 
     public static void Log(string message, bool isError = false) {
-        VT.Log(message, isError);
+        VTMO.Log(message, isError);
     }
 
     public class Debouncer {

@@ -8,9 +8,9 @@ namespace VTModifiers.VTLib;
 public static class ModSettingConnector {
     public static void Init() {
         scavSettingLoaded = false;
-        bool success = ModSettingAPI.Init(ModifiersModBehaviour.Instance.info);
+        bool success = ModSettingAPI.Init(VTMO.Instance.info);
         if (!success) {
-            VT.Log("接入ModSetting失败");
+            VTMO.Log("接入ModSetting失败");
             return;
         }
         
@@ -87,16 +87,16 @@ public static class ModSettingConnector {
             });
         ModSettingAPI.AddButton("CustomModifiersDirectory", "MSText_CustomModifiersDirectory".ToPlainText(), "MSText_Open".ToPlainText(), 
             () => {
-                if (Directory.Exists(ModifiersModBehaviour.Instance._modifiersDirectoryCustom)) {
+                if (Directory.Exists(VTMO.Instance._modifiersDirectoryCustom)) {
                     //打开对应目录
-                    VT.OpenFolderInExplorer(ModifiersModBehaviour.Instance._modifiersDirectoryCustom);
+                    VT.OpenFolderInExplorer(VTMO.Instance._modifiersDirectoryCustom);
                 }
             });
         ModSettingAPI.AddButton("OfficialModifiersDirectory", "MSText_OfficialModifiersDirectory".ToPlainText(), "MSText_Open".ToPlainText(), 
             () => {
-                if (Directory.Exists(ModifiersModBehaviour.Instance._modifiersDirectoryPersistant)) {
+                if (Directory.Exists(VTMO.Instance._modifiersDirectoryPersistant)) {
                     //打开对应目录
-                    VT.OpenFolderInExplorer(ModifiersModBehaviour.Instance._modifiersDirectoryPersistant);
+                    VT.OpenFolderInExplorer(VTMO.Instance._modifiersDirectoryPersistant);
                 }
             });
         ModSettingAPI.AddKeybinding("ReforgeKey", "MSText_ReforgeKey".ToPlainText(), VTSettingManager.Setting.ReforgeKey, 
@@ -110,7 +110,7 @@ public static class ModSettingConnector {
     public static bool scavSettingLoaded = false;
     public static void TryInitSCAV() {
         if (scavSettingLoaded || !ModSettingAPI.IsInit) return;
-        if (!VT.IsModConnected(ModifiersModBehaviour.MOD_SCAV)) return;
+        if (!VTMO.IsModConnected(VTMO.MOD_SCAV)) return;
         ModSettingAPI.AddSlider("SCAVPercentage", "SCAV模式生成词缀概率", VTSettingManager.Setting.SCAVPercentage, 
             new Vector2(0f, 1f), f => {
                 VTSettingManager.Setting.SCAVPercentage = f;
@@ -119,6 +119,6 @@ public static class ModSettingConnector {
         scavSettingLoaded = true;
     }
     static void OnSettingChanged() {
-        SettingUtil.OnSettingChangedDebounce();
+        VTMO.OnSettingChangedDebounce();
     }
 }
