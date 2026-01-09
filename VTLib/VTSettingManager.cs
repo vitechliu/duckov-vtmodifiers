@@ -86,6 +86,7 @@ public static class VTSettingManager {
 
         public bool EnableCommunityModifiers = true; //是否支持社区词缀
         public bool EnableArcaneModifiers = true; //是否支持秘法纪元词缀
+        public bool EnableElementModifiers = true; //是否支持元素断章词缀
 
         public KeyCode ReforgeKey = KeyCode.Keypad9;
         

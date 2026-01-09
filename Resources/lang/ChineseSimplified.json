@@ -40,6 +40,7 @@
     "MSText_CraftPatchedPercentage": "合成道具附带词缀概率",
     "MSText_EnableCommunityModifiers": "支持社区词缀",
     "MSText_EnableArcaneModifiers": "支持[秘法纪元]词缀",
+    "MSText_EnableElementModifiers": "支持[元素断章]词缀",
     "MSText_CustomModifiersDirectory": "自定义词缀目录",
     "MSText_OfficialModifiersDirectory": "官方词缀目录",
     "MSText_ReforgeKey": "重铸快捷键",
