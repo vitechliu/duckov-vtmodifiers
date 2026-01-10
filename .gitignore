@@ -221,3 +221,4 @@ project.lock.json
 #####
 0Harmony.dll
 global.json
+env.props
