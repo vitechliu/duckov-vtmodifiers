@@ -387,30 +387,33 @@ public class VTModifiersCoreV2 {
         }
         return null;
     }
+
+    public static float GetModifierRealValue(Item item, VtMKey vtMKey, VtModifierV2 vtModifierV2, float def = 0f) {
+        if (vtMKey.forceFixed) {
+            //直接获取，更快更稳
+            if (vtModifierV2.data.TryGetValue(vtMKey.key, out var val)) {
+                return val;
+            }
+            return def;
+        }
+        ModifierDescriptionCollection mdc = item.Modifiers;
+        if (mdc) {
+            string hash = vtMKey.hash;
+            ModifierDescription md = mdc.Find(md => (md.Key == hash));
+            if (md != null) {
+                return md.Value;
+            }
+        }
+        return def;
+    }
     public static float Modify(Item item, string key, float original = 0f) {
         if (!item) return original;
         if (!keys.ContainsKey(key)) return original;
         VtMKey vtMKey = keys[key];
         string modifier = item.GetString(VariableVtModifierHashCode);
-        
-        if (modifier != null && ModifierData.TryGetValue(modifier, out var modifierStruct)) {
-            if (vtMKey.forceFixed) {
-                //直接获取，更快更稳
-                if (modifierStruct.data.TryGetValue(key, out var val)) {
-                    return vtMKey.PatchCustom(original, val);
-                }
-            }
-            else {
-                //从modifier获取
-                ModifierDescriptionCollection mdc = item.Modifiers;
-                if (mdc) {
-                    string hash = vtMKey.hash;
-                    ModifierDescription md = mdc.Find(md => (md.Key == hash));
-                    if (md != null) {
-                        return vtMKey.PatchCustom(original, md.Value);
-                    }
-                }
-            }
+        if (modifier != null && ModifierData.TryGetValue(modifier, out var vtModifierV2)) {
+            float val = GetModifierRealValue(item, vtMKey, vtModifierV2);
+            return  vtMKey.PatchCustom(original, val);
         }
         return original;
     }

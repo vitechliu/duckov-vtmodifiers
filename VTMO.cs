@@ -50,7 +50,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     public static void ItemAgentGun_ShootOneBullet_PostFix(ItemAgent_Gun __instance) {
         if (!__instance) return;
         try {
-            Projectile temp = Traverse.Create(__instance).Field("projInst").GetValue<Projectile>();
+            Projectile temp = __instance.projInst;
             if (!temp) return;
             float instantDeathRate = VTModifiersCoreV2.Modify(__instance.Item,
                 VTModifiersCoreV2.VtmDeathRate);
@@ -93,13 +93,12 @@ public class VTMO : VTModBehaviour<VTMO> {
     [HarmonyPatch(typeof(CA_Attack), "OnStart")]
     public static void CAAttack_OnStart_PostFix(CA_Attack __instance) {
         if (!__instance.characterController.IsMainCharacter) return;
-        ItemAgent_MeleeWeapon weapon =
-            Traverse.Create(__instance).Field("meleeWeapon").GetValue<ItemAgent_MeleeWeapon>();
+        ItemAgent_MeleeWeapon weapon = __instance.meleeWeapon;
         if (!weapon) return;
         if (!VTModifiersCoreV2.IsPatchedItem(weapon.Item)) return;
-        float? length = VTModifiersCoreV2.GetItemVtmKey(weapon.Item, VTModifiersCoreV2.VtmShootDistanceMultiplier);
-        if (!length.HasValue) return;
-        GameObject sfx = Traverse.Create(weapon).Field("slashFx").GetValue<GameObject>();
+        float length = VTModifiersCoreV2.Modify(weapon.Item, VTModifiersCoreV2.VtmShootDistanceMultiplier);
+        if (length <= 0.0) return;
+        GameObject sfx = weapon.slashFx;
         sfx.transform.localScale *= (1f + (float)length);
     }
 
@@ -108,9 +107,9 @@ public class VTMO : VTModBehaviour<VTMO> {
     public static void CAAttack_OnStop_PostFix(CA_Attack __instance) {
         if (!__instance.characterController.IsMainCharacter) return;
         ItemAgent_MeleeWeapon weapon =
-            Traverse.Create(__instance).Field("meleeWeapon").GetValue<ItemAgent_MeleeWeapon>();
+            __instance.meleeWeapon;
         if (!weapon) return;
-        GameObject sfx = Traverse.Create(weapon).Field("slashFx").GetValue<GameObject>();
+        GameObject sfx = weapon.slashFx;
         sfx.transform.localScale = new Vector3(1.92f, 1.92f, 1.92f);
     }
 
@@ -213,7 +212,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     [HarmonyPatch(typeof(ItemOperationMenu), "Initialize")]
     public static void ItemOperationMenu_Initialize_PostFix(ItemOperationMenu __instance) {
         if (btn_Reforge == null) {
-            Button btnSample = Traverse.Create(__instance).Field("btn_Equip").GetValue<Button>();
+            Button btnSample = __instance.btn_Equip;
             if (btnSample == null) return;
             GameObject newBtn = Instantiate(btnSample.gameObject, btnSample.transform.parent);
             btn_Reforge = newBtn.GetComponent<Button>();
@@ -229,7 +228,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     public static void ItemOperationMenu_Setup_PostFix(ItemOperationMenu __instance) {
         if (btn_Reforge) {
             if (LevelManager.Instance.IsBaseLevel) {
-                Item targetItem = Traverse.Create(__instance).Property("TargetItem").GetValue<Item>();
+                Item targetItem = __instance.TargetItem;
                 if (targetItem && VTModifiersCoreV2.ItemCanBePatched(targetItem)) {
                     bool patched = VTModifiersCoreV2.IsPatchedItem(targetItem);
                     if ((patched && VTSettingManager.Setting.AllowReforge)
@@ -250,7 +249,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     public static void ItemOperationMenu_OnOpen_PostFix(ItemOperationMenu __instance) {
         if (btn_Reforge) {
             if (LevelManager.Instance.IsBaseLevel) {
-                Item targetItem = Traverse.Create(__instance).Property("TargetItem").GetValue<Item>();
+                Item targetItem = __instance.TargetItem;
                 if (targetItem && VTModifiersCoreV2.ItemCanBePatched(targetItem)) {
                     bool patched = VTModifiersCoreV2.IsPatchedItem(targetItem);
                     if ((patched && VTSettingManager.Setting.AllowReforge)
@@ -308,7 +307,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     public static void OnReforge() {
         ItemOperationMenu __instance = ItemOperationMenu.Instance;
         if (!__instance) return;
-        Item targetItem = Traverse.Create(__instance).Property("TargetItem").GetValue<Item>();
+        Item targetItem = __instance.TargetItem;
         if (!targetItem) return;
         if (!VTModifiersCoreV2.ItemCanBePatched(targetItem)) return;
 
@@ -328,7 +327,7 @@ public class VTMO : VTModBehaviour<VTMO> {
         //更新仓库里面的名称
         ItemOperationMenu iom = ItemOperationMenu.Instance;
         if (iom) {
-            ItemDisplay itemDisplay = Traverse.Create(iom).Field("TargetDisplay").GetValue<ItemDisplay>();
+            ItemDisplay itemDisplay = iom.TargetDisplay;
             if (itemDisplay) itemDisplay.nameText.text = itemDisplay.Target.DisplayName;
         }
     }
@@ -339,7 +338,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     [HarmonyPatch(typeof(Item), "get_DisplayName")]
     public static void Item_DisplayName_PostFix(Item __instance, ref string __result) {
         if (!VTModifiersCoreV2.IsPatchedItem(__instance)) return;
-        string key = Traverse.Create(__instance).Field("displayName").GetValue<string>();
+        string key = __instance.displayName;
         __result = VTModifiersCoreV2.PatchItemDisplayName(__instance, key.ToPlainText());
     }
 
@@ -347,14 +346,8 @@ public class VTMO : VTModBehaviour<VTMO> {
     [HarmonyPrefix]
     [HarmonyPatch(typeof(ItemSetting_Gun), "UseABullet")]
     public static bool ItemSettingGun_UseABullet_PreFix(ItemSetting_Gun __instance) {
-        float? ammoSaveChance = VTModifiersCoreV2.GetItemVtmKey(__instance.Item, VTModifiersCoreV2.VtmAmmoSave);
-        if (ammoSaveChance.HasValue) {
-            bool prob = !VT.Probability(ammoSaveChance.Value);
-            // if (VTSettingManager.Setting.Debug) VTMO.Log("UseABullet:" + prob);
-            return prob;
-        }
-
-        return true;
+        float ammoSaveChance = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmAmmoSave);
+        return !VT.Probability(ammoSaveChance);
     }
 
     //物品价值Patch
@@ -401,7 +394,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     public static void LootBoxLoader_Setup_PostFix(LootBoxLoader __instance) {
         int lootBoxLoaderId = __instance.GetInstanceID();
         InteractableLootbox lootbox =
-            Traverse.Create(__instance).Field("_lootBox").GetValue<InteractableLootbox>();
+            __instance._lootBox;
 
         if (lootbox != null) {
             string lootBoxName = lootbox.InteractName;
@@ -412,8 +405,6 @@ public class VTMO : VTModBehaviour<VTMO> {
                 foreach (Item item in inventory) {
                     VTModifiersCoreV2.PatchItem(item, VTModifiersCoreV2.Sources.LootBox);
                 }
-                // Traverse.Create(lootbox).Field("inventoryReference").SetValue(inventory);
-                // Traverse.Create(__instance).Field("_lootBox").SetValue(lootbox);
             }
             else {
                 // VTMO.Log($"LBLSetupFailed:{lootBoxLoaderId}, name:{lootBoxName},, nullInventory");
@@ -456,9 +447,8 @@ public class VTMO : VTModBehaviour<VTMO> {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(ItemModifierEntry), "Refresh")]
     public static void ItemModifierEntry_Refresh_PostFix(ItemModifierEntry __instance) {
-        Traverse t = Traverse.Create(__instance);
-        TextMeshProUGUI labelGUI = t.Field("displayName").GetValue<TextMeshProUGUI>();
-        TextMeshProUGUI valueGUI = t.Field("value").GetValue<TextMeshProUGUI>();
+        TextMeshProUGUI labelGUI = __instance.displayName;
+        TextMeshProUGUI valueGUI = __instance.value;
         string label = labelGUI.text;
         valueGUI.text = VT.RoundToOneDecimalIfNeeded(valueGUI.text);
         if (label.StartsWith("VTM_")) {
@@ -478,9 +468,8 @@ public class VTMO : VTModBehaviour<VTMO> {
     [HarmonyPostfix]
     [HarmonyPatch(typeof(LabelAndValue), "Setup")]
     public static void LabelAndValue_Setup_PostFix(LabelAndValue __instance, string label, Polarity valuePolarity) {
-        Traverse t = Traverse.Create(__instance);
-        TextMeshProUGUI labelGUI = t.Field("labelText").GetValue<TextMeshProUGUI>();
-        TextMeshProUGUI valueGUI = t.Field("valueText").GetValue<TextMeshProUGUI>();
+        TextMeshProUGUI labelGUI = __instance.labelText;
+        TextMeshProUGUI valueGUI = __instance.valueText;
         valueGUI.text = VT.RoundToOneDecimalIfNeeded(valueGUI.text);
 
         if (label.StartsWith("VTM_")) {
