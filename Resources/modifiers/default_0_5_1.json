@@ -25,7 +25,7 @@
     },
     "Open": {
       "key": "Open",
-      "weight": 200,
+      "weight": 130,
       "quality": 1,
       "forceFixed": false,
       "applyOnGuns": false,
@@ -37,12 +37,12 @@
       "applyOnBackpack": false,
       "data": {
         "PriceMultiplier": 0.1,
-        "ViewAngle": 0.4
+        "ViewAngle": 1
       }
     },
     "Hard": {
       "key": "Hard",
-      "weight": 300,
+      "weight": 200,
       "quality": 2,
       "forceFixed": false,
       "applyOnGuns": false,
@@ -53,7 +53,7 @@
       "applyOnFaceMask": false,
       "applyOnBackpack": false,
       "data": {
-        "PriceMultiplier": 0.1,
+        "PriceMultiplier": 0.2,
         "Armor": 0.5
       }
     },
@@ -135,7 +135,7 @@
       "key": "40m",
       "weight": 50,
       "quality": 5,
-      "forceFixed": false,
+      "forceFixed": true,
       "applyOnGuns": false,
       "applyOnMelee": true,
       "applyOnEquipment": false,

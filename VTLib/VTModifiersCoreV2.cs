@@ -380,13 +380,13 @@ public class VTModifiersCoreV2 {
         return true;
     }
 
-    public static float? GetItemVtmKey(Item item, string key) {
-        string modifier = item.GetString(VariableVtModifierHashCode);
-        if (modifier != null && ModifierData.TryGetValue(modifier, out var modifierStruct)) {
-            return modifierStruct.data.GetValueOrDefault(key);
-        }
-        return null;
-    }
+    // public static float? GetItemVtmKey(Item item, string key) {
+    //     string modifier = item.GetString(VariableVtModifierHashCode);
+    //     if (modifier != null && ModifierData.TryGetValue(modifier, out var modifierStruct)) {
+    //         return modifierStruct.data.GetValueOrDefault(key);
+    //     }
+    //     return null;
+    // }
 
     public static float GetModifierRealValue(Item item, VtMKey vtMKey, VtModifierV2 vtModifierV2, float def = 0f) {
         if (vtMKey.forceFixed) {
@@ -398,7 +398,7 @@ public class VTModifiersCoreV2 {
         }
         ModifierDescriptionCollection mdc = item.Modifiers;
         if (mdc) {
-            string hash = vtMKey.hash;
+            string hash = vtMKey.GetHashForItem(item);
             ModifierDescription md = mdc.Find(md => (md.Key == hash));
             if (md != null) {
                 return md.Value;
@@ -413,7 +413,7 @@ public class VTModifiersCoreV2 {
         string modifier = item.GetString(VariableVtModifierHashCode);
         if (modifier != null && ModifierData.TryGetValue(modifier, out var vtModifierV2)) {
             float val = GetModifierRealValue(item, vtMKey, vtModifierV2);
-            return  vtMKey.PatchCustom(original, val);
+            return vtMKey.PatchCustom(original, val);
         }
         return original;
     }
@@ -468,6 +468,8 @@ public class VTModifiersCoreV2 {
     public const string VtmRunSoundRange = "RunSoundRange"; 
     public const string VtmColdProtection = "ColdProtection"; 
     public const string VtmStormProtection = "StormProtection"; 
+    public const string VtmMaxHealth = "MaxHealth"; 
+    public const string VtmMaxEnergy = "MaxEnergy"; 
     
     //特殊
     public const string VtmBleedChance = "BleedChance"; //流血几率
@@ -525,6 +527,7 @@ public class VTModifiersCoreV2 {
             applyOnGuns = true,
             applyOnMelee = true,
             hashForMelee = nameof(ItemAgent_MeleeWeapon.AttackRange),
+            modifierTypeCustom = ModifierType.Add,
         });
         AddKey(new VtMKey(VtmShootSpeedMultiplier, nameof(ItemAgent_Gun.ShootSpeed)) {
             applyOnGuns = true,
@@ -536,6 +539,7 @@ public class VTModifiersCoreV2 {
         AddKey(new VtMKey(VtmAmmoSave, "VTMC_" + VtmAmmoSave) {
             applyOnGuns = true, 
             modifierType = ModifierType.Add,
+            modifierTypeCustom = ModifierType.Add,
             isCustom = true,
         });
         AddKey(new VtMKey(VtmLifeSteal, "VTMC_" + VtmLifeSteal) {
@@ -705,6 +709,16 @@ public class VTModifiersCoreV2 {
         AddKey(new VtMKey(VtmStormProtection, nameof (CharacterMainControl.StormProtection)) {
             applyOnEquipments = true,
             modifierType = ModifierType.Add
+        });
+        AddKey(new VtMKey(VtmMaxHealth, nameof (Health.MaxHealth)) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
+            roundToInt = true,
+        });
+        AddKey(new VtMKey(VtmMaxEnergy, nameof (CharacterMainControl.MaxEnergy)) {
+            applyOnEquipments = true,
+            modifierType = ModifierType.Add,
+            roundToInt = true,
         });
         AddKey(new VtMKey(VtmMaxStamina, "Stamina"){applyOnEquipments = true, modifierType = ModifierType.Add});
         AddKey(new VtMKey(VtmSenseRange, nameof(CharacterMainControl.SenseRange)) {

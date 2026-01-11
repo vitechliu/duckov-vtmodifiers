@@ -44,6 +44,8 @@ const vtms = {
     SenseRange: "感知距离",
     ColdProtection: "寒冷防护",
     StormProtection: "风暴防护",
+    MaxHealth: "最大生命",
+    MaxEnergy: "最大耐力",
     
     BleedChance: "流血概率",
     Weight: "重量修正",

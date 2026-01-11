@@ -210,7 +210,7 @@
     "Eldritch": {
       "key": "Eldritch",
       "author": null,
-      "weight": 40,
+      "weight": 30,
       "quality": 6,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -225,8 +225,8 @@
         "PriceMultiplier": 5,
         "TraceAbility": 2,
         "ShotCount": 3,
-        "DamageMultiplier": -0.3,
-        "BulletSpeedMultiplier": -0.8,
+        "DamageMultiplier": -0.4,
+        "BulletSpeedMultiplier": -0.7,
         "ShootDistanceMultiplier": 2,
         "AmmoSave": 0.9
       }
