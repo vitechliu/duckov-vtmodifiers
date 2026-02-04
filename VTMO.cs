@@ -30,9 +30,6 @@ public class VTMO : VTModBehaviour<VTMO> {
     public string _modifiersDirectoryPersistant = null!;
     public string _modifiersDirectoryCustom = null!;
 
-    public static string _modName = "VTModifiers";
-    public static string _version = "0.7.1";
-
     public GameObject coreObj;
     public Harmony _harmony;
 
