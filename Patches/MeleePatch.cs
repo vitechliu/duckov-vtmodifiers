@@ -24,6 +24,7 @@ public static class MeleePatch {
                     ElementFactor ef = damageInfo.elementFactors[item.Key];
                     ef.factor = item.Value;
                     damageInfo.elementFactors[item.Key] = ef;
+                    VTMO.Log($"修改了近战武器的: {ef.elementType}为{ef.factor}");
                 }
 
                 if (character.IsMainCharacter) {
