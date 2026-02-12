@@ -25,7 +25,7 @@
     },
     "Open": {
       "key": "Open",
-      "weight": 130,
+      "weight": 50,
       "quality": 1,
       "forceFixed": false,
       "applyOnGuns": false,
@@ -268,7 +268,7 @@
     },
     "Light": {
       "key": "Light",
-      "weight": 300,
+      "weight": 150,
       "quality": 2,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -290,7 +290,7 @@
     },
     "Heavy": {
       "key": "Heavy",
-      "weight": 300,
+      "weight": 150,
       "quality": 1,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -313,7 +313,7 @@
     },
     "Fast": {
       "key": "Fast",
-      "weight": 150,
+      "weight": 120,
       "quality": 2,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -337,7 +337,7 @@
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,
-      "applyOnMelee": false,
+      "applyOnMelee": true,
       "applyOnEquipment": true,
       "applyOnHelmet": false,
       "applyOnArmor": false,
@@ -354,7 +354,7 @@
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,
-      "applyOnMelee": false,
+      "applyOnMelee": true,
       "applyOnEquipment": true,
       "applyOnHelmet": false,
       "applyOnArmor": false,
@@ -371,7 +371,7 @@
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,
-      "applyOnMelee": false,
+      "applyOnMelee": true,
       "applyOnEquipment": true,
       "applyOnHelmet": false,
       "applyOnArmor": false,
@@ -388,7 +388,7 @@
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,
-      "applyOnMelee": false,
+      "applyOnMelee": true,
       "applyOnEquipment": true,
       "applyOnHelmet": false,
       "applyOnArmor": false,
@@ -401,11 +401,11 @@
     },
     "Chaos": {
       "key": "Chaos",
-      "weight": 50,
+      "weight": 40,
       "quality": 5,
       "forceFixed": false,
       "applyOnGuns": true,
-      "applyOnMelee": false,
+      "applyOnMelee": true,
       "applyOnEquipment": true,
       "applyOnHelmet": false,
       "applyOnArmor": false,
@@ -438,7 +438,7 @@
     },
     "Broken": {
       "key": "Broken",
-      "weight": 200,
+      "weight": 90,
       "quality": -2,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -456,7 +456,7 @@
     },
     "Unreal": {
       "key": "Unreal",
-      "weight": 100,
+      "weight": 60,
       "quality": 5,
       "forceFixed": true,
       "applyOnGuns": true,
@@ -476,7 +476,7 @@
     },
     "Sighted": {
       "key": "Sighted",
-      "weight": 300,
+      "weight": 120,
       "quality": 1,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -494,7 +494,7 @@
     },
     "Deadly": {
       "key": "Deadly",
-      "weight": 200,
+      "weight": 120,
       "quality": 2,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -512,7 +512,7 @@
     },
     "Eagle-Eye": {
       "key": "Eagle-Eye",
-      "weight": 100,
+      "weight": 0,
       "quality": 2,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -530,7 +530,7 @@
     },
     "Silver": {
       "key": "Silver",
-      "weight": 100,
+      "weight": 80,
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -549,7 +549,7 @@
     },
     "Penetrating": {
       "key": "Penetrating",
-      "weight": 150,
+      "weight": 120,
       "quality": 4,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -567,7 +567,7 @@
     },
     "Heartbroken": {
       "key": "Heartbroken",
-      "weight": 100,
+      "weight": 80,
       "quality": 4,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -660,7 +660,7 @@
     },
     "Concentrated": {
       "key": "Concentrated",
-      "weight": 200,
+      "weight": 160,
       "quality": 1,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -678,7 +678,7 @@
     },
     "Portable": {
       "key": "Portable",
-      "weight": 300,
+      "weight": 160,
       "quality": 1,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -697,7 +697,7 @@
     },
     "Brutal": {
       "key": "Brutal",
-      "weight": 300,
+      "weight": 200,
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -716,7 +716,7 @@
     },
     "Cheap": {
       "key": "Cheap",
-      "weight": 150,
+      "weight": 120,
       "quality": 1,
       "forceFixed": false,
       "applyOnGuns": true,
@@ -735,7 +735,7 @@
     },
     "Silent": {
       "key": "Silent",
-      "weight": 200,
+      "weight": 70,
       "quality": 2,
       "forceFixed": false,
       "applyOnGuns": true,

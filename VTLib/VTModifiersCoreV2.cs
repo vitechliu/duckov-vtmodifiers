@@ -451,6 +451,9 @@ public class VTModifiersCoreV2 {
     public const string VtmShotCount = "ShotCount"; //多重射击
     public const string VtmShootSpeedGainEachShoot = "ShootSpeedGainEachShoot"; //射速叠加
     public const string VtmShootSpeedGainByShootMax = "ShootSpeedGainByShootMax"; //射速叠加上限
+    public const string VtmDmgOverDistance = "DmgOverDistance"; //超距离伤害系数
+    public const string VtmControlMindType = "ControlMindType"; //心控类型
+    public const string VtmControlMindTime = "ControlMindTime"; //心控时间
 
 
     //护甲
@@ -481,6 +484,15 @@ public class VTModifiersCoreV2 {
     public const string VtmDeathRate = "DeathRate"; //即死(99999)
     public const string VtmEndurance = "Endurance"; //概率不消耗耐久
 
+    public static Dictionary<ElementTypes, string> ElementMapping = new (){
+        [ElementTypes.fire] = VtmElementFire, 
+        [ElementTypes.space] = VtmElementSpace, 
+        [ElementTypes.poison] = VtmElementPoison, 
+        [ElementTypes.electricity] = VtmElementElectricity, 
+        [ElementTypes.ghost] = VtmElementGhost, 
+        [ElementTypes.ice] = VtmElementIce
+    };
+    
     //元素
     public const string VtmElementFire = "ElementFire";
     public const string VtmElementSpace = "ElementSpace";
@@ -608,8 +620,21 @@ public class VTModifiersCoreV2 {
             applyOnGuns = true,
             modifierType = ModifierType.Add,
         });
-        
-        
+        AddKey(new VtMKey(VtmDmgOverDistance, nameof(ItemAgent_Gun.DmgOverDistance)) {
+            applyOnGuns = true, 
+            modifierType = ModifierType.Add,
+        });
+        AddKey(new VtMKey(VtmControlMindType, nameof(ItemAgent_Gun.ControlMindType)) {
+            applyOnGuns = true, 
+            modifierType = ModifierType.Add,
+            roundToInt = true,
+            modifierTypeCustom = ModifierType.Add,
+        });
+        AddKey(new VtMKey(VtmControlMindTime, nameof(ItemAgent_Gun.ControlMindTime)) {
+            applyOnGuns = true, 
+            modifierType = ModifierType.Add,
+            roundToInt = true,
+        });
 
         AddKey(new VtMKey(VtmBleedChance, "VTMC_" + VtmBleedChance) {
             applyOnGuns = true,
@@ -620,6 +645,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementElectricity, "VTMC_" + VtmElementElectricity) {
             applyOnGuns = true, 
+            applyOnMelee = true,
             applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Electricity",
@@ -628,6 +654,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementIce, "VTMC_" + VtmElementIce) {
             applyOnGuns = true, 
+            applyOnMelee = true,
             applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Ice",
@@ -636,6 +663,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementGhost, "VTMC_" + VtmElementGhost) {
             applyOnGuns = true, 
+            applyOnMelee = true,
             applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Ghost",
@@ -644,6 +672,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementFire, "VTMC_" + VtmElementFire) {
             applyOnGuns = true, 
+            applyOnMelee = true,
             applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Fire",
@@ -652,6 +681,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementSpace, "VTMC_" + VtmElementSpace) {
             applyOnGuns = true, 
+            applyOnMelee = true,
             applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Space",
@@ -660,6 +690,7 @@ public class VTModifiersCoreV2 {
         });
         AddKey(new VtMKey(VtmElementPoison, "VTMC_" + VtmElementPoison) {
             applyOnGuns = true, 
+            applyOnMelee = true,
             applyOnEquipments = true,
             modifierType = ModifierType.Add,
             hashForEquipments = "ElementFactor_Poison",

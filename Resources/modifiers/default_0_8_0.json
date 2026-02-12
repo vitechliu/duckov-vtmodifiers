@@ -1,0 +1,72 @@
+{
+  "key": "default080",
+  "author": "Official",
+  "version": "0.8.0",
+  "isCommunity": false,
+  "modifiers": {
+    "Skyfall": {
+      "key": "Skyfall",
+      "author": null,
+      "weight": 40,
+      "quality": 6,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "DmgOverDistance": 3,
+        "ShootDistanceMultiplier": 4,
+        "CritDamageMultiplier": 2.5,
+        "ShootSpeedMultiplier": -0.5,
+        "PriceMultiplier": 4
+      }
+    },
+    "Hacking": {
+      "key": "Hacking",
+      "author": null,
+      "weight": 20,
+      "quality": 2,
+      "forceFixed": true,
+      "applyOnGuns": false,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "ControlMindType": 2,
+        "ControlMindTime": 30,
+        "CritDamageMultiplier": -1.1,
+        "PriceMultiplier": 2
+      }
+    },
+    "Nano": {
+      "key": "Nano",
+      "author": null,
+      "weight": 30,
+      "quality": 3,
+      "forceFixed": false,
+      "applyOnGuns": true,
+      "applyOnMelee": false,
+      "applyOnEquipment": false,
+      "applyOnHelmet": false,
+      "applyOnArmor": false,
+      "applyOnFaceMask": false,
+      "applyOnHeadset": false,
+      "applyOnBackpack": false,
+      "data": {
+        "ControlMindType": 1,
+        "ControlMindTime": 30,
+        "CritDamageMultiplier": -1.1,
+        "PriceMultiplier": 2.5
+      }
+    }
+  }
+}

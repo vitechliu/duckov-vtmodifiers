@@ -11,7 +11,7 @@
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,
-      "applyOnMelee": false,
+      "applyOnMelee": true,
       "applyOnEquipment": true,
       "applyOnHelmet": false,
       "applyOnArmor": false,

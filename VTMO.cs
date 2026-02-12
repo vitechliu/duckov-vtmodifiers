@@ -41,76 +41,6 @@ public class VTMO : VTModBehaviour<VTMO> {
         }
     }
 
-    //枪械Patch
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ItemAgent_Gun), "ShootOneBullet")]
-    public static void ItemAgentGun_ShootOneBullet_PostFix(ItemAgent_Gun __instance) {
-        if (!__instance) return;
-        try {
-            Projectile temp = __instance.projInst;
-            if (!temp) return;
-            float instantDeathRate = VTModifiersCoreV2.Modify(__instance.Item,
-                VTModifiersCoreV2.VtmDeathRate);
-            if (VT.Probability(instantDeathRate)) {
-                CharacterMainControl c = __instance.Holder;
-                //只有玩家才能应用即死
-                if (c && c.IsMainCharacter)
-                    temp.context.damage = 999999f;
-            }
-
-            temp.context.element_Electricity = VTModifiersCoreV2.Modify(__instance.Item,
-                VTModifiersCoreV2.VtmElementElectricity, temp.context.element_Electricity);
-            temp.context.element_Ice = VTModifiersCoreV2.Modify(__instance.Item,
-                VTModifiersCoreV2.VtmElementIce, temp.context.element_Ice);
-            temp.context.element_Fire =
-                VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementFire, temp.context.element_Fire);
-            temp.context.element_Poison = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementPoison,
-                temp.context.element_Poison);
-            temp.context.element_Space = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementSpace,
-                temp.context.element_Space);
-            temp.context.element_Ghost = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmElementGhost,
-                temp.context.element_Ghost);
-
-            temp.context.bleedChance =
-                VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmBleedChance, temp.context.bleedChance);
-
-            // if (VTSettingManager.Setting.Debug) {
-            //     VTMO.Log($"Projectile:CritDamageFactor:{temp.context.critDamageFactor}, " +
-            //               $"ArmorPiercing:{temp.context.armorPiercing}, " +
-            //               $"ArmorBreak:{temp.context.armorBreak}");
-            // }
-        }
-        catch (Exception ex) {
-            VTMO.Log($"PatchFailed: {ex.Message}\n{ex.StackTrace}");
-        }
-    }
-
-    //扩大刀光
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(CA_Attack), "OnStart")]
-    public static void CAAttack_OnStart_PostFix(CA_Attack __instance) {
-        if (!__instance.characterController.IsMainCharacter) return;
-        ItemAgent_MeleeWeapon weapon = __instance.meleeWeapon;
-        if (!weapon) return;
-        if (!VTModifiersCoreV2.IsPatchedItem(weapon.Item)) return;
-        float length = VTModifiersCoreV2.Modify(weapon.Item, VTModifiersCoreV2.VtmShootDistanceMultiplier);
-        if (length <= 0.0) return;
-        GameObject sfx = weapon.slashFx;
-        sfx.transform.localScale *= (1f + (float)length);
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(CA_Attack), "OnStop")]
-    public static void CAAttack_OnStop_PostFix(CA_Attack __instance) {
-        if (!__instance.characterController.IsMainCharacter) return;
-        ItemAgent_MeleeWeapon weapon =
-            __instance.meleeWeapon;
-        if (!weapon) return;
-        GameObject sfx = weapon.slashFx;
-        sfx.transform.localScale = new Vector3(1.92f, 1.92f, 1.92f);
-    }
-
-
     //重量Patch
     [HarmonyPostfix]
     [HarmonyPatch(typeof(Item), "get_SelfWeight")]
@@ -171,7 +101,6 @@ public class VTMO : VTModBehaviour<VTMO> {
                 if (VTSettingManager.Setting.Debug) {
                     VTMO.Log($"耐久触发！");
                 }
-
                 damageInfo.armorBreak = 0f;
             }
         }
@@ -199,7 +128,6 @@ public class VTMO : VTModBehaviour<VTMO> {
             }
         }
     }
-
 
     //ItemOperationMenu 物品操作相关Button
     public static Button btn_Reforge = null!;
@@ -275,7 +203,6 @@ public class VTMO : VTModBehaviour<VTMO> {
         }
     }
 
-
     public static void KeyReforge() {
         Item targetItem = ItemUIUtilities.SelectedItem;
         ItemDisplay display = ItemUIUtilities.SelectedItemDisplay;
@@ -339,13 +266,6 @@ public class VTMO : VTModBehaviour<VTMO> {
         __result = VTModifiersCoreV2.PatchItemDisplayName(__instance, key.ToPlainText());
     }
 
-    //弹药节省Patch
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(ItemSetting_Gun), "UseABullet")]
-    public static bool ItemSettingGun_UseABullet_PreFix(ItemSetting_Gun __instance) {
-        float ammoSaveChance = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmAmmoSave);
-        return !VT.Probability(ammoSaveChance);
-    }
 
     //物品价值Patch
     [HarmonyPostfix]
@@ -519,6 +439,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     public const string MOD_SETTING = "ModSetting";
     public const string MOD_CILV = "CustomItemLevelValue";
     public const string MOD_SCAV = "RandomNpc";
+    
     protected override void OnAfterSetup() {
         base.OnAfterSetup();
         LoadPathCustom();
@@ -527,6 +448,7 @@ public class VTMO : VTModBehaviour<VTMO> {
         RegisterDebouncer(VTSettingManager.OnSettingChanged, 1000);
         VTModifiersCoreV2.InitData();
         ItemUtil.InitItem();
+        LoadFormulas();
         RegisterEvents();
         _harmony = new Harmony("com.vitech.duckov_vt_modifiers_patch");
         _harmony.PatchAll();
@@ -563,6 +485,12 @@ public class VTMO : VTModBehaviour<VTMO> {
         });
     }
 
+    void LoadFormulas() {
+        AddFormulaSimple(0, new[] { (754, 1), (308, 10), (58, 1) }, ItemUtil.MC_CARD_v1);
+        AddFormulaSimple(0, new[] { (755, 1), (309, 10), (58, 1) }, ItemUtil.MC_CARD_v2);
+        AddFormulaSimple(0, new[] { (756, 1), (1165, 30), (58, 1) }, ItemUtil.MC_CARD_v3);
+    }
+    
     protected override void OnBeforeDeactivate() {
         _harmony.UnpatchAll(_harmony.Id);
         ItemUtil.UnloadItems();
@@ -581,6 +509,7 @@ public class VTMO : VTModBehaviour<VTMO> {
         }
         ModSettingConnector.TryInitSCAV();
     }
+    
 
     protected void RegisterEvents() {
         CraftingManager.OnItemCrafted += OnItemCrafted;

@@ -19,13 +19,15 @@
     
     "Stat_ShootSpeedGainEachShoot": "射速叠加",
     "Stat_ShootSpeedGainByShootMax": "射速叠加上限",
+    "Stat_ControlMindType": "控制类型",
+    "Stat_ControlMindTime": "控制时间",
 
     "vt_modifiers_card_v1": "词缀卡v1",
     "vt_modifiers_card_v2": "词缀卡v2",
     "vt_modifiers_card_v3": "词缀卡v3",
-    "vt_modifiers_card_v1_Desc": "含有词缀的卡片，可以承载1-2级的词缀，拖拽到需要施加词缀的物品上即可使用",
-    "vt_modifiers_card_v2_Desc": "含有词缀的卡片，可以承载3-4级的词缀，拖拽到需要施加词缀的物品上即可使用",
-    "vt_modifiers_card_v3_Desc": "含有词缀的卡片，可以承载5-6级的词缀，拖拽到需要施加词缀的物品上即可使用",
+    "vt_modifiers_card_v1_Desc": "含有词缀的卡片，可以承载1-2级的词缀，拖拽到需要施加词缀的物品上即可使用。\n(注:通过其他Mod获取的词缀卡可能会缺少词缀，可免费在基地右键附加)",
+    "vt_modifiers_card_v2_Desc": "含有词缀的卡片，可以承载3-4级的词缀，拖拽到需要施加词缀的物品上即可使用。\n(注:通过其他Mod获取的词缀卡可能会缺少词缀，可免费在基地右键附加)",
+    "vt_modifiers_card_v3_Desc": "含有词缀的卡片，可以承载5-6级的词缀，拖拽到需要施加词缀的物品上即可使用。\n(注:通过其他Mod获取的词缀卡可能会缺少词缀，可免费在基地右键附加)",
 
     "MSText_FixMode": "词缀属性是否固定",
     "MSText_EnableModifiersCard": "启用词缀卡(重启游戏生效)",
@@ -116,7 +118,10 @@
     "Scattering": "散射",
     "Burst": "连发",
     "Eldritch": "异骇",
-    
+
+    "Skyfall": "星坠",
+    "Hacking": "黑客",
+    "Nano": "纳米心控",
     
     "Magic": "魔力",
     "Rich-Magic": "蕴魔",

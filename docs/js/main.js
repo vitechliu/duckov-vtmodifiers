@@ -30,6 +30,9 @@ const vtms = {
     BurstCount: "连发数",
     ShootSpeedGainEachShoot: "每发射速叠加",
     ShootSpeedGainByShootMax: "射速叠加上限",
+    DmgOverDistance: "超距离伤害系数",
+    ControlMindType: "心控类型",
+    ControlMindTime: "心控时间",
     
     
     WalkSoundRange: "行走声音范围",

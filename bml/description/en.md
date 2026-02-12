@@ -4,9 +4,14 @@ Loot boxes, enemy equipment, crafted equipment, etc. will now be randomly attach
 Supports "Reforging" and "Forging", which can be operated by right clicking on the equipment in the base.
 press Ctrl+F3 to open the mod configuration menu
 
-### 0.7.1
-- fix some bugs
-### 0.7.0
+### 0.8.0
+- Now melee weapons also support elemental modifiers and etc
+- Currently, Modifier Cards can be crafted by consuming materials such as Jlab cards
+- Added v2.0 modifiers such as Mind Control and Super Range, adjusted the probabilities and values of some early modifiers, and removed some useless modifiers (without affecting existing weapons)
+- Optimized code structure (please join the group for feedback if you encounter any issues)
+- Fixed the bug where the maximum value was always taken for the "Ammo Efficiency" and "Attack Range" entries in practical applications
+- 
+### 0.7
 - Add new item: Modifiers Cards (v1, v2, v3), card comes with its own modifiers, which can be found in the chassis/JLab box, etc. Dragging the card onto the equipment will assign the modifiers
 - Added new map related modifiers such as cold and ice elements, as well as 11 new modifiers including bullet tracking, storm protection, and increased firing rate
 - Modifiers now support the headphone(headset) area
@@ -16,7 +21,7 @@ press Ctrl+F3 to open the mod configuration menu
 - Fixed the issue of poor calculation of negative values for damage/armor parameters in the settings
 - Fixed some bugs that may cause mod conflicts
 
-### 0.6.0
+### 0.6
 - Refactoring the affix system, optimizing the user experience, and incorporating new mechanisms such as lifesteal, instant death, evasion, and durability
 - Added 7 new affixes and 8 community affixes (provided by group members), which can be disabled in the settings
 - Now supports custom modifiers groups, with configuration files located in the Creative Workshop mod directory /resource/modifiers
