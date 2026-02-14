@@ -51,5 +51,6 @@
         <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModPath)" SkipUnchangedFiles="true"/>
         <Copy SourceFiles="@(ResourceFiles)" DestinationFiles="@(ResourceFiles->'$(ModPath)\resources\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(BmlFiles)" DestinationFiles="@(BmlFiles->'$(ModPath)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="Resources/lang/ChineseSimplified.json" DestinationFolder="docs" />
     </Target>
 </Project>

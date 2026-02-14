@@ -85,20 +85,37 @@ const vtms = {
 //     "MalfunctionChance", "RicochetChance", "FragmentationChance"
 // ];
 
+
+async function loadTranslations() {
+    try {
+        const response = await fetch('ChineseSimplified.json');  // 等待 fetch 完成
+        if (!response.ok) {
+            throw new Error(`HTTP 错误！状态：${response.status}`);
+        }
+        const data = await response.json();  // 等待解析 JSON
+        console.log('翻译数据加载成功:', data);
+        // 在这里使用 data 更新页面内容，例如：
+        window.lang = data.lang || []
+    } catch (error) {
+        console.error('加载翻译文件失败:', error);
+    }
+}
 // 当页面加载完成时初始化
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // 初始化代码高亮
     hljs.highlightAll();
     
     // 绑定事件监听器
     bindEvents();
     
+    //加载翻译json
+    await loadTranslations();
+    
     // 加载JSON文件列表
     loadJsonFileList();
     
     //为select注入options
     //此时获取不到select 
-    
     
 });
 
@@ -157,6 +174,8 @@ async function loadJsonFileList() {
             "default_0_5_1.json",
             "default_0_6_0.json",
             "default_0_7_0.json",
+            "default_0_8_0.json",
+            "community_v1.json",
         ];
         
         // 模拟网络延迟
@@ -426,6 +445,10 @@ function createModifierViewHtml(modifierKey, modifier) {
                                 <tr>
                                     <th width="40%">Key</th>
                                     <td>${modifier.key}</td>
+                                </tr>
+                                <tr>
+                                    <th>中文名</th>
+                                    <td>${lang[modifier.key] || '-'}</td>
                                 </tr>
                                 <tr>
                                     <th>作者</th>
