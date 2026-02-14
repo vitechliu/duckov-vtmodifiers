@@ -3,6 +3,8 @@
 除了游戏中自带的属性外，还加入了一些特色属性！如元素伤害、吸血、不消耗弹药概率、耐久等
 qq交流群群号1042906424
 
+[在线查看或自定义词缀表](https://vitechliu.github.io/duckov-vtmodifiers/)
+
 ### 联动模组
 - [ModSetting](https://steamcommunity.com/sharedfiles/filedetails/?id=3595729494)可以配置参数
 - [秘法纪元](https://steamcommunity.com/sharedfiles/filedetails/?id=3610458453) 会出现法系特色词缀
