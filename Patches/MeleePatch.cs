@@ -14,19 +14,29 @@ public static class MeleePatch {
             ItemAgent_MeleeWeapon agent = character.GetMeleeWeapon();
             if (agent && agent.Item && VTModifiersCoreV2.IsPatchedItem(agent.Item)) {
                 Dictionary<int, float> toModify = new();
-                for (int i = 0; i < damageInfo.elementFactors.Count; i++) {
-                    ElementFactor ef = damageInfo.elementFactors[i];
-                    if (VTModifiersCoreV2.ElementMapping.ContainsKey(ef.elementType)) {
-                        toModify.Add(i, VTModifiersCoreV2.Modify(agent.Item, VTModifiersCoreV2.ElementMapping[ef.elementType],ef.factor));
+                List<ElementFactor> newFactors = new();
+                foreach (ElementTypes elementType in VTModifiersCoreV2.ElementMapping.Keys) {
+                    float original = 0f;
+                    float editted = 0f;
+                    foreach (var ef in damageInfo.elementFactors) {
+                        if (ef.elementType == elementType) {
+                            original = ef.factor;
+                            break;
+                        }
+                    }
+                    if (VTModifiersCoreV2.ElementMapping.ContainsKey(elementType)) {
+                        editted = VTModifiersCoreV2.Modify(agent.Item, VTModifiersCoreV2.ElementMapping[elementType], original);
+                    }
+                    if (editted > 0.0f) {
+                        ElementFactor newFactor = new () {
+                            elementType = elementType,
+                            factor = editted
+                        };
+                        newFactors.Add(newFactor);
+                        VTMO.Log($"修改了近战武器的: {elementType}为{editted}");
                     }
                 }
-                foreach (var item in toModify) {
-                    ElementFactor ef = damageInfo.elementFactors[item.Key];
-                    ef.factor = item.Value;
-                    damageInfo.elementFactors[item.Key] = ef;
-                    VTMO.Log($"修改了近战武器的: {ef.elementType}为{ef.factor}");
-                }
-
+                damageInfo.elementFactors = newFactors;
                 if (character.IsMainCharacter) {
                     float instantDeathRate = VTModifiersCoreV2.Modify(agent.Item,
                         VTModifiersCoreV2.VtmDeathRate);
@@ -43,12 +53,12 @@ public static class MeleePatch {
     static IEnumerable<CodeInstruction> Transpiler(IEnumerable<CodeInstruction> instructions) {
         var codeMatcher = new CodeMatcher(instructions /*, ILGenerator generator*/);
         codeMatcher.MatchStartForward(
-                CodeMatch.Calls(() => default(DamageReceiver).Hurt(default))
+                CodeMatch.Calls(() => default(DamageReceiver)!.Hurt(default))
             )
             .ThrowIfInvalid("Could not find call to DamageReceiver.Hurt")
             .RemoveInstruction()
             .InsertAndAdvance(
-                CodeInstruction.Call(() => MyHurt(default, default))
+                CodeInstruction.Call(() => MyHurt(default!, default))
             );
         return codeMatcher.Instructions();
     }
@@ -64,7 +74,7 @@ public static class MeleePatch {
         float length = VTModifiersCoreV2.Modify(weapon.Item, VTModifiersCoreV2.VtmShootDistanceMultiplier);
         if (length <= 0.0) return;
         GameObject sfx = weapon.slashFx;
-        sfx.transform.localScale *= (1f + (float)length);
+        sfx.transform.localScale *= (1f + length);
     }
     
     
