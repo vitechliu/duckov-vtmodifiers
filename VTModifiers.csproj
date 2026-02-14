@@ -1,0 +1,56 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>netstandard2.1</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>latest</LangVersion>
+        <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    </PropertyGroup>
+    <Import Project="env.props" Condition="Exists('env.props')" />
+
+    <ItemGroup>
+        <Reference Include="$(DuckovPath)$(SubPath)TeamSoda.*"/>
+        <Reference Include="$(DuckovPath)$(SubPath)ItemStatsSystem.dll"/>
+        <Reference Include="$(DuckovPath)$(SubPath)Unity*"/>
+        <Reference Include="$(DuckovPath)$(SubPath)UniTask*"/>
+        <Reference Include="$(DuckovPath)$(SubPath)SodaLocalization.dll"/>
+        <Reference Include="$(DuckovPath)$(SubPath)Sirenix*"/>
+        <Reference Include="$(DuckovPath)$(SubPath)Newtonsoft.Json.dll"/>
+        <Reference Include="$(DuckovPath)$(SubPath)NodeCanvas.dll"/>
+        <Reference Include="$(DuckovPath)$(SubPath)Plugins.dll"/>
+        <Reference Include="$(DuckovPath)$(SubPath)FMOD*"/>
+        <Reference Include="VTLib">
+          <HintPath>..\libs\VTLib.dll</HintPath>
+          <Private>True</Private>
+        </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <ResourceFiles Include="$(ProjectDir)Resources\**\*" />
+        <BmlFiles Include="$(ProjectDir)bml\**\*" />
+    </ItemGroup>
+    <ItemGroup>
+      <Folder Include="docs\css\" />
+      <Folder Include="docs\js\" />
+      <Folder Include="Resources\lang\" />
+      <Folder Include="VTLib\Buildings\" />
+    </ItemGroup>
+    <ItemGroup>
+        <Publicize Include="TeamSoda.Duckov.Core" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+        <Publicize Include="TeamSoda.Duckov.Utilities" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+        <Publicize Include="ItemStatsSystem" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
+    </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
+            <PrivateAssets>all</PrivateAssets>
+            <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
+        <PackageReference Include="Lib.Harmony" Version="2.4.2" />
+    </ItemGroup>
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModPath)" SkipUnchangedFiles="true"/>
+        <Copy SourceFiles="@(ResourceFiles)" DestinationFiles="@(ResourceFiles->'$(ModPath)\resources\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="@(BmlFiles)" DestinationFiles="@(BmlFiles->'$(ModPath)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
+        <Copy SourceFiles="Resources/lang/ChineseSimplified.json" DestinationFolder="docs" />
+    </Target>
+</Project>

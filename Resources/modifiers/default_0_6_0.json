@@ -28,7 +28,7 @@
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,
-      "applyOnMelee": false,
+      "applyOnMelee": true,
       "applyOnEquipment": true,
       "applyOnHelmet": false,
       "applyOnArmor": false,
@@ -62,7 +62,7 @@
       "key": "Unbreaking_3",
       "author": null,
       "weight": 100,
-      "quality": 0,
+      "quality": 2,
       "forceFixed": false,
       "applyOnGuns": false,
       "applyOnMelee": false,
@@ -83,7 +83,7 @@
       "quality": 5,
       "forceFixed": true,
       "applyOnGuns": true,
-      "applyOnMelee": false,
+      "applyOnMelee": true,
       "applyOnEquipment": false,
       "applyOnHelmet": false,
       "applyOnArmor": false,
@@ -92,6 +92,7 @@
       "data": {
         "DeathRate": 0.01,
         "PriceMultiplier": 2,
+        "CritRate":0.5,
         "ScatterADSMultiplier": -0.5
       }
     },

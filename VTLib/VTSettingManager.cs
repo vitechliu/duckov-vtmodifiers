@@ -1,12 +1,15 @@
 using Newtonsoft.Json;
 using UnityEngine;
+using VTLib;
 
 namespace VTModifiers.VTLib;
 
 public static class VTSettingManager {
-    public static string SettingFilePath => Path.Combine(ModBehaviour.Instance._cfgDirectory, "config.json");
 
     public static void LoadSetting() {
+        if (!VTMO.Instance) return;
+        if (VTMO.Instance.SettingFilePath == null) return;
+        string SettingFilePath = Path.Combine(VTMO.Instance.SettingFilePath, "config.json");
         try {
             if (File.Exists(SettingFilePath)) {
                 // 读取文件内容
@@ -26,46 +29,47 @@ public static class VTSettingManager {
 
                 // 3. 转换回设置对象
                 Setting = defaultJson.ToObject<VtModifierSetting>();
-                ModBehaviour.LogStatic("设置加载成功");
+                // VTMO.Log("设置加载成功");
             }
             else {
                 // 文件不存在，使用默认设置
                 Setting = new VtModifierSetting();
-                ModBehaviour.LogStatic("未找到设置文件，使用默认设置");
+                VTMO.Log("未找到设置文件，使用默认设置");
                 OnSettingChanged();
             }
         }
         catch (System.Exception ex) {
-            ModBehaviour.LogStatic($"加载设置失败: {ex.Message}\n{ex.StackTrace}");
+            VTMO.Log($"加载设置失败: {ex.Message}\n{ex.StackTrace}");
             // 加载失败时强制使用默认设置
             Setting = new VtModifierSetting();
         }
     }
 
     public static void OnSettingChanged() {
+        if (!VTMO.Instance) return;
+        if (VTMO.Instance.SettingFilePath == null) return;
+        string SettingFilePath = Path.Combine(VTMO.Instance.SettingFilePath, "config.json");
         try {
             // 序列化当前设置（格式化便于查看）
             string json = JsonConvert.SerializeObject(Setting, Formatting.Indented);
-
             // 写入文件
             File.WriteAllText(SettingFilePath, json);
-            if (Setting.Debug) ModBehaviour.LogStatic($"设置已保存到: {SettingFilePath}");
+            if (Setting.Debug) VTMO.Log($"设置已保存到: {SettingFilePath}");
         }
         catch (System.Exception ex) {
-            if (Setting.Debug) ModBehaviour.LogStatic($"保存设置失败: {ex.Message}\n{ex.StackTrace}");
+            if (Setting.Debug) VTMO.Log($"保存设置失败: {ex.Message}\n{ex.StackTrace}");
         }
     }
 
     public static VtModifierSetting Setting = new VtModifierSetting();
 
-    public static bool _scavLoaded = false;
 
-    public static bool SCAVLoaded => _scavLoaded;
     public struct VtModifierSetting {
         public bool Debug = false;
 
         public bool AllowReforge = true; //实装+UI
         public bool AllowForge = true; //实装+UI
+        public bool EnableModifiersCard = true; //启用词缀卡功能
 
         public bool FixMode = false; //词缀属性是否固定为最大值
 
@@ -82,8 +86,10 @@ public static class VTSettingManager {
 
         public bool EnableCommunityModifiers = true; //是否支持社区词缀
         public bool EnableArcaneModifiers = true; //是否支持秘法纪元词缀
+        public bool EnableElementModifiers = true; //是否支持元素断章词缀
 
         public KeyCode ReforgeKey = KeyCode.Keypad9;
+        
         public VtModifierSetting() { }
     }
 }

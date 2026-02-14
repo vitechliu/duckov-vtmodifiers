@@ -1,9 +1,27 @@
-## Equipment Modifers
+## Equipment Modifiers
 
 Loot boxes, enemy equipment, crafted equipment, etc. will now be randomly attached with Modifier! Start Farming!
 Supports "Reforging" and "Forging", which can be operated by right clicking on the equipment in the base.
 press Ctrl+F3 to open the mod configuration menu
-### 0.6.0
+
+### 0.8.0
+- Now melee weapons also support elemental modifiers and etc
+- Currently, Modifier Cards can be crafted by consuming materials such as Jlab cards
+- Added v2.0 modifiers such as Mind Control and Super Range, adjusted the probabilities and values of some early modifiers, and removed some useless modifiers (without affecting existing weapons)
+- Optimized code structure (please join the group for feedback if you encounter any issues)
+- Fixed the bug where the maximum value was always taken for the "Ammo Efficiency" and "Attack Range" entries in practical applications
+- 
+### 0.7
+- Add new item: Modifiers Cards (v1, v2, v3), card comes with its own modifiers, which can be found in the chassis/JLab box, etc. Dragging the card onto the equipment will assign the modifiers
+- Added new map related modifiers such as cold and ice elements, as well as 11 new modifiers including bullet tracking, storm protection, and increased firing rate
+- Modifiers now support the headphone(headset) area
+- Adjusted the directory location of custom modifiers/configuration files, which can be viewed in ModSetting to prevent loss after version updates
+- Added English/Traditional Chinese translation for ModSetting configuration item
+- Weakened the suffix 'All-in-all' and adjusted the value to 50%
+- Fixed the issue of poor calculation of negative values for damage/armor parameters in the settings
+- Fixed some bugs that may cause mod conflicts
+
+### 0.6
 - Refactoring the affix system, optimizing the user experience, and incorporating new mechanisms such as lifesteal, instant death, evasion, and durability
 - Added 7 new affixes and 8 community affixes (provided by group members), which can be disabled in the settings
 - Now supports custom modifiers groups, with configuration files located in the Creative Workshop mod directory /resource/modifiers
@@ -14,12 +32,6 @@ press Ctrl+F3 to open the mod configuration menu
 - Fixed a bug where the actual effect of weapon element damage, bleeding, and other attributes is at its maximum regardless of the displayed value
 - Refactored mobility related terms, now able to better accelerate player speed
 
-### Update 0.5.0
-- Now melee weapons also support Modifiers!
-- Added the 'Fixed Attribute' switch, which will fix the affix attribute to its maximum value when turned on.
-- Fixed the issue of adding modifiers to the armor of the dummy in the base (no wonder the armor penetration test is inaccurate)
-- Now compatible with [url=https://steamcommunity.com/sharedfiles/filedetails/?id=3595729494]ModSetting[/url] mod allows for more convenient modification of parameters
-- For situations where duplicate affixes are displayed (such as precise precise AK47), patches have been added to avoid them, but please note that this is not a bug. If you encounter this issue, it means that your mod has been used too much! Some mods have caused duplicate loading issues!
 
 - Note:
 1. The probability of equipment with those affixes in the Crafting/Loot box is 75%, and the probability of enemy weapons being 40%
