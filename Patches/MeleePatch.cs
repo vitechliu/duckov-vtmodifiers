@@ -33,7 +33,7 @@ public static class MeleePatch {
                             factor = editted
                         };
                         newFactors.Add(newFactor);
-                        VTMO.Log($"修改了近战武器的: {elementType}为{editted}");
+                        // VTMO.Log($"修改了近战武器的: {elementType}为{editted}");
                     }
                 }
                 damageInfo.elementFactors = newFactors;
