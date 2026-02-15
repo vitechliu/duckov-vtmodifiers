@@ -15,6 +15,11 @@ public static class MeleePatch {
             if (agent && agent.Item && VTModifiersCoreV2.IsPatchedItem(agent.Item)) {
                 Dictionary<int, float> toModify = new();
                 List<ElementFactor> newFactors = new();
+                foreach (var ef in damageInfo.elementFactors) {
+                    if (ef.elementType == ElementTypes.physics) {
+                        newFactors.Add(ef);
+                    }
+                }
                 foreach (ElementTypes elementType in VTModifiersCoreV2.ElementMapping.Keys) {
                     float original = 0f;
                     float editted = 0f;
@@ -34,6 +39,7 @@ public static class MeleePatch {
                         };
                         newFactors.Add(newFactor);
                         // VTMO.Log($"修改了近战武器的: {elementType}为{editted}");
+                        //wqd
                     }
                 }
                 damageInfo.elementFactors = newFactors;

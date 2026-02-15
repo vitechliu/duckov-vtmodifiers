@@ -10,16 +10,16 @@
     <Import Project="env.props" Condition="Exists('env.props')" />
 
     <ItemGroup>
-        <Reference Include="$(DuckovPath)$(SubPath)TeamSoda.*"/>
-        <Reference Include="$(DuckovPath)$(SubPath)ItemStatsSystem.dll"/>
-        <Reference Include="$(DuckovPath)$(SubPath)Unity*"/>
-        <Reference Include="$(DuckovPath)$(SubPath)UniTask*"/>
-        <Reference Include="$(DuckovPath)$(SubPath)SodaLocalization.dll"/>
-        <Reference Include="$(DuckovPath)$(SubPath)Sirenix*"/>
-        <Reference Include="$(DuckovPath)$(SubPath)Newtonsoft.Json.dll"/>
-        <Reference Include="$(DuckovPath)$(SubPath)NodeCanvas.dll"/>
-        <Reference Include="$(DuckovPath)$(SubPath)Plugins.dll"/>
-        <Reference Include="$(DuckovPath)$(SubPath)FMOD*"/>
+        <Reference Include="$(DuckovPath)$(SubPath)TeamSoda.*" />
+        <Reference Include="$(DuckovPath)$(SubPath)ItemStatsSystem.dll" />
+        <Reference Include="$(DuckovPath)$(SubPath)Unity*" />
+        <Reference Include="$(DuckovPath)$(SubPath)UniTask*" />
+        <Reference Include="$(DuckovPath)$(SubPath)SodaLocalization.dll" />
+        <Reference Include="$(DuckovPath)$(SubPath)Sirenix*" />
+        <Reference Include="$(DuckovPath)$(SubPath)Newtonsoft.Json.dll" />
+        <Reference Include="$(DuckovPath)$(SubPath)NodeCanvas.dll" />
+        <Reference Include="$(DuckovPath)$(SubPath)Plugins.dll" />
+        <Reference Include="$(DuckovPath)$(SubPath)FMOD*" />
         <Reference Include="VTLib">
           <HintPath>..\libs\VTLib.dll</HintPath>
           <Private>True</Private>
@@ -41,14 +41,41 @@
         <Publicize Include="ItemStatsSystem" IncludeVirtualMembers="false" IncludeCompilerGeneratedMembers="false" />
     </ItemGroup>
     <ItemGroup>
+        <PackageReference Include="ILRepack.Lib.MSBuild.Task" Version="2.0.44.1">
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+          <PrivateAssets>all</PrivateAssets>
+        </PackageReference>
         <PackageReference Include="Krafs.Publicizer" Version="2.3.0">
             <PrivateAssets>all</PrivateAssets>
             <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
         </PackageReference>
         <PackageReference Include="Lib.Harmony" Version="2.4.2" />
     </ItemGroup>
+
+    <Target Name="MergeMyLib" AfterTargets="Build">
+        <ItemGroup>
+            <!-- 假设游戏安装在 D:\Game，其托管 DLL 在 D:\Game\Managed -->
+            <GameAssemblyPaths Include="$(DuckovPath)$(SubPath)*.dll" />
+        </ItemGroup>
+<!--        <Copy SourceFiles="0Harmony.dll" DestinationFolder="$(OutputPath)" />-->
+        <!-- 使用安装的 ILRepack 任务 -->
+        <ILRepack
+                Parallel="true"
+                Internalize="true"
+                TargetKind="Dll"
+                LibraryPath="$(DuckovPath)$(SubPath)"
+                OutputFile="$(OutputPath)$(AssemblyName).Merged.dll"
+                InputAssemblies="$(OutputPath)$(AssemblyName).dll;$(OutputPath)VTLib.dll;" />
+    </Target>
     <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-        <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(ModPath)" SkipUnchangedFiles="true"/>
+        <ItemGroup>
+            <!-- 项目主输出 -->
+            <FilesToCopy Include="$(OutputPath)$(AssemblyName).Merged.dll" />
+            <FilesToCopy Include="$(OutputPath)0Harmony.dll" Condition="Exists('$(OutputPath)0Harmony.dll')" />
+            <!-- 如果需要复制其他依赖，可以继续添加 -->
+        </ItemGroup>
+        <Copy SourceFiles="$(OutputPath)VTModifiers.Merged.dll" DestinationFiles="$(ModPath)VTModifiers.dll"/>
+        <Copy SourceFiles="$(FilesToCopy)" DestinationFolder="$(ModPath)" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(ResourceFiles)" DestinationFiles="@(ResourceFiles->'$(ModPath)\resources\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(BmlFiles)" DestinationFiles="@(BmlFiles->'$(ModPath)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
         <Copy SourceFiles="Resources/lang/ChineseSimplified.json" DestinationFolder="docs" />

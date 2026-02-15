@@ -486,6 +486,7 @@ public class VTMO : VTModBehaviour<VTMO> {
     }
 
     void LoadFormulas() {
+        if (!VTSettingManager.Setting.EnableModifiersCard) return;
         AddFormulaSimple(0, new[] { (754, 1), (308, 10), (58, 1) }, ItemUtil.MC_CARD_v1);
         AddFormulaSimple(0, new[] { (755, 1), (309, 10), (58, 1) }, ItemUtil.MC_CARD_v2);
         AddFormulaSimple(0, new[] { (756, 1), (1165, 30), (58, 1) }, ItemUtil.MC_CARD_v3);
