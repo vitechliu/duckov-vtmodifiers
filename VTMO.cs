@@ -1,6 +1,5 @@
 using ItemStatsSystem;
 using UnityEngine;
-using Duckov.Economy;
 using HarmonyLib;
 using Duckov.UI;
 using Duckov.Utilities;
@@ -15,6 +14,7 @@ using VTLib.ThirdParty;
 using VTModifiers.VTLib;
 using VTModifiers.VTLib.Items;
 using VTLib;
+using VTModifiers.Patches;
 using VTModifiers.ThirdParty;
 
 // ReSharper disable Unity.PerformanceCriticalCodeInvocation
@@ -36,28 +36,8 @@ public class VTMO : VTModBehaviour<VTMO> {
     public void Update() {
         if (Input.GetKeyDown(VTSettingManager.Setting.ReforgeKey)) {
             if (LevelManager.Instance) {
-                if (LevelManager.Instance.IsBaseLevel) KeyReforge();
+                if (LevelManager.Instance.IsBaseLevel) ReforgePatch.KeyReforge();
             }
-        }
-    }
-
-    //重量Patch
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Item), "get_SelfWeight")]
-    public static void Item_SelfWeight_PostFix(Item __instance, ref float __result) {
-        __result = VTModifiersCoreV2.Modify(__instance, VTModifiersCoreV2.VtmWeight, __result);
-    }
-
-    //MD:DisplayName patch
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ModifierDescription), "get_DisplayName")]
-    public static void ModifierDescription_DisplayName_PostFix(ModifierDescription __instance, ref string __result) {
-        if (
-            VTModifiersCoreV2.IsModMD(__instance)
-            && !__result.StartsWith("VTMC_")
-            && !__result.StartsWith("VTM_")
-        ) {
-            __result = "VTM_" + __result;
         }
     }
 
@@ -72,10 +52,9 @@ public class VTMO : VTModBehaviour<VTMO> {
         if (armor && damageInfo.damageValue > 0f) {
             float dodgeRate = VTModifiersCoreV2.Modify(armor, VTModifiersCoreV2.VtmDodgeRate);
             if (VT.Probability(dodgeRate)) {
-                if (VTSettingManager.Setting.Debug) {
-                    VTMO.Log($"闪避触发！");
-                }
-
+                // if (VTSettingManager.Setting.Debug) {
+                //     VTMO.Log($"闪避触发！");
+                // }
                 PopText.Pop("VTMC_Dodged".ToPlainText(),
                     character.transform.position + Vector3.up * 2f, Color.white, 1f, null);
                 damageInfo.damageValue = 0f;
@@ -98,9 +77,9 @@ public class VTMO : VTModBehaviour<VTMO> {
 
             float fnEnduranceProb = (armorEnduranceProb + helmetEnduranceProb) / 2;
             if (fnEnduranceProb > 0 && VT.Probability(fnEnduranceProb)) {
-                if (VTSettingManager.Setting.Debug) {
-                    VTMO.Log($"耐久触发！");
-                }
+                // if (VTSettingManager.Setting.Debug) {
+                //     VTMO.Log($"耐久触发！");
+                // }
                 damageInfo.armorBreak = 0f;
             }
         }
@@ -123,7 +102,7 @@ public class VTMO : VTModBehaviour<VTMO> {
                 //     VTMO.Log($"LifeSteal:{lifeStealAmount}");
                 // }
                 PopText.Pop(lifeStealAmount.ToString("F1"),
-                    damageInfo.fromCharacter.transform.position + Vector3.up * 2f, Color.red, 1f, null);
+                    damageInfo.fromCharacter.transform.position + Vector3.up * 2f, Color.green, 1f, null);
                 damageInfo.fromCharacter.AddHealth(lifeStealAmount);
             }
         }
@@ -131,151 +110,6 @@ public class VTMO : VTModBehaviour<VTMO> {
 
     //ItemOperationMenu 物品操作相关Button
     public static Button btn_Reforge = null!;
-
-    //重铸
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ItemOperationMenu), "Initialize")]
-    public static void ItemOperationMenu_Initialize_PostFix(ItemOperationMenu __instance) {
-        if (btn_Reforge == null) {
-            Button btnSample = __instance.btn_Equip;
-            if (btnSample == null) return;
-            GameObject newBtn = Instantiate(btnSample.gameObject, btnSample.transform.parent);
-            btn_Reforge = newBtn.GetComponent<Button>();
-            btn_Reforge.name = "Btn_Reforge";
-
-            btn_Reforge.onClick.RemoveAllListeners();
-            btn_Reforge.onClick.AddListener(OnReforge);
-        }
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ItemOperationMenu), "Setup")]
-    public static void ItemOperationMenu_Setup_PostFix(ItemOperationMenu __instance) {
-        if (btn_Reforge) {
-            if (LevelManager.Instance.IsBaseLevel) {
-                Item targetItem = __instance.TargetItem;
-                if (targetItem && VTModifiersCoreV2.ItemCanBePatched(targetItem)) {
-                    bool patched = VTModifiersCoreV2.IsPatchedItem(targetItem);
-                    if ((patched && VTSettingManager.Setting.AllowReforge)
-                        || (!patched && VTSettingManager.Setting.AllowForge)) {
-                        btn_Reforge.gameObject.SetActive(true);
-                        EnsureButtonStyle(targetItem);
-                        return;
-                    }
-                }
-            }
-
-            btn_Reforge.gameObject.SetActive(false);
-        }
-    }
-
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(ItemOperationMenu), "OnOpen")]
-    public static void ItemOperationMenu_OnOpen_PostFix(ItemOperationMenu __instance) {
-        if (btn_Reforge) {
-            if (LevelManager.Instance.IsBaseLevel) {
-                Item targetItem = __instance.TargetItem;
-                if (targetItem && VTModifiersCoreV2.ItemCanBePatched(targetItem)) {
-                    bool patched = VTModifiersCoreV2.IsPatchedItem(targetItem);
-                    if ((patched && VTSettingManager.Setting.AllowReforge)
-                        || (!patched && VTSettingManager.Setting.AllowForge)) {
-                        EnsureButtonStyle(targetItem);
-                    }
-                }
-            }
-        }
-    }
-
-    static void EnsureButtonStyle(Item targetItem) {
-        bool patched = VTModifiersCoreV2.IsPatchedItem(targetItem);
-        int price = VTModifiersCoreV2.ReforgePrice(targetItem);
-        long userMoney = EconomyManager.Money;
-        string buttonText = patched ? "Btn_reforge".ToPlainText() : "Btn_forge".ToPlainText();
-        VT.SetButtonText(btn_Reforge, buttonText + $"(${price})");
-
-        if (userMoney >= price) {
-            btn_Reforge.interactable = true;
-            VT.SetButtonColor(btn_Reforge, new Color(0.6f, 0f, 0.7f));
-        }
-        else {
-            btn_Reforge.interactable = false;
-            VT.SetButtonColor(btn_Reforge, new Color(0.8f, 0.4f, 0.9f));
-        }
-    }
-
-    public static void KeyReforge() {
-        Item targetItem = ItemUIUtilities.SelectedItem;
-        ItemDisplay display = ItemUIUtilities.SelectedItemDisplay;
-
-        if (!targetItem || !display) {
-            VT.BubbleUserDebug("Bubble_no_item_select".ToPlainText());
-            return;
-        }
-
-        if (!VTModifiersCoreV2.ItemCanBePatched(targetItem)) return;
-        int price = VTModifiersCoreV2.ReforgePrice(targetItem);
-        if (!EconomyManager.Pay(new Cost(price))) {
-            VT.BubbleUserDebug("Bubble_lack_of_coin".ToPlainText());
-            return;
-        }
-
-        VTModifiersCoreV2.TryUnpatchItem(targetItem);
-        VTModifiersCoreV2.PatchItem(targetItem, VTModifiersCoreV2.Sources.Reforge);
-        PostCustomSFX("Terraria_reforging.wav");
-        VT.BubbleUserDebug("Bubble_reforge_success".ToPlainText());
-
-        //更新仓库里面的名称
-        display.nameText.text = display.Target.DisplayName;
-    }
-
-    public static void OnReforge() {
-        ItemOperationMenu __instance = ItemOperationMenu.Instance;
-        if (!__instance) return;
-        Item targetItem = __instance.TargetItem;
-        if (!targetItem) return;
-        if (!VTModifiersCoreV2.ItemCanBePatched(targetItem)) return;
-
-        int price = VTModifiersCoreV2.ReforgePrice(targetItem);
-        if (!EconomyManager.Pay(new Cost(price))) {
-            VT.BubbleUserDebug("Bubble_lack_of_coin".ToPlainText());
-            __instance.Close();
-            return;
-        }
-
-        VTModifiersCoreV2.TryUnpatchItem(targetItem);
-        VTModifiersCoreV2.PatchItem(targetItem, VTModifiersCoreV2.Sources.Reforge);
-        PostCustomSFX("Terraria_reforging.wav");
-        VT.BubbleUserDebug("Bubble_reforge_success".ToPlainText());
-        __instance.Close();
-
-        //更新仓库里面的名称
-        ItemOperationMenu iom = ItemOperationMenu.Instance;
-        if (iom) {
-            ItemDisplay itemDisplay = iom.TargetDisplay;
-            if (itemDisplay) itemDisplay.nameText.text = itemDisplay.Target.DisplayName;
-        }
-    }
-
-
-    //DisplayName patch
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Item), "get_DisplayName")]
-    public static void Item_DisplayName_PostFix(Item __instance, ref string __result) {
-        if (!VTModifiersCoreV2.IsPatchedItem(__instance)) return;
-        string key = __instance.displayName;
-        __result = VTModifiersCoreV2.PatchItemDisplayName(__instance, key.ToPlainText());
-    }
-
-
-    //物品价值Patch
-    [HarmonyPostfix]
-    [HarmonyPatch(typeof(Item), "GetTotalRawValue")]
-    public static void Item_GetTotalRawValue_PostFix(Item __instance, ref int __result) {
-        // VTMO.Log($"ItemPriceModify: {__instance.DisplayName}");
-        __result = Mathf.RoundToInt(
-            VTModifiersCoreV2.Modify(__instance, VTModifiersCoreV2.VtmPriceMultiplier, (float)__result)
-        );
-    }
 
 
     //词缀化来源：敌人生成
@@ -402,37 +236,6 @@ public class VTMO : VTModBehaviour<VTMO> {
         }
     }
 
-    //拖拽物品色卡
-    [HarmonyPrefix]
-    [HarmonyPatch(typeof(ItemDisplay), "HandleDirectDrop")]
-    public static bool ItemDisplay_HandleDirectDrop_PrePatch(ItemDisplay __instance, PointerEventData eventData) {
-        if (__instance.Target == null || eventData.button != PointerEventData.InputButton.Left ||
-            __instance.IsStockshopSample)
-            return true;
-        IItemDragSource component = eventData.pointerDrag.gameObject.GetComponent<IItemDragSource>();
-        if (component == null || !component.IsEditable())
-            return true;
-        Item part = component.GetItem();
-        Item main = __instance.Target;
-        if (
-            part && main
-                 && part != main
-                 && VTModifiersCoreV2.IsModifiersCard(part)
-                 && VTModifiersCoreV2.ItemCanBePatched(main)
-        ) {
-            VTModifiersCoreV2.PatchByCard(part, main, __instance);
-            ItemUIUtilities.NotifyPutItem(part);
-            eventData.Use();
-            return false;
-        }
-
-        return true;
-    }
-
-    public static bool loggedIMEColor = false;
-
-
-
 
     public const string MOD_VTMAGIC = "VTMagic";
     public const string MOD_ELEMENT = "VTElements";
@@ -485,13 +288,6 @@ public class VTMO : VTModBehaviour<VTMO> {
         });
     }
 
-    void LoadFormulas() {
-        if (!VTSettingManager.Setting.EnableModifiersCard) return;
-        AddFormulaSimple(0, new[] { (754, 1), (308, 10), (58, 1) }, ItemUtil.MC_CARD_v1);
-        AddFormulaSimple(0, new[] { (755, 1), (309, 10), (58, 1) }, ItemUtil.MC_CARD_v2);
-        AddFormulaSimple(0, new[] { (756, 1), (1165, 30), (58, 1) }, ItemUtil.MC_CARD_v3);
-    }
-    
     protected override void OnBeforeDeactivate() {
         _harmony.UnpatchAll(_harmony.Id);
         ItemUtil.UnloadItems();
@@ -502,6 +298,13 @@ public class VTMO : VTModBehaviour<VTMO> {
         base.OnBeforeDeactivate();
     }
 
+    //配方
+    void LoadFormulas() {
+        if (!VTSettingManager.Setting.EnableModifiersCard) return;
+        AddFormulaSimple(0, new[] { (754, 1), (308, 10), (58, 1) }, ItemUtil.MC_CARD_v1);
+        AddFormulaSimple(0, new[] { (755, 1), (309, 10), (58, 1) }, ItemUtil.MC_CARD_v2);
+        AddFormulaSimple(0, new[] { (756, 1), (1165, 30), (58, 1) }, ItemUtil.MC_CARD_v3);
+    }
 
     void TryInitSetting() {
         if (!ModSettingAPI.IsInit) {
@@ -511,32 +314,29 @@ public class VTMO : VTModBehaviour<VTMO> {
         ModSettingConnector.TryInitSCAV();
     }
     
-
-    protected void RegisterEvents() {
+    void RegisterEvents() {
         CraftingManager.OnItemCrafted += OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory += OnItemSentToPlayerInventory;
         ItemTreeData.OnItemLoaded += OnItemLoaded;
     }
 
-
-    protected void UnregisterEvents() {
+    void UnregisterEvents() {
         CraftingManager.OnItemCrafted -= OnItemCrafted;
         ItemUtilities.OnItemSentToPlayerInventory -= OnItemSentToPlayerInventory;
         ItemTreeData.OnItemLoaded -= OnItemLoaded;
     }
 
-    private void OnItemSentToPlayerInventory(Item item) {
+    void OnItemSentToPlayerInventory(Item item) {
         // VTMO.Log($"OnItemSentToPlayerInventory: {item.DisplayName}");
         VTModifiersCoreV2.CalcItemModifiers(item);
     }
 
-
     //修复
-    private void OnItemLoaded(Item item) {
+    void OnItemLoaded(Item item) {
         VTModifiersCoreV2.CalcItemModifiers(item);
     }
 
-    protected void LoadPathCustom() {
+    void LoadPathCustom() {
         _modifiersDirectoryPersistant = Path.Combine(_resourceDirectory, "modifiers");
         _modifiersDirectoryCustom = Path.Combine(_persistantFilePath, "modifiers");
         Directory.CreateDirectory(_modifiersDirectoryCustom);
