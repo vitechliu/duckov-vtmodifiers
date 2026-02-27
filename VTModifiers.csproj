@@ -5,6 +5,7 @@
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
         <LangVersion>latest</LangVersion>
+        <Version>0.9.0</Version>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
     </PropertyGroup>
     <Import Project="env.props" Condition="Exists('env.props')" />
@@ -24,6 +25,11 @@
           <HintPath>..\libs\VTLib.dll</HintPath>
           <Private>True</Private>
         </Reference>
+    </ItemGroup>
+    <ItemGroup>
+        <Compile Update="VTMO.cs">
+            <Generator>MSBuild:Compile</Generator>
+        </Compile>
     </ItemGroup>
     <ItemGroup>
         <ResourceFiles Include="$(ProjectDir)Resources\**\*" />
@@ -54,11 +60,11 @@
 
     <Target Name="MergeMyLib" AfterTargets="Build">
         <ItemGroup>
-            <!-- 假设游戏安装在 D:\Game，其托管 DLL 在 D:\Game\Managed -->
             <GameAssemblyPaths Include="$(DuckovPath)$(SubPath)*.dll" />
         </ItemGroup>
 <!--        <Copy SourceFiles="0Harmony.dll" DestinationFolder="$(OutputPath)" />-->
         <!-- 使用安装的 ILRepack 任务 -->
+<!--        <Exec Command="echo RUN ILREPACK" StandardOutputImportance="High" />-->
         <ILRepack
                 Parallel="true"
                 Internalize="true"
@@ -67,14 +73,15 @@
                 OutputFile="$(OutputPath)$(AssemblyName).Merged.dll"
                 InputAssemblies="$(OutputPath)$(AssemblyName).dll;$(OutputPath)VTLib.dll;" />
     </Target>
-    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+    <Target Name="PostBuild" AfterTargets="MergeMyLib">
         <ItemGroup>
             <!-- 项目主输出 -->
             <FilesToCopy Include="$(OutputPath)$(AssemblyName).Merged.dll" />
             <FilesToCopy Include="$(OutputPath)0Harmony.dll" Condition="Exists('$(OutputPath)0Harmony.dll')" />
             <!-- 如果需要复制其他依赖，可以继续添加 -->
         </ItemGroup>
-        <Copy SourceFiles="$(OutputPath)VTModifiers.Merged.dll" DestinationFiles="$(ModPath)VTModifiers.dll"/>
+<!--        <Exec Command="echo RUN COPY" StandardOutputImportance="High" />-->
+        <Copy SourceFiles="$(OutputPath)$(AssemblyName).Merged.dll" DestinationFiles="$(ModPath)/$(AssemblyName).dll"/>
         <Copy SourceFiles="$(FilesToCopy)" DestinationFolder="$(ModPath)" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(ResourceFiles)" DestinationFiles="@(ResourceFiles->'$(ModPath)\resources\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />
         <Copy SourceFiles="@(BmlFiles)" DestinationFiles="@(BmlFiles->'$(ModPath)\%(RecursiveDir)%(Filename)%(Extension)')" SkipUnchangedFiles="true" />

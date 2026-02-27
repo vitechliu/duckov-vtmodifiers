@@ -1,6 +1,7 @@
 using Duckov.ItemBuilders;
 using Duckov.Utilities;
 using ItemStatsSystem;
+using SodaCraft.Localizations;
 using UnityEngine;
 using Object = UnityEngine.Object;
 using VTLib;
@@ -25,6 +26,8 @@ public class ItemUtil {
         item.DisplayNameRaw = "vt_modifiers_card_v" + lvl;
         item.Tags.Add(GetTargetTag("Electric"));
         item.Tags.Add(GetTargetTag("JLab"));
+        item.SetString(VTModifiersCoreV2.VariableVtModifierCardScope, "ScopeApply_None".ToPlainText());
+        item.Variables.SetDisplay(VTModifiersCoreV2.VariableVtModifierCardScope, true);
         if (lvl == 1) item.Value = 1000;
         if (lvl == 2) item.Value = 5000;
         if (lvl == 3) item.Value = 10000;

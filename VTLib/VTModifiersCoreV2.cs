@@ -40,6 +40,7 @@ public class VTModifiersCoreV2 {
 
     public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
     public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
+    public static readonly string VariableVtModifierCardScope = "VTMC_MODIFIER_CARD_SCOPE";
     public static readonly string VariableVtModifierDisplayHashCodeOld = "Top1_词缀";
     public static readonly string VariableVtModifierDisplayHashCode = "VTModifiers_Top1_词缀";
     public static readonly string VariableVtAuthorDisplayHashCode = "VTModifiers_Top1_词缀作者";
@@ -73,6 +74,10 @@ public class VTModifiersCoreV2 {
                     flag = true;
                     // Log($"注入了Modifier:{item.DisplayName}_{vtm}");
                 }
+            }
+
+            if (IsModifiersCard(item)) {
+                PatchModifierCardScopes(item, vtModifier);
             }
 
             if (flag) {
@@ -211,6 +216,7 @@ public class VTModifiersCoreV2 {
         if (variables != null) {
             VT.RemoveItemVariable(variables, VariableVtModifierHashCode);
             VT.RemoveItemVariable(variables, VariableVtModifierSeedHashCode);
+            VT.RemoveItemVariable(variables, VariableVtModifierCardScope);
             VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCodeOld);
             VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCode);
             VT.RemoveItemVariable(variables, VariableVtAuthorDisplayHashCode);
@@ -378,6 +384,17 @@ public class VTModifiersCoreV2 {
         md.display = true;
         item.Modifiers.Add(md);
         return true;
+    }
+
+    //对词缀卡道具添加适用范围Modifier
+    public static void PatchModifierCardScopes(Item card, VtModifierV2 vtModifier) {
+        List<string> scopes = vtModifier.applyScopesTranslated();
+        //将List<string>以逗号分隔
+        string scopeRes = "ScopeApply_None".ToPlainText();
+        if (scopes.Count > 0) {
+            scopeRes = string.Join(",", scopes);
+        }
+        card.SetString(VariableVtModifierCardScope, scopeRes);
     }
 
     // public static float? GetItemVtmKey(Item item, string key) {
@@ -913,6 +930,7 @@ public class VTModifiersCoreV2 {
             this.key = key;
         }
     }
+    
     public struct VtModifierV2 {
         public string key;
         public string? author = null; //作者名
@@ -943,6 +961,23 @@ public class VTModifiersCoreV2 {
 
         public VtModifierV2(string key) {
             this.key = key;
+        }
+
+        public List<string> applyScopesTranslated() {
+            List<string> res = new();
+            if (applyOnGuns) res.Add("ScopeApply_Gun".ToPlainText());
+            if (applyOnMelee) res.Add("ScopeApply_Melee".ToPlainText());
+            if (applyOnEquipment) {
+                res.Add("ScopeApply_Equipment".ToPlainText());
+            }
+            else {
+                if (applyOnHelmet) res.Add("ScopeApply_Helmet".ToPlainText());
+                if (applyOnArmor) res.Add("ScopeApply_Armor".ToPlainText());
+                if (applyOnHeadset) res.Add("ScopeApply_Headset".ToPlainText());
+                if (applyOnFaceMask) res.Add("ScopeApply_FaceMask".ToPlainText());
+                if (applyOnBackpack) res.Add("ScopeApply_Backpack".ToPlainText());
+            }
+            return res;
         }
     }
     

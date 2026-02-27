@@ -127,6 +127,17 @@
     "Rich-Magic": "蕴魔",
     "Wizard": "巫术",
     "Fiend": "魔神",
+
+    "ScopeApply_None": "暂无",
+    "ScopeApply_Gun": "枪械",
+    "ScopeApply_Melee": "近战武器",
+    "ScopeApply_Equipment": "所有防具",
+    "ScopeApply_Armor": "护甲",
+    "ScopeApply_Helmet": "头盔",
+    "ScopeApply_Headset": "耳机",
+    "ScopeApply_FaceMask": "面部",
+    "ScopeApply_Backpack": "背包",
+    
     
     "VTMC_FIX": "修正",
     "VTMC_Dodged": "Miss!",
