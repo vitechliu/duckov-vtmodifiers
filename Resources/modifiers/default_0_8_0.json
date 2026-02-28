@@ -20,7 +20,7 @@
       "applyOnBackpack": false,
       "data": {
         "DmgOverDistance": 3,
-        "ShootDistanceMultiplier": 4,
+        "ShootDistanceMultiplier": 0.5,
         "CritDamageMultiplier": 2.5,
         "ShootSpeedMultiplier": -0.5,
         "PriceMultiplier": 4
