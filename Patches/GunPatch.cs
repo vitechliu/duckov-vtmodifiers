@@ -44,7 +44,7 @@ public static class GunPatch {
 
             float controlMindTypeRaw = VTModifiersCoreV2.Modify(__instance.Item, VTModifiersCoreV2.VtmControlMindType, 0f);
             int controlMindType = Mathf.RoundToInt(controlMindTypeRaw);
-            VTMO.Log("cmt:" + controlMindType);
+            // VTMO.Log("cmt:" + controlMindType);
             if (controlMindType is > 0 and < 3) {
                 temp.context.controlMindType = (ControlMindTypes) controlMindType;
             }

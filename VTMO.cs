@@ -21,7 +21,7 @@ namespace VTModifiers;
 [HarmonyPatch]
 public class VTMO : VTModBehaviour<VTMO> {
     public override string ModName => "VTModifiers";
-    public override string Version => "${Version}";
+    public override string Version => "0.8.3";
 
     // public string _logFilePath;
     public string _modifiersDirectoryPersistant = null!;

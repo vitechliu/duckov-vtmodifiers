@@ -210,7 +210,7 @@
     "Eldritch": {
       "key": "Eldritch",
       "author": null,
-      "weight": 30,
+      "weight": 20,
       "quality": 6,
       "forceFixed": false,
       "applyOnGuns": true,

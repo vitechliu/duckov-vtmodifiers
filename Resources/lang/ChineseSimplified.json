@@ -37,6 +37,7 @@
     "MSText_ReforgePriceFactor": "重铸价格倍率",
     "MSText_Forge": "允许词缀附加",
     "MSText_ForgePriceFactor": "词缀附加价格倍率",
+    "MSText_ReforgeSound": "播放重铸音效",
     "MSText_EnemyPatchedPercentage": "敌人生成词缀概率",
     "MSText_LootBoxPatchedPercentage": "物资箱生成词缀概率",
     "MSText_CraftPatchedPercentage": "合成道具附带词缀概率",
@@ -137,7 +138,8 @@
     "ScopeApply_Headset": "耳机",
     "ScopeApply_FaceMask": "面部",
     "ScopeApply_Backpack": "背包",
-    
+
+    "Var_VT_MODIFIER_CARD_SCOPE": "适用范围",
     
     "VTMC_FIX": "修正",
     "VTMC_Dodged": "Miss!",

@@ -59,6 +59,11 @@ public static class ModSettingConnector {
                 VTSettingManager.Setting.ForgePriceFactor = f;
                 OnSettingChanged();
             });
+        ModSettingAPI.AddToggle("ReforgeSound", "MSText_ReforgeSound".ToPlainText(), VTSettingManager.Setting.ReforgeSound, 
+            b => {
+                VTSettingManager.Setting.ReforgeSound = b;
+                OnSettingChanged();
+            });
         ModSettingAPI.AddSlider("EnemyPatchedPercentage", "MSText_EnemyPatchedPercentage".ToPlainText(), VTSettingManager.Setting.EnemyPatchedPercentage, 
             new Vector2(0f, 1f), f => {
                 VTSettingManager.Setting.EnemyPatchedPercentage = f;

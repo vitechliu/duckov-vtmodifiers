@@ -40,7 +40,8 @@ public class VTModifiersCoreV2 {
 
     public static readonly string VariableVtModifierHashCode = "VT_MODIFIER";
     public static readonly string VariableVtModifierSeedHashCode = "VT_MODIFIER_SEED";
-    public static readonly string VariableVtModifierCardScope = "VTMC_MODIFIER_CARD_SCOPE";
+    public static readonly string VariableVtModifierSeedV2HashCode = "VT_MODIFIER_SEED_V2";
+    public static readonly string VariableVtModifierCardScope = "VT_MODIFIER_CARD_SCOPE";
     public static readonly string VariableVtModifierDisplayHashCodeOld = "Top1_词缀";
     public static readonly string VariableVtModifierDisplayHashCode = "VTModifiers_Top1_词缀";
     public static readonly string VariableVtAuthorDisplayHashCode = "VTModifiers_Top1_词缀作者";
@@ -59,31 +60,36 @@ public class VTModifiersCoreV2 {
         if (ModifierData.TryGetValue(modifier, out VtModifierV2 vtModifier)) {
             bool flag = false;
             Random.State originalState = Random.state;
+            int randomVersion = 1;
             if (!IsModifierFixed(vtModifier)) {
-                int modifierSeed = item.GetInt(VariableVtModifierSeedHashCode, -1);
-                if (modifierSeed == -1) {
-                    modifierSeed = Random.Range(0, 1000000);
-                    item.SetInt(VariableVtModifierSeedHashCode, modifierSeed);
+                int modifierSeedV1 = item.GetInt(VariableVtModifierSeedHashCode, -1);
+                if (modifierSeedV1 != -1) {
+                    Random.InitState(modifierSeedV1);
                 }
-                Random.InitState(modifierSeed);
+                else {
+                    //新的随机数算法
+                    randomVersion = 2;
+                    int modifierSeedV2 = item.GetInt(VariableVtModifierSeedV2HashCode, -1);
+                    if (modifierSeedV2 == -1) {
+                        modifierSeedV2 = Random.Range(0, 1000000);
+                        item.SetInt(VariableVtModifierSeedV2HashCode, modifierSeedV2);
+                    }
+                }
             }
-
             foreach (string vtmKey in vtModifier.data.Keys) {
                 float value = vtModifier.data[vtmKey];
-                if (TryPatchModifier(item, vtModifier, vtmKey, value)) {
+                if (TryPatchModifier(item, vtModifier, vtmKey, value, randomVersion)) {
                     flag = true;
                     // Log($"注入了Modifier:{item.DisplayName}_{vtm}");
                 }
             }
-
             if (IsModifiersCard(item)) {
                 PatchModifierCardScopes(item, vtModifier);
             }
-
             if (flag) {
                 item.Modifiers.ReapplyModifiers();
             }
-            Random.state = originalState;
+            if (randomVersion == 1) Random.state = originalState;
             PatchItemDisplayInfo(item, vtModifier);
         }
         else {
@@ -216,7 +222,7 @@ public class VTModifiersCoreV2 {
         if (variables != null) {
             VT.RemoveItemVariable(variables, VariableVtModifierHashCode);
             VT.RemoveItemVariable(variables, VariableVtModifierSeedHashCode);
-            VT.RemoveItemVariable(variables, VariableVtModifierCardScope);
+            VT.RemoveItemVariable(variables, VariableVtModifierSeedV2HashCode);
             VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCodeOld);
             VT.RemoveItemVariable(variables, VariableVtModifierDisplayHashCode);
             VT.RemoveItemVariable(variables, VariableVtAuthorDisplayHashCode);
@@ -304,7 +310,7 @@ public class VTModifiersCoreV2 {
         Reforge, //重铸的
     }
 
-    static bool TryPatchModifier(Item item, VtModifierV2 vtModifier, string key, float value) {
+    static bool TryPatchModifier(Item item, VtModifierV2 vtModifier, string key, float value, int randomVersion) {
         if (!keys.ContainsKey(key)) return false;
         VtMKey vtMKey = keys[key];
         if (vtMKey.noHash) return false;
@@ -364,10 +370,17 @@ public class VTModifiersCoreV2 {
             //避免重复添加
             return false;
         }
-
-        
         if (!IsModifierFixed(vtModifier) && !vtMKey.forceFixed) {
-            value *= Random.Range(0.5f, 1f);
+            if (randomVersion == 1) {
+                value *= Random.Range(0.5f, 1f);
+                // VTMO.Log($"SeedV1");
+            }
+            else {
+                int weaponSeed = item.GetInt(VariableVtModifierSeedV2HashCode, -1);
+                float res = RandomUtil.Range(weaponSeed, key.GetHashCode(), 0.5f, 1f);
+                // VTMO.Log($"SeedV2:{weaponSeed}, key:{key}, res:{res}");
+                value *= res;
+            }
             if (vtMKey.roundToInt) {
                 value = Mathf.Round(value);
             }
@@ -908,11 +921,12 @@ public class VTModifiersCoreV2 {
             VTMO.PostCustomSFX("Terraria_no.wav");
             return;
         }
-        int cardModifierSeed = card.GetInt(VariableVtModifierSeedHashCode, -1);
-        if (cardModifierSeed != -1) {
-            item.SetInt(VariableVtModifierSeedHashCode, cardModifierSeed);
-        }
         TryUnpatchItem(item);
+        int cardModifierSeed = card.GetInt(VariableVtModifierSeedV2HashCode, -1);
+        if (cardModifierSeed != -1) {
+            // VTMO.Log("成功设置武器V2HashCode为:" +cardModifierSeed);
+            item.SetInt(VariableVtModifierSeedV2HashCode, cardModifierSeed);
+        }
         PatchItem(item, Sources.Card, cardModifier);
         card.Detach();
         VTMO.PostCustomSFX("Terraria_card_patch.wav");

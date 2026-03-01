@@ -6,7 +6,7 @@
   "modifiers": {
     "Feathering": {
       "key": "Feathering",
-      "weight": 50,
+      "weight": 30,
       "quality": 5,
       "forceFixed": false,
       "applyOnGuns": false,
@@ -24,7 +24,7 @@
     },
     "WithGhost": {
       "key": "WithGhost",
-      "weight": 80,
+      "weight": 60,
       "quality": 3,
       "forceFixed": false,
       "applyOnGuns": true,

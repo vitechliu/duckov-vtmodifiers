@@ -4,13 +4,19 @@ Loot boxes, enemy equipment, crafted equipment, etc. will now be randomly attach
 Supports "Reforging" and "Forging", which can be operated by right clicking on the equipment in the base.
 press Ctrl+F3 to open the mod configuration menu
 
+### 0.8.3
+- Modifiers cards now display the applicable equipment scope
+- The Modifiers card random algorithm has been refactored, ensuring that the entry values displayed on the card will now be applied correctly (previously, the value range might have been reset).
+- Adjusted the bloodsucking numbers effect to green, and optimized the numerical values of related entries for SkyFall
+- The sound effect of reforging can now be turned off in the settings
+
 ### 0.8.0
 - Now melee weapons also support elemental modifiers and etc
 - Currently, Modifier Cards can be crafted by consuming materials such as Jlab cards
 - Added v2.0 modifiers such as Mind Control and Super Range, adjusted the probabilities and values of some early modifiers, and removed some useless modifiers (without affecting existing weapons)
 - Optimized code structure (please join the group for feedback if you encounter any issues)
 - Fixed the bug where the maximum value was always taken for the "Ammo Efficiency" and "Attack Range" entries in practical applications
-- 
+
 ### 0.7
 - Add new item: Modifiers Cards (v1, v2, v3), card comes with its own modifiers, which can be found in the chassis/JLab box, etc. Dragging the card onto the equipment will assign the modifiers
 - Added new map related modifiers such as cold and ice elements, as well as 11 new modifiers including bullet tracking, storm protection, and increased firing rate

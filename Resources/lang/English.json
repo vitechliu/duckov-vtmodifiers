@@ -80,6 +80,19 @@
         "Cheap": "Cheap",
         "Silent": "Silent",
         "Violent": "Violent",
+
+        "ScopeApply_None": "None",
+        "ScopeApply_Gun": "Gun",
+        "ScopeApply_Melee": "Melee",
+        "ScopeApply_Equipment": "Equipment(All)",
+        "ScopeApply_Armor": "Armor",
+        "ScopeApply_Helmet": "Helmet",
+        "ScopeApply_Headset": "Headset",
+        "ScopeApply_FaceMask": "FaceMask",
+        "ScopeApply_Backpack": "Backpack",        
+        
+        "Var_VT_MODIFIER_CARD_SCOPE": "Scope",
+        
         "VTMC_FIX": "Fix",
         "Tag_vttag": "VtModifier",
         "Btn_reforge": "Reforge",

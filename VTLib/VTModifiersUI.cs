@@ -98,6 +98,7 @@ public class VTModifiersUI : MonoBehaviour {
         GUILayout.BeginHorizontal();
         VTSettingManager.Setting.AllowReforge = GUILayout.Toggle(VTSettingManager.Setting.AllowReforge, "右键重铸");
         VTSettingManager.Setting.AllowForge = GUILayout.Toggle(VTSettingManager.Setting.AllowForge, "右键词缀化");
+        VTSettingManager.Setting.ReforgeSound = GUILayout.Toggle(VTSettingManager.Setting.ReforgeSound, "开启重铸音效");
         GUILayout.EndHorizontal();
 
 
@@ -254,23 +255,26 @@ public class VTModifiersUI : MonoBehaviour {
                     stringBuilder.AppendLine($"输出物品信息:{item.DisplayName}");
                     if (item.Variables != null) {
                         foreach (CustomData variable in item.Variables) {
+                            string hide = variable.Display ? "d" : "h";
                             stringBuilder.AppendLine("Variable:" + variable.Key + "\t" + variable.DisplayName + "\t" +
-                                                     variable.GetValueDisplayString());
+                                                     variable.GetValueDisplayString() + "\t" + hide);
                         }
                     }
 
                     if (item.Constants != null) {
                         foreach (CustomData constant in item.Constants) {
+                            string hide = constant.Display ? "d" : "h";
                             stringBuilder.AppendLine("Constant:" + constant.Key + "\t" + constant.DisplayName + "\t" +
-                                                     constant.GetValueDisplayString());
+                                                     constant.GetValueDisplayString() + "\t" + hide);
                         }
                     }
 
                     if ((UnityEngine.Object)item.Stats != (UnityEngine.Object)null) {
                         foreach (Stat stat in item.Stats) {
+                            string hide = stat.Display ? "d" : "h";
                             stringBuilder.AppendLine("Stat:" + stat.Key + "\t" +
                                                      string.Format("{0}\t{1}", (object)stat.DisplayName,
-                                                         (object)stat.Value));
+                                                         (object)stat.Value) + "\t" + hide);
                         }
                     }
 
@@ -278,8 +282,9 @@ public class VTModifiersUI : MonoBehaviour {
                         foreach (ModifierDescription modifier in item.Modifiers) {
                             ModifierTarget mt = modifier.target;
                             string mts = mt.ToString();
+                            string hide = modifier.Display ? "d" : "h";
                             stringBuilder.AppendLine("Modifier:" + modifier.Key + "\t" + modifier.DisplayName + "\t" +
-                                                     "MT:" + mts + "\t" + modifier.GetDisplayValueString());
+                                                     "MT:" + mts + "\t" + modifier.GetDisplayValueString() + "\t" + hide);
                         }
                     }
 

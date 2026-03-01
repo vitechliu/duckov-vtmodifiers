@@ -102,7 +102,9 @@ public static class ReforgePatch {
 
         VTModifiersCoreV2.TryUnpatchItem(targetItem);
         VTModifiersCoreV2.PatchItem(targetItem, VTModifiersCoreV2.Sources.Reforge);
-        VTMO.PostCustomSFX("Terraria_reforging.wav");
+        
+        if (VTSettingManager.Setting.ReforgeSound)
+            VTMO.PostCustomSFX("Terraria_reforging.wav");
         VT.BubbleUserDebug("Bubble_reforge_success".ToPlainText());
 
         //更新仓库里面的名称
@@ -126,7 +128,8 @@ public static class ReforgePatch {
 
         VTModifiersCoreV2.TryUnpatchItem(targetItem);
         VTModifiersCoreV2.PatchItem(targetItem, VTModifiersCoreV2.Sources.Reforge);
-        VTMO.PostCustomSFX("Terraria_reforging.wav");
+        if (VTSettingManager.Setting.ReforgeSound)
+            VTMO.PostCustomSFX("Terraria_reforging.wav");
         VT.BubbleUserDebug("Bubble_reforge_success".ToPlainText());
         __instance.Close();
 
